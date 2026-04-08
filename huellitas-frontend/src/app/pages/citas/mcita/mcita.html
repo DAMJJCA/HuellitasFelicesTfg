@@ -1,0 +1,119 @@
+<section
+  class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100
+         px-6 py-6 md:px-10 md:py-8">
+
+  <div class="max-w-3xl mx-auto">
+
+    <h1 class="text-3xl font-semibold tracking-tight">Editar cita</h1>
+    <p class="text-sm text-slate-500 dark:text-slate-400">
+      Actualiza la fecha, hora o asigna otro profesional o mascota.
+    </p>
+
+    <!-- MENSAJES -->
+    <div *ngIf="errorMsg"
+         class="mt-4 rounded-md border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
+      {{ errorMsg }}
+    </div>
+
+    <div *ngIf="successMsg"
+         class="mt-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm">
+      {{ successMsg }}
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="guardar()"
+          class="mt-6 rounded-xl border border-slate-200 dark:border-slate-700
+                 bg-white dark:bg-slate-800 p-6 shadow space-y-6">
+
+      <!-- FECHA -->
+      <div>
+        <label class="block text-sm mb-1">Fecha de la cita *</label>
+        <input type="date" formControlName="fecha"
+               class="w-full rounded-lg border border-slate-300 dark:border-slate-700
+                      bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
+      </div>
+
+      <!-- HORA -->
+      <div>
+        <label class="block text-sm mb-1">Hora *</label>
+        <input type="time" formControlName="hora"
+               class="w-full rounded-lg border border-slate-300 dark:border-slate-700
+                      bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
+      </div>
+
+      <!-- MOTIVO -->
+      <div>
+        <label class="block text-sm mb-1">Motivo *</label>
+        <input type="text" formControlName="motivo"
+               class="w-full rounded-lg border border-slate-300 dark:border-slate-700
+                      bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
+      </div>
+
+      <!-- ESTADO -->
+      <div>
+        <label class="block text-sm mb-1">Estado</label>
+        <select formControlName="estado"
+                class="w-full rounded-lg border border-slate-300 dark:border-slate-700
+                       bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
+          <option value="programada">Programada</option>
+          <option value="cancelada">Cancelada</option>
+          <option value="realizada">Realizada</option>
+        </select>
+      </div>
+
+      <!-- MASCOTA -->
+      <div>
+        <label class="block text-sm mb-1">Mascota *</label>
+        <select formControlName="idMascota"
+                class="w-full rounded-lg border border-slate-300 dark:border-slate-700
+                       bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
+
+          <option value="" disabled>Seleccione...</option>
+
+          <option *ngFor="let m of mascotas" [value]="m.idMascota">
+            {{ m.nombre }} ({{ m.especie }})
+          </option>
+
+        </select>
+      </div>
+
+      <!-- VETERINARIO -->
+      <div>
+        <label class="block text-sm mb-1">Veterinario *</label>
+        <select formControlName="idVeterinario"
+                class="w-full rounded-lg border border-slate-300 dark:border-slate-700
+                       bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
+
+          <option value="" disabled>Seleccione...</option>
+
+          <option *ngFor="let v of veterinarios" [value]="v.idVeterinario">
+            {{ v.nombre }} — {{ v.especialidad }}
+          </option>
+
+        </select>
+      </div>
+
+      <!-- BOTONES -->
+      <div class="flex justify-end gap-2 pt-4">
+
+        <button type="button"
+                class="rounded-lg border border-slate-300 dark:border-slate-700
+                       px-5 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700"
+                (click)="cancelar()">
+          Cancelar
+        </button>
+
+        <button type="submit"
+                [disabled]="cargando"
+                class="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white
+                       px-5 py-2.5 text-sm shadow disabled:opacity-60
+                       disabled:cursor-not-allowed">
+          Guardar cambios
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</section>

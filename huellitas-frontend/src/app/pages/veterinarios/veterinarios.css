@@ -1,0 +1,32 @@
+table {
+  border-collapse: collapse;
+  margin-top: 20px;
+
+}
+
+th {
+  background-color: #add3f7;
+  padding: 10px;
+  border-top: 8px;
+}
+td {
+  padding: 10px;
+}
+button {
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.btn-crear {
+  background-color: #4CAF50;
+  color: white;
+}
+.btn-editar {
+  background-color: #2196F3;
+  color: white;
+}
+.btn-eliminar {
+  background-color: #f44336;
+  color: white;
+}

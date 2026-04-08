@@ -1,0 +1,68 @@
+<section
+  class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 px-6 py-6 md:px-10 md:py-8">
+  <div class="max-w-2xl mx-auto">
+
+    <h1 class="text-2xl font-semibold tracking-tight">Crear nuevo veterinario</h1>
+    <p class="text-sm text-slate-500 dark:text-slate-400">Completa los datos y guarda el registro.</p>
+
+    <div *ngIf="error" class="mt-4 rounded-md border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
+      {{ error }}
+    </div>
+
+    <div *ngIf="success"
+      class="mt-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm">
+      {{ success }}
+    </div>
+
+    <form #f="ngForm" (ngSubmit)="onSubmit(f)"
+      class="mt-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow">
+
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Nombre completo <span class="text-rose-600">*</span></label>
+        <input type="text" name="nombre" [(ngModel)]="veterinario.nombre" required minlength="2" maxlength="60"
+          class="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <p *ngIf="f.submitted && f.controls['nombre']?.invalid || (f.controls['nombre']?.touched && f.controls['nombre']?.invalid)"
+          class="mt-1 text-xs text-rose-600">Nombre completo requerido (mín. 2).</p>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Especialidad <span class="text-rose-600">*</span></label>
+        <input type="text" name="especialidad" [(ngModel)]="veterinario.especialidad" required minlength="2"
+          maxlength="80" class="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <p *ngIf="f.submitted && f.controls['especialidad']?.invalid || (f.controls['especialidad']?.touched && f.controls['especialidad']?.invalid )"
+          class="mt-1 text-xs text-rose-600">Especialidad requerida.</p>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Teléfono <span class="text-rose-600">*</span></label>
+        <input type="text" name="telefono" [(ngModel)]="veterinario.telefono" required pattern="^[0-9+\-\s]{6,20}$"
+          class="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="Ej: +34 600 123 123">
+        <p *ngIf="f.submitted && f.controls['telefono']?.invalid || (f.controls['telefono']?.touched && f.controls['telefono']?.invalid)"
+          class="mt-1 text-xs text-rose-600">Teléfono inválido (6–20 caracteres).</p>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Email <span class="text-rose-600">*</span></label>
+        <input type="email" name="email" [(ngModel)]="veterinario.email" required maxlength="120"
+          class="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="ejemplo@dominio.com">
+        <p *ngIf="f.submitted && f.controls['email']?.invalid || (f.controls['email']?.touched && f.controls['email']?.invalid)"
+          class="mt-1 text-xs text-rose-600">Email inválido.</p>
+      </div>
+      <div class="mt-6 flex justify-end gap-2">
+        <button type="button"
+          class="rounded-md border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-700"
+          (click)="cancelar()">Cancelar
+        </button>
+
+        <button type="submit" [disabled]="cargando"
+          class="inline-flex items-center gap-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed">
+          <svg *ngIf="cargando" class="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</section>

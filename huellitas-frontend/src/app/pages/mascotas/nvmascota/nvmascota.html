@@ -1,0 +1,79 @@
+<section class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 px-6 py-6 md:px-10 md:py-8">
+  <div class="max-w-2xl mx-auto">
+
+    <h1 class="text-2xl font-semibold tracking-tight">Registrar nueva mascota</h1>
+    <p class="text-sm text-slate-500 dark:text-slate-400">Completa los datos y guarda la mascota.</p>
+
+    <div *ngIf="error" class="mt-4 rounded-md border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
+      {{ error }}
+    </div>
+
+    <div *ngIf="success" class="mt-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm">
+      {{ success }}
+    </div>
+
+    <form #f="ngForm" (ngSubmit)="onSubmit(f)" class="mt-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow">
+
+      <!-- Nombre Mascota -->
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Nombre de la mascota <span class="text-rose-600">*</span></label>
+        <input type="text" required name="nombre" [(ngModel)]="mascota.nombre"
+          class="w-full rounded-md border px-3 py-2 text-sm">
+      </div>
+
+      <!-- Cliente -->
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Dueño <span class="text-rose-600">*</span></label>
+        <select name="idCliente" required [(ngModel)]="mascota.idCliente"
+          class="w-full rounded-md border px-3 py-2 text-sm">
+          <option value="" disabled selected>Seleccione...</option>
+          <option *ngFor="let c of clientes" [value]="c.idCliente">
+            {{ c.nombre }} {{ c.apellidos }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Fecha nacimiento -->
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Fecha de nacimiento</label>
+        <input type="date" name="fechaNacimiento" [(ngModel)]="mascota.fechaNacimiento"
+          class="w-full rounded-md border px-3 py-2 text-sm">
+      </div>
+
+      <!-- Sexo -->
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Sexo</label>
+        <select name="sexo" [(ngModel)]="mascota.sexo"
+          class="w-full rounded-md border px-3 py-2 text-sm">
+          <option value="">Seleccione...</option>
+          <option value="Macho">Macho</option>
+          <option value="Hembra">Hembra</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Especie <span class="text-rose-600">*</span></label>
+        <input type="text" required name="especie" [(ngModel)]="mascota.especie"
+          class="w-full rounded-md border px-3 py-2 text-sm">
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Raza</label>
+        <input type="text" name="raza" [(ngModel)]="mascota.raza"
+          class="w-full rounded-md border px-3 py-2 text-sm">
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Peso (kg)</label>
+        <input type="number" step="0.01" name="peso" [(ngModel)]="mascota.peso"
+          class="w-full rounded-md border px-3 py-2 text-sm">
+      </div>
+
+      <div class="mt-6 flex justify-end gap-2">
+        <button type="button" (click)="cancelar()" class="rounded-md border px-4 py-2">Cancelar</button>
+        <button type="submit" class="rounded-md bg-emerald-600 text-white px-4 py-2">Guardar</button>
+      </div>
+
+    </form>
+  </div>
+</section>

@@ -1,0 +1,126 @@
+<section
+  class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100
+         px-6 py-6 md:px-10 md:py-8">
+
+  <!-- Header -->
+  <header class="mb-8">
+    <h1 class="text-4xl font-semibold tracking-tight">Modificar Consulta</h1>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+      Registro clínico del veterinario. Los datos de agenda no pueden modificarse.
+    </p>
+  </header>
+
+  <!-- Card principal -->
+  <div
+    class="max-w-4xl rounded-2xl border border-slate-200 dark:border-slate-700
+           bg-white dark:bg-slate-800 shadow-lg p-6 md:p-8 space-y-8">
+
+    <!-- Mensajes -->
+    <div *ngIf="errorMsg"
+         class="rounded-lg border border-rose-300 bg-rose-50 text-rose-800
+                px-4 py-2 text-sm flex items-start gap-2">
+      <span class="font-semibold">Error:</span> {{ errorMsg }}
+    </div>
+
+    <div *ngIf="successMsg"
+         class="rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-800
+                px-4 py-2 text-sm flex items-start gap-2">
+      <span class="font-semibold">Éxito:</span> {{ successMsg }}
+    </div>
+
+    <!-- Datos de la consulta (NO modificables) -->
+    <section class="rounded-xl border border-slate-200 dark:border-slate-700
+                    bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
+
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400 mb-4">
+        Datos de la consulta
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-500 mb-1">ID Consulta</label>
+          <input [value]="idConsulta" readonly class="input-readonly" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-500 mb-1">Fecha</label>
+          <input [value]="fecha" readonly class="input-readonly" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-500 mb-1">Hora</label>
+          <input [value]="hora" readonly class="input-readonly" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Formulario clínico -->
+    <form [formGroup]="form" (ngSubmit)="guardar()" class="space-y-8">
+
+      <!-- Diagnóstico -->
+      <section>
+        <h2 class="text-lg font-semibold mb-2">Diagnóstico</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">
+          Resultado principal de la evaluación clínica.
+        </p>
+
+        <textarea
+          rows="10"
+          formControlName="diagnostico"
+          placeholder="Describe aquí el diagnóstico del paciente..."
+          class="input-textarea w-full text-sm">
+        </textarea>
+      </section>
+
+      <!-- Observaciones -->
+      <section>
+        <h2 class="text-base font-semibold mb-2">Observaciones</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">
+          Información adicional relevante para el tratamiento o seguimiento.
+        </p>
+
+        <textarea
+          rows="6"
+          formControlName="observaciones"
+          placeholder="Observaciones adicionales..."
+          class="input-textarea w-full text-sm">
+        </textarea>
+      </section>
+
+      <!-- Tratamiento -->
+      <section class="rounded-xl border border-slate-200 dark:border-slate-700
+                      bg-slate-50 dark:bg-slate-900 p-4 flex items-start gap-3">
+
+        <input
+          type="checkbox"
+          formControlName="tratamiento"
+          class="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600" />
+
+        <div>
+          <label class="text-sm font-semibold">Requiere tratamiento</label>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Marca esta opción si es necesario crear uno o más tratamientos asociados a la consulta.
+          </p>
+        </div>
+      </section>
+
+      <!-- Acciones -->
+      <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
+        <button
+          type="button"
+          (click)="cancelar()"
+          class="btn-secondary">
+          Cancelar
+        </button>
+
+        <button
+          type="submit"
+          [disabled]="cargando"
+          class="btn-primary disabled:opacity-60 disabled:cursor-not-allowed">
+          Guardar cambios
+        </button>
+      </div>
+
+    </form>
+  </div>
+</section>

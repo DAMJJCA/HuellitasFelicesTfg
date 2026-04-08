@@ -1,0 +1,77 @@
+<section
+  class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 px-6 py-6 md:px-10 md:py-8">
+  <div class="max-w-2xl mx-auto">
+
+    <h1 class="text-2xl font-semibold tracking-tight">Editar veterinario</h1>
+    <p class="text-sm text-slate-500 dark:text-slate-400">Actualiza los datos y guarda los cambios.</p>
+
+    <!-- mensajes -->
+    <div *ngIf="errorMsg"
+      class="mt-4 rounded-md border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
+      {{ errorMsg }}
+    </div>
+
+    <div *ngIf="successMsg"
+      class="mt-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm">
+      {{ successMsg }}
+    </div>
+
+    <!-- cargar veterinario -->
+    <ng-container *ngIf="veterinario$ | async as veterinario; else cargando">
+
+      <form [formGroup]="form" (ngSubmit)="guardar()"
+        class="mt-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow">
+
+        <p class="text-2xl font-semibold text-slate-500 dark:text-slate-400 mb-4">
+          ID: {{ veterinario.idVeterinario }}
+        </p>
+
+        <!-- nombreCompleto -->
+        <div class="mb-4">
+          <label class="block text-sm mb-1">Nombre completo <span class="text-rose-600">*</span></label>
+          <input type="text" formControlName="nombre"
+            class="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <!-- especialidad -->
+        <div class="mb-4">
+          <label class="block text-sm mb-1">Especialidad <span class="text-rose-600">*</span></label>
+          <input type="text" formControlName="especialidad"
+            class="w-full rounded-md border px-3 py-2 text-sm">
+        </div>
+
+        <!-- telefono -->
+        <div class="mb-4">
+          <label class="block text-sm mb-1">Teléfono <span class="text-rose-600">*</span></label>
+          <input type="text" formControlName="telefono"
+            class="w-full rounded-md border px-3 py-2 text-sm">
+        </div>
+
+        <!-- email -->
+        <div class="mb-4">
+          <label class="block text-sm mb-1">Email <span class="text-rose-600">*</span></label>
+          <input type="email" formControlName="email"
+            class="w-full rounded-md border px-3 py-2 text-sm">
+        </div>
+
+        <!-- botones -->
+        <div class="mt-6 flex justify-end gap-2">
+          <button type="button" (click)="cancelar()"
+            class="rounded-md border px-4 py-2 text-sm">Cancelar</button>
+
+          <button type="submit"
+            class="rounded-md bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm">
+            Guardar cambios
+          </button>
+        </div>
+
+      </form>
+
+    </ng-container>
+
+    <ng-template #cargando>
+      <p class="text-slate-400 mt-6">Cargando datos…</p>
+    </ng-template>
+
+  </div>
+</section>
