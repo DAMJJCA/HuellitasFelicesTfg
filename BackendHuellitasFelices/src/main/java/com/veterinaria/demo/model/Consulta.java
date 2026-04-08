@@ -5,6 +5,7 @@ import java.util.List;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "consultas")
@@ -15,11 +16,11 @@ public class Consulta {
     @Column(name = "id_consulta")
     private Long idConsulta;
 
-    //  Copiada desde la cita (NO editable)
+    // Copiada desde la cita (NO editable)
     @Column(nullable = false, updatable = false)
     private LocalDate fecha;
 
-    //  Copiada desde la cita (NO editable)
+    // Copiada desde la cita (NO editable)
     @Column(nullable = false, updatable = false)
     private String hora;
 
@@ -29,17 +30,36 @@ public class Consulta {
     @Column(columnDefinition = "TEXT")
     private String observaciones;
 
-    //  Relación con la cita (agenda)
+    // Relación con la cita
     @JsonBackReference
     @OneToOne
     @JoinColumn(name = "id_cita", nullable = false, unique = true)
     private Cita cita;
 
-    //  Relación con tratamientos
+    // Relación con tratamientos
     @OneToMany(mappedBy = "consulta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tratamiento> tratamientos;
 
-    // Getters y setters
+    // -------------------------------------------------
+    // ✅ GETTERS CALCULADOS (SIN DTO)
+    // -------------------------------------------------
+
+    @JsonProperty("idCita")
+    public Long getIdCita() {
+        return cita != null ? cita.getIdCita() : null;
+    }
+
+    @JsonProperty("nombreMascota")
+    public String getNombreMascota() {
+        return (cita != null && cita.getMascota() != null)
+                ? cita.getMascota().getNombre()
+                : null;
+    }
+
+    // -------------------------------------------------
+    // Getters y setters normales
+    // -------------------------------------------------
+
     public Long getIdConsulta() { return idConsulta; }
     public void setIdConsulta(Long idConsulta) { this.idConsulta = idConsulta; }
 
@@ -59,5 +79,7 @@ public class Consulta {
     public void setCita(Cita cita) { this.cita = cita; }
 
     public List<Tratamiento> getTratamientos() { return tratamientos; }
-    public void setTratamientos(List<Tratamiento> tratamientos) { this.tratamientos = tratamientos; }
+    public void setTratamientos(List<Tratamiento> tratamientos) {
+        this.tratamientos = tratamientos;
+    }
 }

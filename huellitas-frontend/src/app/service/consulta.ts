@@ -9,9 +9,10 @@ export interface Consulta {
   diagnostico: string;
   observaciones: string;
   tratamiento: boolean;
-  cita: {
-    idCita: number;
-  };
+
+  // ✅ vienen directo del backend
+  idCita: number;
+  nombreMascota: string;
 }
 
 @Injectable({ providedIn: 'root' })

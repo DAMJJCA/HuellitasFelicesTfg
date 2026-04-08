@@ -10,113 +10,105 @@
     </p>
   </header>
 
-  <!-- Card principal -->
   <div
     class="max-w-4xl rounded-2xl border border-slate-200 dark:border-slate-700
            bg-white dark:bg-slate-800 shadow-lg p-6 md:p-8 space-y-8">
 
     <!-- Mensajes -->
     <div *ngIf="errorMsg"
-         class="rounded-lg border border-rose-300 bg-rose-50 text-rose-800
-                px-4 py-2 text-sm flex items-start gap-2">
-      <span class="font-semibold">Error:</span> {{ errorMsg }}
+         class="rounded-lg border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
+      <strong>Error:</strong> {{ errorMsg }}
     </div>
 
     <div *ngIf="successMsg"
-         class="rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-800
-                px-4 py-2 text-sm flex items-start gap-2">
-      <span class="font-semibold">Éxito:</span> {{ successMsg }}
+         class="rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm">
+      <strong>Éxito:</strong> {{ successMsg }}
     </div>
 
-    <!-- Datos de la consulta (NO modificables) -->
-    <section class="rounded-xl border border-slate-200 dark:border-slate-700
-                    bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
+    <!-- Datos no modificables -->
+    <section
+      class="rounded-xl border border-slate-200 dark:border-slate-700
+             bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
 
-      <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400 mb-4">
+      <h2 class="text-xs font-semibold uppercase tracking-wide mb-4 text-slate-600 dark:text-slate-400">
         Datos de la consulta
       </h2>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
         <div>
-          <label class="block text-xs font-medium text-slate-500 mb-1">ID Consulta</label>
+          <label class="text-xs text-slate-500">ID Consulta</label>
           <input [value]="idConsulta" readonly class="input-readonly" />
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-slate-500 mb-1">Fecha</label>
+          <label class="text-xs text-slate-500">ID Cita</label>
+          <input [value]="idCita" readonly class="input-readonly" />
+        </div>
+
+        <div>
+          <label class="text-xs text-slate-500">Mascota</label>
+          <input [value]="nombreMascota" readonly class="input-readonly" />
+        </div>
+
+        <div>
+          <label class="text-xs text-slate-500">Fecha</label>
           <input [value]="fecha" readonly class="input-readonly" />
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-slate-500 mb-1">Hora</label>
+          <label class="text-xs text-slate-500">Hora</label>
           <input [value]="hora" readonly class="input-readonly" />
         </div>
       </div>
     </section>
 
-    <!-- Formulario clínico -->
+    <!-- Formulario -->
     <form [formGroup]="form" (ngSubmit)="guardar()" class="space-y-8">
 
-      <!-- Diagnóstico -->
       <section>
         <h2 class="text-lg font-semibold mb-2">Diagnóstico</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">
-          Resultado principal de la evaluación clínica.
-        </p>
-
-        <textarea
-          rows="10"
-          formControlName="diagnostico"
-          placeholder="Describe aquí el diagnóstico del paciente..."
-          class="input-textarea w-full text-sm">
+        <textarea rows="10"
+                  formControlName="diagnostico"
+                  class="input-textarea w-full text-sm"
+                  placeholder="Describe aquí el diagnóstico clínico...">
         </textarea>
       </section>
 
-      <!-- Observaciones -->
       <section>
         <h2 class="text-base font-semibold mb-2">Observaciones</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">
-          Información adicional relevante para el tratamiento o seguimiento.
-        </p>
-
-        <textarea
-          rows="6"
-          formControlName="observaciones"
-          placeholder="Observaciones adicionales..."
-          class="input-textarea w-full text-sm">
+        <textarea rows="6"
+                  formControlName="observaciones"
+                  class="input-textarea w-full text-sm"
+                  placeholder="Observaciones adicionales...">
         </textarea>
       </section>
 
-      <!-- Tratamiento -->
-      <section class="rounded-xl border border-slate-200 dark:border-slate-700
-                      bg-slate-50 dark:bg-slate-900 p-4 flex items-start gap-3">
+      <section
+        class="rounded-xl border border-slate-200 dark:border-slate-700
+               bg-slate-50 dark:bg-slate-900 p-4 flex gap-3 items-start">
 
-        <input
-          type="checkbox"
-          formControlName="tratamiento"
-          class="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600" />
+        <input type="checkbox"
+               formControlName="tratamiento"
+               class="mt-1 h-4 w-4 rounded text-indigo-600" />
 
         <div>
-          <label class="text-sm font-semibold">Requiere tratamiento</label>
+          <label class="font-semibold text-sm">Requiere tratamiento</label>
           <p class="text-xs text-slate-500 dark:text-slate-400">
-            Marca esta opción si es necesario crear uno o más tratamientos asociados a la consulta.
+            Marca si esta consulta requiere tratamiento asociado.
           </p>
         </div>
       </section>
 
-      <!-- Acciones -->
-      <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
-        <button
-          type="button"
-          (click)="cancelar()"
-          class="btn-secondary">
+      <div class="flex justify-end gap-3 pt-4">
+        <button type="button"
+                (click)="cancelar()"
+                class="btn-secondary">
           Cancelar
         </button>
 
-        <button
-          type="submit"
-          [disabled]="cargando"
-          class="btn-primary disabled:opacity-60 disabled:cursor-not-allowed">
+        <button type="submit"
+                [disabled]="cargando"
+                class="btn-primary disabled:opacity-60">
           Guardar cambios
         </button>
       </div>
