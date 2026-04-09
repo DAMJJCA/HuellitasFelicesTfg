@@ -2,7 +2,6 @@
   class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100
          px-6 py-6 md:px-10 md:py-8">
 
-  <!-- Header -->
   <header class="mb-8">
     <h1 class="text-4xl font-semibold tracking-tight">Modificar Consulta</h1>
     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -25,94 +24,67 @@
       <strong>Éxito:</strong> {{ successMsg }}
     </div>
 
-    <!-- Datos no modificables -->
-    <section
-      class="rounded-xl border border-slate-200 dark:border-slate-700
-             bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
+    <!-- Datos -->
+    <section class="rounded-xl border border-slate-200 dark:border-slate-700
+                    bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
 
       <h2 class="text-xs font-semibold uppercase tracking-wide mb-4 text-slate-600 dark:text-slate-400">
         Datos de la consulta
       </h2>
 
       <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
-        <div>
-          <label class="text-xs text-slate-500">ID Consulta</label>
-          <input [value]="idConsulta" readonly class="input-readonly" />
-        </div>
-
-        <div>
-          <label class="text-xs text-slate-500">ID Cita</label>
-          <input [value]="idCita" readonly class="input-readonly" />
-        </div>
-
-        <div>
-          <label class="text-xs text-slate-500">Mascota</label>
-          <input [value]="nombreMascota" readonly class="input-readonly" />
-        </div>
-
-        <div>
-          <label class="text-xs text-slate-500">Fecha</label>
-          <input [value]="fecha" readonly class="input-readonly" />
-        </div>
-
-        <div>
-          <label class="text-xs text-slate-500">Hora</label>
-          <input [value]="hora" readonly class="input-readonly" />
-        </div>
+        <input [value]="idConsulta" readonly class="input-readonly" />
+        <input [value]="idCita" readonly class="input-readonly" />
+        <input [value]="nombreMascota" readonly class="input-readonly" />
+        <input [value]="fecha" readonly class="input-readonly" />
+        <input [value]="hora" readonly class="input-readonly" />
       </div>
     </section>
 
-    <!-- Formulario -->
+    <!-- FORMULARIO -->
     <form [formGroup]="form" (ngSubmit)="guardar()" class="space-y-8">
 
-      <section>
-        <h2 class="text-lg font-semibold mb-2">Diagnóstico</h2>
-        <textarea rows="10"
-                  formControlName="diagnostico"
-                  class="input-textarea w-full text-sm"
-                  placeholder="Describe aquí el diagnóstico clínico...">
-        </textarea>
-      </section>
+      <textarea rows="8" formControlName="diagnostico"
+                class="input-textarea w-full"
+                placeholder="Diagnóstico...">
+      </textarea>
 
-      <section>
-        <h2 class="text-base font-semibold mb-2">Observaciones</h2>
-        <textarea rows="6"
-                  formControlName="observaciones"
-                  class="input-textarea w-full text-sm"
-                  placeholder="Observaciones adicionales...">
-        </textarea>
-      </section>
+      <textarea rows="5" formControlName="observaciones"
+                class="input-textarea w-full"
+                placeholder="Observaciones...">
+      </textarea>
 
-      <section
-        class="rounded-xl border border-slate-200 dark:border-slate-700
-               bg-slate-50 dark:bg-slate-900 p-4 flex gap-3 items-start">
-
+      <section class="flex gap-3 items-start">
         <input type="checkbox"
                formControlName="tratamiento"
                class="mt-1 h-4 w-4 rounded text-indigo-600" />
-
-        <div>
-          <label class="font-semibold text-sm">Requiere tratamiento</label>
-          <p class="text-xs text-slate-500 dark:text-slate-400">
-            Marca si esta consulta requiere tratamiento asociado.
-          </p>
-        </div>
+        <label class="font-semibold text-sm">Requiere tratamiento</label>
       </section>
 
-      <div class="flex justify-end gap-3 pt-4">
-        <button type="button"
-                (click)="cancelar()"
-                class="btn-secondary">
+      <!-- Formulario Tratamiento -->
+      <section *ngIf="form.value.tratamiento"
+               [formGroup]="tratamientoForm"
+               class="rounded-xl border border-indigo-200
+                      bg-indigo-50 dark:bg-slate-800 p-5 space-y-4">
+
+        <input formControlName="nombre" class="input-textarea" placeholder="Nombre" />
+        <input formControlName="medicamento" class="input-textarea" placeholder="Medicamento" />
+        <input formControlName="dosis" class="input-textarea" placeholder="Dosis" />
+        <input formControlName="duracion" class="input-textarea" placeholder="Duración" />
+        <textarea formControlName="descripcion" rows="4"
+                  class="input-textarea w-full"
+                  placeholder="Descripción">
+        </textarea>
+      </section>
+
+      <div class="flex justify-end gap-3">
+        <button type="button" (click)="cancelar()" class="btn-secondary">
           Cancelar
         </button>
-
-        <button type="submit"
-                [disabled]="cargando"
-                class="btn-primary disabled:opacity-60">
-          Guardar cambios
+        <button type="submit" [disabled]="cargando" class="btn-primary">
+          Guardar
         </button>
       </div>
-
     </form>
   </div>
 </section>

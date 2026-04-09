@@ -10,7 +10,6 @@ export interface Consulta {
   observaciones: string;
   tratamiento: boolean;
 
-  // ✅ vienen directo del backend
   idCita: number;
   nombreMascota: string;
 }

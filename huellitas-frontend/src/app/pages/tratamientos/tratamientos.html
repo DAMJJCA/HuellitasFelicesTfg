@@ -1,1 +1,136 @@
-<p>tratamientos works!</p>
+<section
+  class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100
+         px-6 py-6 md:px-10 md:py-8">
+
+  <!-- Header -->
+  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+    <div>
+      <h1 class="text-4xl font-semibold tracking-tight">Tratamientos</h1>
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        Tratamientos médicos asociados a consultas veterinarias.
+      </p>
+    </div>
+
+    <!-- Buscador -->
+    <div class="relative w-full sm:w-72">
+      <input
+        type="text"
+        (input)="onBuscar($event.target.value)"
+        placeholder="Buscar tratamiento..."
+        class="w-full rounded-lg border border-slate-300 dark:border-slate-700
+               bg-white dark:bg-slate-800 px-3 py-2.5 text-sm"
+      />
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMsg"
+       class="mb-4 rounded-lg border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
+    {{ errorMsg }}
+  </div>
+
+  <!-- Tabla -->
+  <ng-container *ngIf="tratamientosFiltrados$ | async as tratamientos">
+    <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700
+                bg-white dark:bg-slate-800 shadow">
+
+      <table class="min-w-full text-sm text-left">
+        <thead class="bg-slate-100 dark:bg-slate-900 text-xs uppercase">
+          <tr>
+            <th class="px-6 py-3">ID</th>
+            <th class="px-6 py-3">Nombre</th>
+            <th class="px-6 py-3">Medicamento</th>
+            <th class="px-6 py-3">Dosis</th>
+            <th class="px-6 py-3">Duración</th>
+            <th class="px-6 py-3 text-right">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+          <tr *ngFor="let t of tratamientos">
+            <td class="px-6 py-4 font-mono text-xs">#{{ t.idTratamiento }}</td>
+            <td class="px-6 py-4 font-medium">{{ t.nombre }}</td>
+            <td class="px-6 py-4">{{ t.medicamento }}</td>
+            <td class="px-6 py-4">{{ t.dosis }}</td>
+            <td class="px-6 py-4">{{ t.duracion }}</td>
+
+            <td class="px-6 py-4 text-right">
+              <div class="flex justify-end gap-2">
+
+                <!-- VER DETALLE -->
+                <button
+                  class="inline-flex items-center gap-1.5 rounded-md border
+                         border-slate-300 bg-white dark:bg-slate-700
+                         px-3 py-1 text-xs hover:bg-slate-50"
+                  (click)="verDetalle(t)">
+                  Ver más detalle
+                </button>
+
+                <!-- ELIMINAR -->
+                <button
+                  class="inline-flex items-center gap-1.5 rounded-md
+                         bg-rose-600 text-white px-3 py-1 text-xs hover:bg-rose-700"
+                  (click)="abrirEliminar(t)">
+                  Eliminar
+                </button>
+
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+  <!-- MODAL DETALLE -->
+  <div *ngIf="mostrandoDetalle"
+       class="fixed inset-0 z-50 flex items-center justify-center">
+
+    <div class="absolute inset-0 bg-black/40" (click)="cerrarDetalle()"></div>
+
+    <div class="relative bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md shadow-xl">
+      <h3 class="text-xl font-semibold mb-4">Detalle del Tratamiento</h3>
+
+      <div *ngIf="detalleSeleccionado" class="space-y-2 text-sm">
+        <p><strong>Nombre:</strong> {{ detalleSeleccionado.nombre }}</p>
+        <p><strong>Medicamento:</strong> {{ detalleSeleccionado.medicamento }}</p>
+        <p><strong>Dosis:</strong> {{ detalleSeleccionado.dosis }}</p>
+        <p><strong>Duración:</strong> {{ detalleSeleccionado.duracion }}</p>
+
+        <div>
+          <p class="font-semibold mt-2">Descripción</p>
+          <p class="text-slate-600 dark:text-slate-300">
+            {{ detalleSeleccionado.descripcion }}
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button class="btn-secondary" (click)="cerrarDetalle()">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ELIMINAR -->
+  <div *ngIf="mostrandoConfirmacion"
+       class="fixed inset-0 z-50 flex items-center justify-center">
+
+    <div class="absolute inset-0 bg-black/40" (click)="cancelarEliminar()"></div>
+
+    <div class="relative bg-white dark:bg-slate-800 rounded-xl p-6 w-80 shadow-lg">
+      <h3 class="text-lg font-semibold">Eliminar tratamiento</h3>
+      <p class="text-sm mt-2">Esta acción no se puede deshacer.</p>
+
+      <div class="mt-4 flex justify-end gap-2">
+        <button class="btn-secondary" (click)="cancelarEliminar()">Cancelar</button>
+        <button class="bg-rose-600 text-white px-4 py-2 rounded-lg"
+                (click)="confirmarEliminar()">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+</section>

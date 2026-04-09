@@ -3,6 +3,7 @@ import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConsultaService, Consulta } from '../../../service/consulta';
+import { TratamientoService } from '../../../service/tratamiento';
 
 @Component({
   selector: 'app-mconsulta',
@@ -16,20 +17,30 @@ export class MconsultaComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private consultaService = inject(ConsultaService);
+  private tratamientoService = inject(TratamientoService);
   private cdr = inject(ChangeDetectorRef);
 
-  // 🔒 NO modificables
+  // Datos no modificables
   idConsulta!: number;
   fecha = '';
   hora = '';
   idCita!: number;
   nombreMascota = '';
 
-  // ✅ Formulario
+  // Formulario de consulta
   form = this.fb.nonNullable.group({
     diagnostico: [''],
     observaciones: [''],
     tratamiento: [false]
+  });
+
+  // Formulario de tratamiento
+  tratamientoForm = this.fb.nonNullable.group({
+    nombre: [''],
+    descripcion: [''],
+    dosis: [''],
+    duracion: [''],
+    medicamento: ['']
   });
 
   cargando = false;
@@ -47,7 +58,6 @@ export class MconsultaComponent {
 
     this.consultaService.getConsulta(id).subscribe({
       next: (c: Consulta) => {
-        // ✅ datos directos del backend
         this.fecha = c.fecha;
         this.hora = c.hora;
         this.idCita = c.idCita;
@@ -66,29 +76,55 @@ export class MconsultaComponent {
   }
 
   guardar(): void {
-    if (this.form.invalid) return;
-
-    const dto = {
-      diagnostico: this.form.value.diagnostico,
-      observaciones: this.form.value.observaciones,
-      tratamiento: this.form.value.tratamiento
-    };
-
     this.cargando = true;
     this.errorMsg = '';
     this.successMsg = '';
 
-    this.consultaService.actualizarConsulta(this.idConsulta, dto).subscribe({
-      next: () => {
-        this.cargando = false;
-        this.successMsg = 'Consulta actualizada correctamente.';
-        setTimeout(() => this.router.navigate(['/consultas']), 400);
-      },
-      error: () => {
-        this.cargando = false;
-        this.errorMsg = 'Error guardando la consulta.';
-      }
-    });
+    //  Actualizar consulta
+    this.consultaService
+      .actualizarConsulta(this.idConsulta, this.form.getRawValue())
+      .subscribe({
+        next: () => {
+
+          //  Crear tratamiento si aplica
+          if (this.form.value.tratamiento === true) {
+
+            const t = this.tratamientoForm.getRawValue();
+
+            const tratamiento = {
+              nombre: t.nombre,
+              descripcion: t.descripcion,
+              dosis: t.dosis,
+              duracion: t.duracion,
+              medicamento: t.medicamento,
+              consulta: {
+                idConsulta: this.idConsulta
+              }
+            };
+
+            this.tratamientoService.crearTratamiento(tratamiento).subscribe({
+              next: () => this.finalizar(),
+              error: () => {
+                this.cargando = false;
+                this.errorMsg = 'Error creando el tratamiento.';
+              }
+            });
+
+          } else {
+            this.finalizar();
+          }
+        },
+        error: () => {
+          this.errorMsg = 'Error guardando la consulta.';
+          this.cargando = false;
+        }
+      });
+  }
+
+  finalizar(): void {
+    this.cargando = false;
+    this.successMsg = 'Consulta y tratamiento guardados correctamente.';
+    setTimeout(() => this.router.navigate(['/consultas']), 500);
   }
 
   cancelar(): void {
