@@ -1,0 +1,112 @@
+<section class="min-h-screen bg-slate-50 dark:bg-slate-900
+         text-slate-800 dark:text-slate-100
+         px-6 py-6 md:px-10 md:py-8">
+
+  <!-- Header -->
+  <header class="mb-8">
+    <h1 class="text-4xl font-semibold tracking-tight">
+      Historial Médico
+    </h1>
+    <p class="text-sm text-slate-500 dark:text-slate-400">
+      Consulta el historial clínico completo de cada mascota.
+    </p>
+  </header>
+
+  <!-- Selector de mascota -->
+  <div class="max-w-md mb-8">
+    <label class="block text-sm font-medium mb-1">
+      Seleccionar mascota
+    </label>
+    <select class="w-full rounded-lg border border-slate-300 dark:border-slate-700
+         bg-white dark:bg-slate-800 px-3 py-2 text-sm
+         focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      (change)="seleccionarMascota($any($event.target).value)">
+
+      <option value="">-- Selecciona una mascota --</option>
+
+      <option *ngFor="let m of mascotas$ | async" [value]="m.idMascota">
+        {{ m.nombre }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Estado cargando -->
+  <div *ngIf="cargando" class="text-sm text-slate-500 mb-6">
+    Cargando historial médico...
+  </div>
+
+  <!-- CONSULTAS -->
+  <section *ngIf="consultas.length > 0" class="mb-12">
+
+    <h2 class="text-xl font-semibold mb-4">
+      Consultas
+    </h2>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white dark:bg-slate-800
+               rounded-xl shadow text-sm">
+
+        <thead class="bg-slate-100 dark:bg-slate-700 text-left">
+          <tr>
+            <th class="px-4 py-3">Fecha</th>
+            <th class="px-4 py-3">Hora</th>
+            <th class="px-4 py-3">Diagnóstico</th>
+            <th class="px-4 py-3">Observaciones</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+          <tr *ngFor="let c of consultas">
+            <td class="px-4 py-2 whitespace-nowrap">{{ c.fecha }}</td>
+            <td class="px-4 py-2 whitespace-nowrap">{{ c.hora }}</td>
+            <td class="px-4 py-2">{{ c.diagnostico }}</td>
+            <td class="px-4 py-2">{{ c.observaciones }}</td>
+          </tr>
+        </tbody>
+
+      </table>
+    </div>
+  </section>
+
+  <!-- TRATAMIENTOS -->
+  <section *ngIf="tratamientos.length > 0">
+
+    <h2 class="text-xl font-semibold mb-4">
+      Tratamientos
+    </h2>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white dark:bg-slate-800
+               rounded-xl shadow text-sm">
+
+        <thead class="bg-slate-100 dark:bg-slate-700 text-left">
+          <tr>
+            <th class="px-4 py-3">Nombre</th>
+            <th class="px-4 py-3">Medicamento</th>
+            <th class="px-4 py-3">Dosis</th>
+            <th class="px-4 py-3">Duración</th>
+            <th class="px-4 py-3">Descripción</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+          <tr *ngFor="let t of tratamientos">
+            <td class="px-4 py-2 font-medium">{{ t.nombre }}</td>
+            <td class="px-4 py-2">{{ t.medicamento }}</td>
+            <td class="px-4 py-2">{{ t.dosis }}</td>
+            <td class="px-4 py-2">{{ t.duracion }}</td>
+            <td class="px-4 py-2">{{ t.descripcion }}</td>
+          </tr>
+        </tbody>
+
+      </table>
+    </div>
+  </section>
+
+  <!-- Sin historial -->
+  <div *ngIf="mascotaSeleccionadaId && consultas.length === 0 && tratamientos.length === 0"
+    class="mt-8 text-sm text-slate-500">
+    Esta mascota aún no tiene historial médico registrado.
+  </div>
+
+</section>

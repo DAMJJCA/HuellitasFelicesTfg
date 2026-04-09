@@ -20,7 +20,7 @@ export class ConsultaService {
 
   private api = 'http://localhost:8080/api/consultas';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getConsultas(): Observable<Consulta[]> {
     return this.http.get<Consulta[]>(this.api);
@@ -28,6 +28,12 @@ export class ConsultaService {
 
   getConsulta(id: number): Observable<Consulta> {
     return this.http.get<Consulta>(`${this.api}/${id}`);
+  }
+
+  getConsultasPorMascota(idMascota: number) {
+    return this.http.get<Consulta[]>(
+      `${this.api}/mascota/${idMascota}`
+    );
   }
 
   actualizarConsulta(id: number, body: Partial<Consulta>): Observable<Consulta> {

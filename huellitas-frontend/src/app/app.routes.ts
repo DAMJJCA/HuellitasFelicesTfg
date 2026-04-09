@@ -83,6 +83,19 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/consultas/mconsulta/mconsulta').then(m => m.MconsultaComponent)
       },
+      //tratamientos
+      {
+        path: 'tratamientos',
+        loadComponent: () =>
+          import('./pages/tratamientos/tratamientos')
+            .then(m => m.TratamientosComponent)
+      },
+      //historial
+      {
+        path: 'historial',
+        loadComponent: () =>
+          import('./pages/historial/historial').then(m => m.HistorialComponent)
+      },
       { path: '**', redirectTo: '' }
     ]
   }

@@ -18,14 +18,14 @@ export class MconsultaComponent {
   private consultaService = inject(ConsultaService);
   private cdr = inject(ChangeDetectorRef);
 
-  // 🔒 NO modificables
+  // NO modificables
   idConsulta!: number;
   fecha = '';
   hora = '';
   idCita!: number;
   nombreMascota = '';
 
-  // ✅ Formulario
+  // Formulario
   form = this.fb.nonNullable.group({
     diagnostico: [''],
     observaciones: [''],

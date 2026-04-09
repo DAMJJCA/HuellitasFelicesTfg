@@ -7,6 +7,7 @@ public interface TratamientoService {
 
     List<Tratamiento> findAll();
     List<Tratamiento> findByConsulta(Long idConsulta);
+    List<Tratamiento> findByMascota(Long idMascota);
 
     Tratamiento findById(Long id);
     Tratamiento save(Tratamiento tratamiento);

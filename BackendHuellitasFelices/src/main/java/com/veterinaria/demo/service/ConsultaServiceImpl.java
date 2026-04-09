@@ -24,6 +24,12 @@ public class ConsultaServiceImpl implements ConsultaService {
     public Consulta findById(Long id) {
         return repo.findById(id).orElse(null);
     }
+    
+    @Override
+	public List<Consulta> findByMascota(Long idMascota) {
+    	return repo.findByCita_Mascota_IdMascota(idMascota);
+	}
+
 
     @Override
     public Consulta save(Consulta consulta) {
