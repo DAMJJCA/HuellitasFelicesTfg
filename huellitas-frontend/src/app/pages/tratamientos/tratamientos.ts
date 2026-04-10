@@ -22,11 +22,11 @@ export class TratamientosComponent {
 
   errorMsg = '';
 
-  // 🔴 Modal eliminar
+
   mostrandoEliminar = false;
   seleccionadoEliminar: Tratamiento | null = null;
 
-  // 🔍 Modal detalle
+
   mostrandoDetalle = false;
   seleccionadoDetalle: Tratamiento | null = null;
 
@@ -67,7 +67,6 @@ export class TratamientosComponent {
     this.refrescar$.next();
   }
 
-  // 🔍 Detalle
   verDetalle(t: Tratamiento) {
     this.seleccionadoDetalle = t;
     this.mostrandoDetalle = true;
@@ -78,7 +77,6 @@ export class TratamientosComponent {
     this.mostrandoDetalle = false;
   }
 
-  // 🔴 Eliminar
   abrirEliminar(t: Tratamiento) {
     this.seleccionadoEliminar = t;
     this.mostrandoEliminar = true;

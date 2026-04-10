@@ -2,6 +2,7 @@ package com.veterinaria.demo.model;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "tratamientos")
@@ -26,6 +27,15 @@ public class Tratamiento {
     @ManyToOne
     @JoinColumn(name = "id_consulta", nullable = false)
     private Consulta consulta;
+    
+    @JsonProperty("nombreMascota")
+    public String getNombreMascota() {
+        return consulta != null &&
+               consulta.getCita() != null &&
+               consulta.getCita().getMascota() != null
+               ? consulta.getCita().getMascota().getNombre()
+               : null;
+    }
 
     // Getters y setters
     public Long getIdTratamiento() { return idTratamiento; }

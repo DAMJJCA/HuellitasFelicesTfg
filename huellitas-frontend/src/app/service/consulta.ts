@@ -10,9 +10,9 @@ export interface Consulta {
   observaciones: string;
   tratamiento: boolean;
 
-  // ✅ vienen directo del backend
   idCita: number;
   nombreMascota: string;
+  idsTratamientos: number[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -25,21 +25,17 @@ export class ConsultaService {
   getConsultas(): Observable<Consulta[]> {
     return this.http.get<Consulta[]>(this.api);
   }
-
   getConsulta(id: number): Observable<Consulta> {
     return this.http.get<Consulta>(`${this.api}/${id}`);
   }
-
   getConsultasPorMascota(idMascota: number) {
     return this.http.get<Consulta[]>(
       `${this.api}/mascota/${idMascota}`
     );
   }
-
   actualizarConsulta(id: number, body: Partial<Consulta>): Observable<Consulta> {
     return this.http.put<Consulta>(`${this.api}/${id}`, body);
   }
-
   eliminarConsulta(id: number): Observable<void> {
     return this.http.delete<void>(`${this.api}/${id}`);
   }

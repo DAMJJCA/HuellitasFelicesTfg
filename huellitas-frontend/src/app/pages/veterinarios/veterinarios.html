@@ -94,7 +94,7 @@
     <!-- LISTADO -->
     <ng-template #listado>
 
-      <!-- TABLA (md+) -->
+      <!-- TABLA -->
       <div class="hidden md:block overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700
                   bg-white dark:bg-slate-800 shadow">
         <div class="overflow-x-auto">
@@ -140,7 +140,6 @@
                     </button>
                   </div>
                 </td>
-
               </tr>
             </tbody>
           </table>
@@ -179,12 +178,9 @@
             <button class="rounded-md bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 text-sm"
                     (click)="confirmarEliminar()">Eliminar</button>
           </div>
-
         </article>
       </div>
-
     </ng-template>
-
   </ng-container>
 
   <!-- LOADING -->
@@ -208,9 +204,7 @@
           <button class="rounded-md border px-4 py-2 text-sm" (click)="cancelarEliminar()">Cancelar</button>
           <button class="rounded-md bg-rose-600 text-white px-4 py-2 text-sm" (click)="confirmarEliminar()">Eliminar</button>
         </div>
-
       </div>
     </div>
   </div>
-
 </section>

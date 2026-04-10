@@ -27,7 +27,6 @@
        class="mb-4 rounded-lg border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
     {{ errorMsg }}
   </div>
-
   <!-- Tabla -->
   <ng-container *ngIf="tratamientosFiltrados$ | async as tratamientos">
 
@@ -44,7 +43,8 @@
       <table class="min-w-full text-sm">
         <thead class="bg-slate-100 dark:bg-slate-700">
           <tr>
-            <th class="px-4 py-3 text-left">Nombre</th>
+            <th class="px-4 py-3 text-left">Mascota</th>
+            <th class="px-4 py-3 text-left">Nombre tratamiento</th>
             <th class="px-4 py-3 text-left">Medicamento</th>
             <th class="px-4 py-3 text-left">Dosis</th>
             <th class="px-4 py-3 text-left">Duración</th>
@@ -54,7 +54,8 @@
 
         <tbody class="divide-y">
           <tr *ngFor="let t of tratamientos">
-            <td class="px-4 py-2 font-medium">{{ t.nombre }}</td>
+            <td class="px-6 py-4 font-medium  text-slate-500">{{ t.nombreMascota }}</td>
+            <td class="px-4 py-2">{{ t.nombre }}</td>
             <td class="px-4 py-2">{{ t.medicamento }}</td>
             <td class="px-4 py-2">{{ t.dosis }}</td>
             <td class="px-4 py-2">{{ t.duracion }}</td>
@@ -62,13 +63,13 @@
             <td class="px-4 py-2 text-right">
               <div class="flex justify-end gap-2">
                 <button
-                  class="btn-secondary"
+                  class="rounded-md border border-slate-300 bg-slate-300 px-3 py-2 text-xs hover:bg-slate-50 dark:hover:bg-slate-700"
                   (click)="verDetalle(t)">
-                  Ver más detalle
+                  Detalle
                 </button>
 
                 <button
-                  class="bg-rose-600 text-white px-3 py-1 rounded text-xs"
+                  class="rounded-md border bg-rose-600 text-white px-3 py-1 text-xs"
                   (click)="abrirEliminar(t)">
                   Eliminar
                 </button>
@@ -92,6 +93,7 @@
       <h3 class="text-xl font-semibold mb-4">Detalle del Tratamiento</h3>
 
       <div *ngIf="seleccionadoDetalle" class="space-y-2 text-sm">
+        <p><strong>Mascota:</strong> {{ seleccionadoDetalle.nombreMascota }}</p>
         <p><strong>Nombre:</strong> {{ seleccionadoDetalle.nombre }}</p>
         <p><strong>Medicamento:</strong> {{ seleccionadoDetalle.medicamento }}</p>
         <p><strong>Dosis:</strong> {{ seleccionadoDetalle.dosis }}</p>
@@ -127,5 +129,4 @@
       </div>
     </div>
   </div>
-
 </section>

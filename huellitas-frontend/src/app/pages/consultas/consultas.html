@@ -1,6 +1,7 @@
 <!-- Contenedor principal -->
-<section class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100
-               px-6 py-6 md:px-10 md:py-8">
+<section
+  class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100
+         px-6 py-6 md:px-10 md:py-8">
 
   <!-- Header / acciones -->
   <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
@@ -11,35 +12,37 @@
       </p>
     </div>
 
-    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
+    <!-- Buscador -->
+    <div class="relative">
+      <svg
+        class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2
+               h-5 w-5 text-slate-400"
+        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
 
-      <!-- Buscador -->
-      <div class="relative">
-        <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2
-                    h-5 w-5 text-slate-400"
-             fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-
-        <input type="text"
-               (input)="buscar($event.target.value)"
-               placeholder="Buscar por diagnóstico u observaciones…"
-               class="w-full sm:w-80 rounded-lg border border-slate-300 dark:border-slate-700
-                      bg-white dark:bg-slate-800 pl-10 pr-3 py-2.5 text-sm
-                      placeholder-slate-400 focus:outline-none
-                      focus:ring-2 focus:ring-indigo-500"/>
-      </div>
+      <input
+        type="text"
+        placeholder="Buscar por mascota, diagnóstico u observaciones…"
+        class="w-full sm:w-80 rounded-lg border border-slate-300 dark:border-slate-700
+               bg-white dark:bg-slate-800 pl-10 pr-3 py-2.5 text-sm
+               placeholder-slate-400 focus:outline-none
+               focus:ring-2 focus:ring-indigo-500"
+        (input)="buscar($any($event.target).value)" />
     </div>
   </div>
 
-  <!-- Contador -->
+  <!-- Contenido -->
   <ng-container *ngIf="consultasFiltradas$ | async as consultas; else cargando">
+
+    <!-- Contador -->
     <div class="mb-4 text-sm">
-      <span class="inline-flex items-center gap-2 rounded-full
-                   bg-indigo-50 dark:bg-indigo-900/30
-                   text-indigo-700 dark:text-indigo-300
-                   px-3 py-1.5">
+      <span
+        class="inline-flex items-center gap-2 rounded-full
+               bg-indigo-50 dark:bg-indigo-900/30
+               text-indigo-700 dark:text-indigo-300
+               px-3 py-1.5">
         <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
         {{ consultas.length }} consulta{{ consultas.length === 1 ? '' : 's' }}
       </span>
@@ -47,9 +50,10 @@
 
     <!-- Estado vacío -->
     <ng-container *ngIf="consultas.length === 0; else listado">
-      <div class="rounded-xl border border-dashed border-slate-300
-                  dark:border-slate-700 bg-white dark:bg-slate-800
-                  p-10 text-center">
+      <div
+        class="rounded-xl border border-dashed border-slate-300
+               dark:border-slate-700 bg-white dark:bg-slate-800
+               p-10 text-center">
         <h3 class="mt-3 text-base font-semibold">No hay consultas registradas</h3>
         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Las consultas se crean automáticamente al agendar una cita.
@@ -59,17 +63,21 @@
 
     <!-- LISTADO -->
     <ng-template #listado>
+
       <!-- Tabla desktop -->
-      <div class="hidden md:block overflow-hidden rounded-xl
-                  border border-slate-200 dark:border-slate-700
-                  bg-white dark:bg-slate-800 shadow">
+      <div
+        class="hidden md:block overflow-hidden rounded-xl
+               border border-slate-200 dark:border-slate-700
+               bg-white dark:bg-slate-800 shadow">
         <div class="overflow-x-auto">
           <table class="min-w-full text-left text-sm">
-            <thead class="bg-slate-50 dark:bg-slate-900/40
-                         text-slate-600 dark:text-slate-300
-                         text-xs uppercase tracking-wide">
+            <thead
+              class="bg-slate-50 dark:bg-slate-900/40
+                     text-slate-600 dark:text-slate-300
+                     text-xs uppercase tracking-wide">
               <tr>
                 <th class="px-6 py-3">ID</th>
+                <th class="px-6 py-3">Mascota</th>
                 <th class="px-6 py-3">Fecha</th>
                 <th class="px-6 py-3">Hora</th>
                 <th class="px-6 py-3">Diagnóstico</th>
@@ -78,21 +86,35 @@
             </thead>
 
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-              <tr *ngFor="let c of consultas"
-                  class="hover:bg-slate-50/60
-                         dark:hover:bg-slate-700/30 transition">
-                <td class="px-6 py-4 font-mono text-xs text-slate-500">#{{ c.idConsulta }}</td>
+              <tr
+                *ngFor="let c of consultas"
+                class="hover:bg-slate-50/60
+                       dark:hover:bg-slate-700/30 transition">
+
+                <td class="px-6 py-4 font-mono text-xs text-slate-500">
+                  #{{ c.idConsulta }}
+                </td>
+
+                <td class="px-6 py-4 font-medium  text-slate-500">
+                  {{ c.nombreMascota }}
+                </td>
+
                 <td class="px-6 py-4">{{ c.fecha }}</td>
                 <td class="px-6 py-4">{{ c.hora }}</td>
+
                 <td class="px-6 py-4 truncate max-w-xs">
                   {{ c.diagnostico || '—' }}
                 </td>
+
                 <td class="px-6 py-4">
                   <div class="flex justify-center">
-                    <button class="inline-flex items-center gap-1.5
-                                   rounded-md border bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 text-sm"
-                            (click)="editar(c)">
-                      ingresar
+                    <button
+                      class="inline-flex items-center gap-1.5
+                             rounded-md border bg-emerald-600
+                             hover:bg-emerald-700 text-white
+                             px-4 py-1.5 text-sm"
+                      (click)="editar(c)">
+                      Ingresar
                     </button>
                   </div>
                 </td>
@@ -104,26 +126,40 @@
 
       <!-- Cards mobile -->
       <div class="md:hidden grid grid-cols-1 gap-3">
-        <article *ngFor="let c of consultas"
-                 class="rounded-xl border border-slate-200
-                        dark:border-slate-700 bg-white dark:bg-slate-800
-                        p-4 shadow-sm">
-          <div class="flex justify-between">
-            <h3 class="font-semibold">Consulta #{{ c.idConsulta }}</h3>
-            <span class="text-xs text-slate-500">{{ c.fecha }} · {{ c.hora }}</span>
+        <article
+          *ngFor="let c of consultas"
+          class="rounded-xl border border-slate-200
+                 dark:border-slate-700 bg-white dark:bg-slate-800
+                 p-4 shadow-sm">
+
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-semibold">
+                {{ c.nombreMascota }}
+              </h3>
+              <p class="text-xs text-slate-500">
+                Consulta #{{ c.idConsulta }}
+              </p>
+            </div>
+
+            <span class="text-xs text-slate-500">
+              {{ c.fecha }} · {{ c.hora }}
+            </span>
           </div>
 
           <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
             {{ c.diagnostico || 'Sin diagnóstico' }}
           </p>
 
-          <button class="mt-3 w-full rounded-md border px-3 py-2 text-xs
-                         hover:bg-slate-50 dark:hover:bg-slate-700"
-                  (click)="editar(c)">
-            ingresar a consulta
+          <button
+            class="mt-3 w-full rounded-md border px-3 py-2 text-xs
+                   hover:bg-slate-50 dark:hover:bg-slate-700"
+            (click)="editar(c)">
+            Ingresar a consulta
           </button>
         </article>
       </div>
+
     </ng-template>
   </ng-container>
 
@@ -135,5 +171,4 @@
       <div class="h-4 w-10/12 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
     </div>
   </ng-template>
-
 </section>

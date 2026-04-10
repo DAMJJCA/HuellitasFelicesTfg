@@ -30,19 +30,15 @@ export class CitaService {
   getCitas(): Observable<Cita[]> {
     return this.http.get<Cita[]>(this.api);
   }
-
   crearCita(cita: CrearCitaDto): Observable<Cita> {
     return this.http.post<Cita>(this.api, cita);
   }
-
   eliminarCita(id: number): Observable<void> {
     return this.http.delete<void>(`${this.api}/${id}`);
   }
-
   actualizarCita(id: number, body: Partial<CrearCitaDto>): Observable<Cita> {
     return this.http.put<Cita>(`${this.api}/${id}`, body);
   }
-
   getCita(id: number): Observable<Cita> {
     return this.http.get<Cita>(`${this.api}/${id}`);
   }
