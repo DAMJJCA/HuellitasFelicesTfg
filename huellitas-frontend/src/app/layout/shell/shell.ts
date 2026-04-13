@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { SidebarComponent } from "../sidebar/sidebar";
+import { SidebarComponent } from '../sidebar/sidebar';
 
 @Component({
   selector: 'app-shell',
@@ -8,5 +8,4 @@ import { SidebarComponent } from "../sidebar/sidebar";
   templateUrl: './shell.html',
   imports: [RouterOutlet, SidebarComponent]
 })
-export class ShellComponent {
-}
+export class ShellComponent {}

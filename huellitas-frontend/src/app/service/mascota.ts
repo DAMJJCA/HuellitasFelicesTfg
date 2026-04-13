@@ -48,4 +48,7 @@ export class MascotaService {
   getMascota(id: number): Observable<Mascotas> {
     return this.http.get<Mascotas>(`${this.api}/${id}`);
   }
+  totalMascotas(): Observable<number> {
+    return this.http.get<number>(`${this.api}/total`);
+  }
 }

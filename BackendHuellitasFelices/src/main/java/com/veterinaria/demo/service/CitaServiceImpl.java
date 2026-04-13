@@ -39,15 +39,15 @@ public class CitaServiceImpl implements CitaService {
     @Transactional
     public Cita save(Cita cita) {
 
-        // 1️⃣ Guardar la cita
+        //  Guardar la cita
         Cita saved = citaRepo.save(cita);
 
-        // 2️⃣ Evitar crear consulta duplicada (por seguridad)
+        //  Evitar crear consulta duplicada (por seguridad)
         if (saved.getConsulta() == null) {
 
             Consulta consulta = new Consulta();
 
-            // ✅ COPIAR FECHA Y HORA DESDE LA CITA
+            //  COPIAR FECHA Y HORA DESDE LA CITA
             consulta.setFecha(saved.getFecha());
             consulta.setHora(saved.getHora());
 

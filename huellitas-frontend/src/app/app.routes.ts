@@ -96,6 +96,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/historial/historial').then(m => m.HistorialComponent)
       },
+      //dashboard
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
+      },
       { path: '**', redirectTo: '' }
     ]
   }

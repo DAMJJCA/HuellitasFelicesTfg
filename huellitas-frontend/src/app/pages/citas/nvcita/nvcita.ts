@@ -27,7 +27,6 @@ export class NvcitaComponent {
   mascotas: Mascotas[] = [];
   veterinarios: any[] = [];
 
-  cargando = false;
   error = '';
   success = '';
 
