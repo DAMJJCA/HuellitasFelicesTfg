@@ -87,9 +87,6 @@ export const routes: Routes = [
       {
         path: 'tratamientos',
         loadComponent: () =>
-<<<<<<< HEAD
-          import('./pages/tratamientos/tratamientos').then(m => m.TratamientosComponent)
-=======
           import('./pages/tratamientos/tratamientos')
             .then(m => m.TratamientosComponent)
       },
@@ -104,7 +101,6 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () =>
           import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
->>>>>>> Jorge
       },
       { path: '**', redirectTo: '' }
     ]
