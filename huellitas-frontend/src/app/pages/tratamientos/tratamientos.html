@@ -1,100 +1,40 @@
 <section
-<<<<<<< HEAD
-  class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100
-=======
   class="min-h-screen bg-slate-50 dark:bg-slate-900
          text-slate-800 dark:text-slate-100
->>>>>>> Jorge
          px-6 py-6 md:px-10 md:py-8">
 
   <!-- Header -->
-  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+  <div class="flex flex-col gap-4 md:flex-row
+              md:items-center md:justify-between mb-6">
     <div>
-      <h1 class="text-4xl font-semibold tracking-tight">Tratamientos</h1>
+      <h1 class="text-4xl font-semibold tracking-tight">
+        Tratamientos
+      </h1>
       <p class="text-sm text-slate-500 dark:text-slate-400">
-<<<<<<< HEAD
-        Tratamientos médicos asociados a consultas veterinarias.
-=======
         Tratamientos creados desde las consultas médicas.
->>>>>>> Jorge
       </p>
     </div>
 
     <!-- Buscador -->
-<<<<<<< HEAD
-    <div class="relative w-full sm:w-72">
-      <input
-        type="text"
-        (input)="onBuscar($event.target.value)"
-        placeholder="Buscar tratamiento..."
-        class="w-full rounded-lg border border-slate-300 dark:border-slate-700
-               bg-white dark:bg-slate-800 px-3 py-2.5 text-sm"
-      />
-    </div>
-=======
     <input
       type="text"
       placeholder="Buscar tratamiento..."
-      class="w-full md:w-72 rounded-lg border border-slate-300 dark:border-slate-700
-             bg-white dark:bg-slate-800 px-3 py-2 text-sm"
+      class="w-full md:w-72 rounded-lg
+             border border-slate-300 dark:border-slate-700
+             bg-white dark:bg-slate-800
+             px-3 py-2 text-sm"
       (input)="buscar($any($event.target).value)"
     />
->>>>>>> Jorge
   </div>
 
   <!-- Error -->
   <div *ngIf="errorMsg"
-       class="mb-4 rounded-lg border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
+       class="mb-4 rounded-lg border border-rose-300
+              bg-rose-50 text-rose-800
+              px-4 py-2 text-sm">
     {{ errorMsg }}
   </div>
-<<<<<<< HEAD
 
-  <!-- Tabla -->
-  <ng-container *ngIf="tratamientosFiltrados$ | async as tratamientos">
-    <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700
-                bg-white dark:bg-slate-800 shadow">
-
-      <table class="min-w-full text-sm text-left">
-        <thead class="bg-slate-100 dark:bg-slate-900 text-xs uppercase">
-          <tr>
-            <th class="px-6 py-3">ID</th>
-            <th class="px-6 py-3">Nombre</th>
-            <th class="px-6 py-3">Medicamento</th>
-            <th class="px-6 py-3">Dosis</th>
-            <th class="px-6 py-3">Duración</th>
-            <th class="px-6 py-3 text-right">Acciones</th>
-          </tr>
-        </thead>
-
-        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-          <tr *ngFor="let t of tratamientos">
-            <td class="px-6 py-4 font-mono text-xs">#{{ t.idTratamiento }}</td>
-            <td class="px-6 py-4 font-medium">{{ t.nombre }}</td>
-            <td class="px-6 py-4">{{ t.medicamento }}</td>
-            <td class="px-6 py-4">{{ t.dosis }}</td>
-            <td class="px-6 py-4">{{ t.duracion }}</td>
-
-            <td class="px-6 py-4 text-right">
-              <div class="flex justify-end gap-2">
-
-                <!-- VER DETALLE -->
-                <button
-                  class="inline-flex items-center gap-1.5 rounded-md border
-                         border-slate-300 bg-white dark:bg-slate-700
-                         px-3 py-1 text-xs hover:bg-slate-50"
-                  (click)="verDetalle(t)">
-                  Ver más detalle
-                </button>
-
-                <!-- ELIMINAR -->
-                <button
-                  class="inline-flex items-center gap-1.5 rounded-md
-                         bg-rose-600 text-white px-3 py-1 text-xs hover:bg-rose-700"
-                  (click)="abrirEliminar(t)">
-                  Eliminar
-                </button>
-
-=======
   <!-- Tabla -->
   <ng-container *ngIf="tratamientosFiltrados$ | async as tratamientos">
 
@@ -104,44 +44,56 @@
     </div>
 
     <div *ngIf="tratamientos.length > 0"
-         class="overflow-hidden rounded-xl border
-                border-slate-200 dark:border-slate-700
+         class="overflow-hidden rounded-xl
+                border border-slate-200 dark:border-slate-700
                 bg-white dark:bg-slate-800 shadow">
 
-      <table class="min-w-full text-sm">
-        <thead class="bg-slate-100 dark:bg-slate-700">
+      <table class="min-w-full text-sm text-left">
+        <thead class="bg-slate-100 dark:bg-slate-900/40 text-xs uppercase">
           <tr>
-            <th class="px-4 py-3 text-left">Mascota</th>
-            <th class="px-4 py-3 text-left">Nombre tratamiento</th>
-            <th class="px-4 py-3 text-left">Medicamento</th>
-            <th class="px-4 py-3 text-left">Dosis</th>
-            <th class="px-4 py-3 text-left">Duración</th>
+            <th class="px-4 py-3">Nombre</th>
+            <th class="px-4 py-3">Medicamento</th>
+            <th class="px-4 py-3">Dosis</th>
+            <th class="px-4 py-3">Duración</th>
             <th class="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
 
-        <tbody class="divide-y">
+        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
           <tr *ngFor="let t of tratamientos">
-            <td class="px-6 py-4 font-medium  text-slate-500">{{ t.nombreMascota }}</td>
-            <td class="px-4 py-2">{{ t.nombre }}</td>
-            <td class="px-4 py-2">{{ t.medicamento }}</td>
-            <td class="px-4 py-2">{{ t.dosis }}</td>
-            <td class="px-4 py-2">{{ t.duracion }}</td>
+            <td class="px-4 py-2 font-medium">
+              {{ t.nombre }}
+            </td>
+            <td class="px-4 py-2">
+              {{ t.medicamento }}
+            </td>
+            <td class="px-4 py-2">
+              {{ t.dosis }}
+            </td>
+            <td class="px-4 py-2">
+              {{ t.duracion }}
+            </td>
 
             <td class="px-4 py-2 text-right">
               <div class="flex justify-end gap-2">
+
                 <button
-                  class="rounded-md border border-slate-300 bg-slate-300 px-3 py-2 text-xs hover:bg-slate-50 dark:hover:bg-slate-700"
+                  class="rounded-md border
+                         border-slate-300
+                         bg-slate-50 dark:bg-slate-700
+                         px-3 py-1 text-xs
+                         hover:bg-slate-100 dark:hover:bg-slate-600"
                   (click)="verDetalle(t)">
                   Detalle
                 </button>
 
                 <button
-                  class="rounded-md border bg-rose-600 text-white px-3 py-1 text-xs"
+                  class="rounded-md bg-rose-600
+                         text-white px-3 py-1 text-xs
+                         hover:bg-rose-700"
                   (click)="abrirEliminar(t)">
                   Eliminar
                 </button>
->>>>>>> Jorge
               </div>
             </td>
           </tr>
@@ -154,38 +106,19 @@
   <div *ngIf="mostrandoDetalle"
        class="fixed inset-0 z-50 flex items-center justify-center">
 
-    <div class="absolute inset-0 bg-black/40" (click)="cerrarDetalle()"></div>
+    <div class="absolute inset-0 bg-black/40"
+         (click)="cerrarDetalle()"></div>
 
-<<<<<<< HEAD
-    <div class="relative bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md shadow-xl">
-      <h3 class="text-xl font-semibold mb-4">Detalle del Tratamiento</h3>
+    <div
+      class="relative bg-white dark:bg-slate-800
+             rounded-xl p-6 w-full max-w-md shadow-xl">
 
-      <div *ngIf="detalleSeleccionado" class="space-y-2 text-sm">
-        <p><strong>Nombre:</strong> {{ detalleSeleccionado.nombre }}</p>
-        <p><strong>Medicamento:</strong> {{ detalleSeleccionado.medicamento }}</p>
-        <p><strong>Dosis:</strong> {{ detalleSeleccionado.dosis }}</p>
-        <p><strong>Duración:</strong> {{ detalleSeleccionado.duracion }}</p>
+      <h3 class="text-xl font-semibold mb-4">
+        Detalle del Tratamiento
+      </h3>
 
-        <div>
-          <p class="font-semibold mt-2">Descripción</p>
-          <p class="text-slate-600 dark:text-slate-300">
-            {{ detalleSeleccionado.descripcion }}
-          </p>
-        </div>
-      </div>
-
-      <div class="mt-6 flex justify-end">
-        <button class="btn-secondary" (click)="cerrarDetalle()">
-          Cerrar
-        </button>
-=======
-    <div class="relative bg-white dark:bg-slate-800
-                rounded-xl p-6 w-full max-w-md shadow-xl">
-
-      <h3 class="text-xl font-semibold mb-4">Detalle del Tratamiento</h3>
-
-      <div *ngIf="seleccionadoDetalle" class="space-y-2 text-sm">
-        <p><strong>Mascota:</strong> {{ seleccionadoDetalle.nombreMascota }}</p>
+      <div *ngIf="seleccionadoDetalle"
+           class="space-y-2 text-sm">
         <p><strong>Nombre:</strong> {{ seleccionadoDetalle.nombre }}</p>
         <p><strong>Medicamento:</strong> {{ seleccionadoDetalle.medicamento }}</p>
         <p><strong>Dosis:</strong> {{ seleccionadoDetalle.dosis }}</p>
@@ -194,50 +127,48 @@
       </div>
 
       <div class="mt-6 flex justify-end">
-        <button class="btn-secondary" (click)="cerrarDetalle()">Cerrar</button>
->>>>>>> Jorge
+        <button class="btn-secondary"
+                (click)="cerrarDetalle()">
+          Cerrar
+        </button>
       </div>
     </div>
   </div>
 
   <!-- MODAL ELIMINAR -->
-<<<<<<< HEAD
-  <div *ngIf="mostrandoConfirmacion"
-=======
   <div *ngIf="mostrandoEliminar"
->>>>>>> Jorge
        class="fixed inset-0 z-50 flex items-center justify-center">
 
-    <div class="absolute inset-0 bg-black/40" (click)="cancelarEliminar()"></div>
+    <div class="absolute inset-0 bg-black/40"
+         (click)="cancelarEliminar()"></div>
 
-<<<<<<< HEAD
-    <div class="relative bg-white dark:bg-slate-800 rounded-xl p-6 w-80 shadow-lg">
-=======
-    <div class="relative bg-white dark:bg-slate-800
-                rounded-xl p-6 w-80 shadow-lg">
+    <div
+      class="relative bg-white dark:bg-slate-800
+             rounded-xl p-6 w-80 shadow-lg">
 
->>>>>>> Jorge
-      <h3 class="text-lg font-semibold">Eliminar tratamiento</h3>
-      <p class="text-sm mt-2">Esta acción no se puede deshacer.</p>
+      <h3 class="text-lg font-semibold">
+        Eliminar tratamiento
+      </h3>
+
+      <p class="text-sm mt-2">
+        Esta acción no se puede deshacer.
+      </p>
 
       <div class="mt-4 flex justify-end gap-2">
-        <button class="btn-secondary" (click)="cancelarEliminar()">Cancelar</button>
-<<<<<<< HEAD
-        <button class="bg-rose-600 text-white px-4 py-2 rounded-lg"
-                (click)="confirmarEliminar()">
-=======
+        <button class="btn-secondary"
+                (click)="cancelarEliminar()">
+          Cancelar
+        </button>
+
         <button
-          class="bg-rose-600 text-white px-4 py-2 rounded-lg"
+          class="bg-rose-600 text-white
+                 px-4 py-2 rounded-lg
+                 hover:bg-rose-700"
           (click)="confirmarEliminar()">
->>>>>>> Jorge
           Eliminar
         </button>
       </div>
     </div>
   </div>
-<<<<<<< HEAD
 
 </section>
-=======
-</section>
->>>>>>> Jorge

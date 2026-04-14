@@ -20,35 +20,27 @@ export class MconsultaComponent {
   private tratamientoService = inject(TratamientoService);
   private cdr = inject(ChangeDetectorRef);
 
-  // Datos no modificables
+  // DATOS NO MODIFICABLES
   idConsulta!: number;
   fecha = '';
   hora = '';
   idCita!: number;
   nombreMascota = '';
 
-<<<<<<< HEAD
-  // Formulario de consulta
-=======
-  // 🩺 Formulario de consulta
->>>>>>> Jorge
+  // FORMULARIO CONSULTA
   form = this.fb.nonNullable.group({
     diagnostico: [''],
     observaciones: [''],
     tratamiento: [false]
   });
 
-<<<<<<< HEAD
-  // Formulario de tratamiento
-=======
-  // 💊 FORMULARIO DE TRATAMIENTO ✅ (FALTABA)
->>>>>>> Jorge
+  // FORMULARIO TRATAMIENTO
   tratamientoForm = this.fb.nonNullable.group({
     nombre: [''],
-    descripcion: [''],
+    medicamento: [''],
     dosis: [''],
     duracion: [''],
-    medicamento: ['']
+    descripcion: ['']
   });
 
   cargando = false;
@@ -57,6 +49,7 @@ export class MconsultaComponent {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
+
     if (Number.isNaN(id)) {
       this.errorMsg = 'ID de consulta inválido.';
       return;
@@ -79,55 +72,42 @@ export class MconsultaComponent {
 
         this.cdr.detectChanges();
       },
-      error: () => this.errorMsg = 'No se pudo cargar la consulta.'
+      error: () => {
+        this.errorMsg = 'No se pudo cargar la consulta.';
+      }
     });
   }
 
+  // GUARDAR
   guardar(): void {
-<<<<<<< HEAD
-=======
     if (this.form.invalid) return;
 
->>>>>>> Jorge
     this.cargando = true;
     this.errorMsg = '';
+    this.successMsg = '';
 
-<<<<<<< HEAD
-    //  Actualizar consulta
-=======
     // Actualizar consulta
->>>>>>> Jorge
     this.consultaService
       .actualizarConsulta(this.idConsulta, this.form.getRawValue())
       .subscribe({
         next: () => {
 
-<<<<<<< HEAD
-          //  Crear tratamiento si aplica
-=======
-          // Crear tratamiento si aplica 
->>>>>>> Jorge
+          // Crear tratamiento si aplica
           if (this.form.value.tratamiento === true) {
 
             const t = this.tratamientoForm.getRawValue();
 
             const tratamiento = {
               nombre: t.nombre,
-              descripcion: t.descripcion,
+              medicamento: t.medicamento,
               dosis: t.dosis,
               duracion: t.duracion,
-              medicamento: t.medicamento,
-              consulta: {
-                idConsulta: this.idConsulta
-              }
+              descripcion: t.descripcion,
+              consulta: { idConsulta: this.idConsulta }
             };
 
-<<<<<<< HEAD
-            this.tratamientoService.crearTratamiento(tratamiento).subscribe({
-=======
             this.tratamientoService.crear(tratamiento).subscribe({
->>>>>>> Jorge
-              next: () => this.finalizar(),
+              next: () => this.finalizar(true),
               error: () => {
                 this.cargando = false;
                 this.errorMsg = 'Error creando el tratamiento.';
@@ -135,32 +115,29 @@ export class MconsultaComponent {
             });
 
           } else {
-            this.finalizar();
+            this.finalizar(false);
           }
         },
         error: () => {
-<<<<<<< HEAD
-          this.errorMsg = 'Error guardando la consulta.';
-          this.cargando = false;
-=======
           this.cargando = false;
           this.errorMsg = 'Error guardando la consulta.';
->>>>>>> Jorge
         }
       });
   }
 
-  finalizar(): void {
+  //  FINALIZAR
+  finalizar(conTratamiento: boolean): void {
     this.cargando = false;
-<<<<<<< HEAD
-    this.successMsg = 'Consulta y tratamiento guardados correctamente.';
-    setTimeout(() => this.router.navigate(['/consultas']), 500);
-=======
-    this.successMsg = 'Consulta guardada correctamente.';
-    setTimeout(() => this.router.navigate(['/consultas']), 400);
->>>>>>> Jorge
+    this.successMsg = conTratamiento
+      ? 'Consulta y tratamiento guardados correctamente.'
+      : 'Consulta guardada correctamente.';
+
+    setTimeout(() => {
+      this.router.navigate(['/consultas']);
+    }, 400);
   }
 
+  //  CANCELAR
   cancelar(): void {
     this.router.navigate(['/consultas']);
   }

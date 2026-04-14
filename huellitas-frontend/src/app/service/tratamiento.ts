@@ -10,23 +10,18 @@ export interface Tratamiento {
   duracion: string;
   medicamento: string;
 
-<<<<<<< HEAD
-=======
+
   nombreMascota: string;
 
->>>>>>> Jorge
   consulta: {
     idConsulta: number;
   };
 }
 
-<<<<<<< HEAD
 @Injectable({ providedIn: 'root' })
-=======
 @Injectable({
   providedIn: 'root'
 })
->>>>>>> Jorge
 export class TratamientoService {
 
   private api = 'http://localhost:8080/api/tratamientos';
@@ -36,14 +31,8 @@ export class TratamientoService {
   getTratamientos(): Observable<Tratamiento[]> {
     return this.http.get<Tratamiento[]>(this.api);
   }
-<<<<<<< HEAD
-
   crearTratamiento(tratamiento: Tratamiento): Observable<Tratamiento> {
     return this.http.post<Tratamiento>(this.api, tratamiento);
-  }
-
-  eliminarTratamiento(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.api}/${id}`);
   }
 
   actualizarTratamiento(id: number, body: Partial<Tratamiento>): Observable<Tratamiento> {
@@ -53,8 +42,7 @@ export class TratamientoService {
   getTratamiento(id: number): Observable<Tratamiento> {
     return this.http.get<Tratamiento>(`${this.api}/${id}`);
   }
-}
-=======
+
   getTratamientosPorMascota(idMascota: number): Observable<Tratamiento[]> {
     return this.http.get<Tratamiento[]>(
       `${this.api}/mascota/${idMascota}`
@@ -67,4 +55,4 @@ export class TratamientoService {
     return this.http.delete<void>(`${this.api}/${idTratamiento}`);
   }
 }
->>>>>>> Jorge
+
