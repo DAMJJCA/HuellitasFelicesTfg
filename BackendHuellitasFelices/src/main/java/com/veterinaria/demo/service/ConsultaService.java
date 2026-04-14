@@ -9,4 +9,5 @@ public interface ConsultaService {
     Consulta findById(Long id);
     Consulta save(Consulta consulta);
     void deleteById(Long id);
+    List<Consulta> findByMascota(Long idMascota);
 }

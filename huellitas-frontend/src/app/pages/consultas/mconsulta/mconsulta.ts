@@ -27,14 +27,22 @@ export class MconsultaComponent {
   idCita!: number;
   nombreMascota = '';
 
+<<<<<<< HEAD
   // Formulario de consulta
+=======
+  // 🩺 Formulario de consulta
+>>>>>>> Jorge
   form = this.fb.nonNullable.group({
     diagnostico: [''],
     observaciones: [''],
     tratamiento: [false]
   });
 
+<<<<<<< HEAD
   // Formulario de tratamiento
+=======
+  // 💊 FORMULARIO DE TRATAMIENTO ✅ (FALTABA)
+>>>>>>> Jorge
   tratamientoForm = this.fb.nonNullable.group({
     nombre: [''],
     descripcion: [''],
@@ -76,17 +84,29 @@ export class MconsultaComponent {
   }
 
   guardar(): void {
+<<<<<<< HEAD
+=======
+    if (this.form.invalid) return;
+
+>>>>>>> Jorge
     this.cargando = true;
     this.errorMsg = '';
-    this.successMsg = '';
 
+<<<<<<< HEAD
     //  Actualizar consulta
+=======
+    // Actualizar consulta
+>>>>>>> Jorge
     this.consultaService
       .actualizarConsulta(this.idConsulta, this.form.getRawValue())
       .subscribe({
         next: () => {
 
+<<<<<<< HEAD
           //  Crear tratamiento si aplica
+=======
+          // Crear tratamiento si aplica 
+>>>>>>> Jorge
           if (this.form.value.tratamiento === true) {
 
             const t = this.tratamientoForm.getRawValue();
@@ -102,7 +122,11 @@ export class MconsultaComponent {
               }
             };
 
+<<<<<<< HEAD
             this.tratamientoService.crearTratamiento(tratamiento).subscribe({
+=======
+            this.tratamientoService.crear(tratamiento).subscribe({
+>>>>>>> Jorge
               next: () => this.finalizar(),
               error: () => {
                 this.cargando = false;
@@ -115,16 +139,26 @@ export class MconsultaComponent {
           }
         },
         error: () => {
+<<<<<<< HEAD
           this.errorMsg = 'Error guardando la consulta.';
           this.cargando = false;
+=======
+          this.cargando = false;
+          this.errorMsg = 'Error guardando la consulta.';
+>>>>>>> Jorge
         }
       });
   }
 
   finalizar(): void {
     this.cargando = false;
+<<<<<<< HEAD
     this.successMsg = 'Consulta y tratamiento guardados correctamente.';
     setTimeout(() => this.router.navigate(['/consultas']), 500);
+=======
+    this.successMsg = 'Consulta guardada correctamente.';
+    setTimeout(() => this.router.navigate(['/consultas']), 400);
+>>>>>>> Jorge
   }
 
   cancelar(): void {

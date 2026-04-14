@@ -5,13 +5,16 @@
     <p class="text-sm text-slate-500 dark:text-slate-400">
       Selecciona la fecha, hora y asigna mascota y veterinario.
     </p>
-    <div *ngIf="error" class="mt-4 rounded-md border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
-      {{ error }}
-    </div>
-    <div *ngIf="success"
-      class="mt-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm">
-      {{ success }}
-    </div>
+    @if (error){
+      <div class="mt-4 rounded-md border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
+        {{ error }}
+      </div>
+    }
+    @if (success){
+       <div class="mt-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm">
+        {{ success }}
+      </div>
+    }
     <form #f="ngForm" (ngSubmit)="onSubmit(f)" class="mt-6 rounded-xl border border-slate-200 dark:border-slate-700
                  bg-white dark:bg-slate-800 p-6 shadow space-y-6">
 
@@ -70,7 +73,7 @@
         </button>
         <button type="submit" class="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white
                        px-5 py-2.5 text-sm font-medium shadow disabled:opacity-60
-                       disabled:cursor-not-allowed" [disabled]="cargando">
+                       disabled:cursor-not-allowed">
           Guardar cita
         </button>
       </div>

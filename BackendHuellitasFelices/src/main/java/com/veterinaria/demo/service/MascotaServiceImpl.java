@@ -16,7 +16,8 @@ public class MascotaServiceImpl implements MascotaService {
     private final MascotaRepository repository;
     private final ClienteRepository clienteRepository;
 
-    public MascotaServiceImpl(MascotaRepository repository, ClienteRepository clienteRepository) {
+    public MascotaServiceImpl(MascotaRepository repository,
+                              ClienteRepository clienteRepository) {
         this.repository = repository;
         this.clienteRepository = clienteRepository;
     }
@@ -31,13 +32,19 @@ public class MascotaServiceImpl implements MascotaService {
         return repository.findById(id).orElse(null);
     }
 
+    // ✅ MÉTODO DEL DASHBOARD
+    @Override
+    public long count() {
+        return repository.count();
+    }
+
     @Override
     @Transactional
     public Mascota save(Mascota mascota) {
-        
 
-        Cliente cliente = clienteRepository.findById(mascota.getCliente().getIdCliente())
-                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+        Cliente cliente = clienteRepository.findById(
+                mascota.getCliente().getIdCliente()
+        ).orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
         mascota.setCliente(cliente);
 

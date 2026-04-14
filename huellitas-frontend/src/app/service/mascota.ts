@@ -36,20 +36,19 @@ export class MascotaService {
   getMascotas(): Observable<Mascotas[]> {
     return this.http.get<Mascotas[]>(this.api);
   }
-
   crearMascota(mascota: CrearMascotaDto): Observable<Mascotas> {
     return this.http.post<Mascotas>(this.api, mascota);
   }
-
   eliminarMascota(id: number): Observable<void> {
     return this.http.delete<void>(`${this.api}/${id}`);
   }
-
   actualizarMascota(id: number, body: Partial<CrearMascotaDto>): Observable<Mascotas> {
     return this.http.put<Mascotas>(`${this.api}/${id}`, body);
   }
-
   getMascota(id: number): Observable<Mascotas> {
     return this.http.get<Mascotas>(`${this.api}/${id}`);
+  }
+  totalMascotas(): Observable<number> {
+    return this.http.get<number>(`${this.api}/total`);
   }
 }

@@ -87,7 +87,24 @@ export const routes: Routes = [
       {
         path: 'tratamientos',
         loadComponent: () =>
+<<<<<<< HEAD
           import('./pages/tratamientos/tratamientos').then(m => m.TratamientosComponent)
+=======
+          import('./pages/tratamientos/tratamientos')
+            .then(m => m.TratamientosComponent)
+      },
+      //historial
+      {
+        path: 'historial',
+        loadComponent: () =>
+          import('./pages/historial/historial').then(m => m.HistorialComponent)
+      },
+      //dashboard
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
+>>>>>>> Jorge
       },
       { path: '**', redirectTo: '' }
     ]

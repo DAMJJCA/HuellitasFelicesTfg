@@ -1,9 +1,14 @@
-<div class="min-h-screen bg-gray-700">
+<div class="min-h-screen flex bg-gray-200">
+
+  
   <app-sidebar
-    class="w-65 fixed inset-y-0 left-0 bg-gray-900 text-gray-100 p-6">
+    class="fixed inset-y-0 left-0 flex-shrink-0
+           w-[clamp(14rem,18vw,16rem)]">
   </app-sidebar>
 
-  <main class="ml-65 bg-gray-200 p-6 min-h-screen">
+
+  <main class="ml-[clamp(14rem,18vw,16rem)] flex-1 p-6">
     <router-outlet></router-outlet>
   </main>
+
 </div>

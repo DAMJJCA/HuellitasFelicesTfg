@@ -1,7 +1,9 @@
 package com.veterinaria.demo.model;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -39,9 +41,11 @@ public class Consulta {
     // Relación con tratamientos
     @OneToMany(mappedBy = "consulta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tratamiento> tratamientos;
+    
+    
 
     // -------------------------------------------------
-    // ✅ GETTERS CALCULADOS (SIN DTO)
+    //  GETTERS CALCULADOS (SIN DTO)
     // -------------------------------------------------
 
     @JsonProperty("idCita")
@@ -56,9 +60,8 @@ public class Consulta {
                 : null;
     }
 
-    // -------------------------------------------------
-    // Getters y setters normales
-    // -------------------------------------------------
+
+    // Getters y setters
 
     public Long getIdConsulta() { return idConsulta; }
     public void setIdConsulta(Long idConsulta) { this.idConsulta = idConsulta; }
@@ -82,4 +85,15 @@ public class Consulta {
     public void setTratamientos(List<Tratamiento> tratamientos) {
         this.tratamientos = tratamientos;
     }
+    @JsonProperty("idsTratamientos")
+    public List<Long> getIdsTratamientos() {
+        if (tratamientos == null || tratamientos.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return tratamientos.stream()
+                .map(Tratamiento::getIdTratamiento)
+                .collect(Collectors.toList());
+    }
+    
 }

@@ -9,5 +9,6 @@ public interface MascotaService {
     Mascota findById(Long id);
     Mascota save(Mascota mascota);
     void deleteById(Long id);
+    long count();
 
 }

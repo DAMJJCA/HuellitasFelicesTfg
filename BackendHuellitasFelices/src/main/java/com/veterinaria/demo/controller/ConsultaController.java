@@ -29,6 +29,13 @@ public class ConsultaController {
     public Consulta obtener(@PathVariable Long id) {
         return consultaService.findById(id);
     }
+    
+
+    @GetMapping("/mascota/{idMascota}")
+	public List<Consulta> listarPorMascota(@PathVariable Long idMascota) {
+    	return consultaService.findByMascota(idMascota);
+	}
+
 
     // Actualizar SOLO datos clínicos
     @PutMapping("/{id}")

@@ -6,6 +6,6 @@ import com.veterinaria.demo.model.Tratamiento;
 
 public interface TratamientoRepository extends JpaRepository<Tratamiento, Long> {
 
-    // Obtener tratamientos por consulta
     List<Tratamiento> findByConsulta_IdConsulta(Long idConsulta);
+    List<Tratamiento> findByConsulta_Cita_Mascota_IdMascota(Long idMascota);
 }

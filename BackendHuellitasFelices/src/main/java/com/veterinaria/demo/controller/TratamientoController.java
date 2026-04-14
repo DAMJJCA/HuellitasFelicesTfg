@@ -18,38 +18,68 @@ public class TratamientoController {
         this.service = service;
     }
 
+<<<<<<< HEAD
     //  Listar todos
+=======
+    // Listar todos
+>>>>>>> Jorge
     @GetMapping
     public List<Tratamiento> listar() {
         return service.findAll();
     }
 
+<<<<<<< HEAD
     //  Listar por consulta
+=======
+    // Listar por consulta
+>>>>>>> Jorge
     @GetMapping("/consulta/{idConsulta}")
     public List<Tratamiento> listarPorConsulta(@PathVariable Long idConsulta) {
         return service.findByConsulta(idConsulta);
     }
+    
 
+<<<<<<< HEAD
+=======
+    @GetMapping("/mascota/{idMascota}")
+	public List<Tratamiento> listarPorMascota(@PathVariable Long idMascota) {
+    	return service.findByMascota(idMascota);
+	}
+
+
+>>>>>>> Jorge
     // Obtener uno
     @GetMapping("/{id}")
     public Tratamiento obtener(@PathVariable Long id) {
         return service.findById(id);
     }
 
+<<<<<<< HEAD
     //  Crear
+=======
+    // Crear
+>>>>>>> Jorge
     @PostMapping
     public Tratamiento crear(@RequestBody Tratamiento tratamiento) {
         return service.save(tratamiento);
     }
 
+<<<<<<< HEAD
     //  Editar
+=======
+    // Editar
+>>>>>>> Jorge
     @PutMapping("/{id}")
     public Tratamiento editar(@PathVariable Long id, @RequestBody Tratamiento datos) {
         datos.setIdTratamiento(id);
         return service.save(datos);
     }
 
+<<<<<<< HEAD
     //  Eliminar
+=======
+    // Eliminar
+>>>>>>> Jorge
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Long id) {
         service.deleteById(id);

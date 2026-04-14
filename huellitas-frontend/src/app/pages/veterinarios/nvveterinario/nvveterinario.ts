@@ -60,4 +60,3 @@ export class NvVeterinarioComponent {
     this.router.navigate(['/veterinarios']);
   }
 }
-``

@@ -27,7 +27,6 @@ export class NvcitaComponent {
   mascotas: Mascotas[] = [];
   veterinarios: any[] = [];
 
-  cargando = false;
   error = '';
   success = '';
 
@@ -59,8 +58,6 @@ export class NvcitaComponent {
       return;
     }
 
-    this.cargando = true;
-
     const dto: CrearCitaDto = {
       fecha: this.cita.fecha,
       hora: this.cita.hora,
@@ -73,12 +70,10 @@ export class NvcitaComponent {
     this.citaService.crearCita(dto).subscribe({
       next: () => {
         this.success = 'Cita creada exitosamente.';
-        this.cargando = false;
         setTimeout(() => this.router.navigate(['/citas']), 600);
       },
       error: () => {
         this.error = 'Error creando la cita.';
-        this.cargando = false;
       }
     });
   }

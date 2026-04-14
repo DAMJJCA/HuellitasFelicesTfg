@@ -25,6 +25,13 @@ public class TratamientoServiceImpl implements TratamientoService {
     public List<Tratamiento> findByConsulta(Long idConsulta) {
         return repo.findByConsulta_IdConsulta(idConsulta);
     }
+    
+
+    @Override
+	public List<Tratamiento> findByMascota(Long idMascota) {
+    	return repo.findByConsulta_Cita_Mascota_IdMascota(idMascota);
+	}
+
 
     @Override
     public Tratamiento findById(Long id) {
