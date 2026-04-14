@@ -24,7 +24,7 @@ export class DashboardComponent {
   ngOnInit(): void {
     const hoy = new Date();
 
-    // ✅ CITAS
+    // CITAS
     this.citaService.getCitas().subscribe(citas => {
       this.citasHoy = citas.filter(c => this.esHoy(c.fecha)).length;
       this.citasCanceladas = citas.filter(
@@ -32,12 +32,12 @@ export class DashboardComponent {
       ).length;
     });
 
-    // ✅ CONSULTAS
+    // CONSULTAS
     this.consultaService.getConsultas().subscribe(consultas => {
       this.consultasHoy = consultas.filter(c => this.esHoy(c.fecha)).length;
     });
 
-    // ✅ TOTAL MASCOTAS
+    // TOTAL MASCOTAS
     this.mascotaService.getMascotas().subscribe(mascotas => {
       this.totalMascotas = mascotas.length;
     });
