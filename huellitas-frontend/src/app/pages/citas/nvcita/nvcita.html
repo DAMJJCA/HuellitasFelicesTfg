@@ -5,14 +5,14 @@
     <p class="text-sm text-slate-500 dark:text-slate-400">
       Selecciona la fecha, hora y asigna mascota y veterinario.
     </p>
-    @if (error){
+    @if (error()){
       <div class="mt-4 rounded-md border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
-        {{ error }}
+        {{ error() }}
       </div>
     }
-    @if (success){
+    @if (success()){
        <div class="mt-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm">
-        {{ success }}
+        {{ success() }}
       </div>
     }
     <form #f="ngForm" (ngSubmit)="onSubmit(f)" class="mt-6 rounded-xl border border-slate-200 dark:border-slate-700
@@ -23,7 +23,7 @@
         <select name="idMascota" required [(ngModel)]="cita.idMascota" class="w-full rounded-lg border border-slate-300 dark:border-slate-700
                        bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
           <option value="" disabled selected>Seleccione una mascota...</option>
-          <option *ngFor="let m of mascotas" [value]="m.idMascota">
+          <option *ngFor="let m of mascotas()" [value]="m.idMascota">
             {{ m.nombre }} - Especie: {{ m.especie }}
           </option>
         </select>
@@ -36,7 +36,7 @@
         <select name="idVeterinario" required [(ngModel)]="cita.idVeterinario" class="w-full rounded-lg border border-slate-300 dark:border-slate-700
                        bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
           <option value="" disabled selected>Seleccione un veterinario...</option>
-          <option *ngFor="let v of veterinarios" [value]="v.idVeterinario">
+          <option *ngFor="let v of veterinarios()" [value]="v.idVeterinario">
             {{ v.nombre }} — {{ v.especialidad }}
           </option>
         </select>

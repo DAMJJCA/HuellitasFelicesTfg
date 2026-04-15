@@ -4,12 +4,12 @@
     <h1 class="text-2xl font-semibold tracking-tight">Registrar nueva mascota</h1>
     <p class="text-sm text-slate-500 dark:text-slate-400">Completa los datos y guarda la mascota.</p>
 
-    <div *ngIf="error" class="mt-4 rounded-md border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
-      {{ error }}
+    <div *ngIf="error()" class="mt-4 rounded-md border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
+      {{ error() }}
     </div>
 
-    <div *ngIf="success" class="mt-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm">
-      {{ success }}
+    <div *ngIf="success()" class="mt-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm">
+      {{ success() }}
     </div>
 
     <form #f="ngForm" (ngSubmit)="onSubmit(f)" class="mt-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow">
@@ -27,7 +27,7 @@
         <select name="idCliente" required [(ngModel)]="mascota.idCliente"
           class="w-full rounded-md border px-3 py-2 text-sm">
           <option value="" disabled selected>Seleccione...</option>
-          <option *ngFor="let c of clientes" [value]="c.idCliente">
+          <option *ngFor="let c of clientes()" [value]="c.idCliente">
             {{ c.nombre }} {{ c.apellidos }}
           </option>
         </select>

@@ -1,7 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+
 import { MascotaService } from '../../../service/mascota';
 import { ClienteService } from '../../../service/cliente';
 
@@ -24,10 +30,11 @@ export class NvmascotaComponent implements OnInit {
     idCliente: ''
   };
 
-  clientes: any[] = [];
-  cargando = false;
-  error = '';
-  success = '';
+  // ✅ SIGNALS
+  clientes = signal<any[]>([]);
+  cargando = signal<boolean>(false);
+  error = signal<string>('');
+  success = signal<string>('');
 
   constructor(
     private readonly mascotaService: MascotaService,
@@ -37,21 +44,21 @@ export class NvmascotaComponent implements OnInit {
 
   ngOnInit(): void {
     this.clienteService.getClientes().subscribe({
-      next: (c) => this.clientes = c,
-      error: () => this.error = 'Error cargando la lista de dueños'
+      next: c => this.clientes.set(c),
+      error: () => this.error.set('Error cargando la lista de dueños')
     });
   }
 
-  onSubmit(f: any) {
-    this.error = '';
-    this.success = '';
+  onSubmit(form: any) {
+    this.error.set('');
+    this.success.set('');
 
-    if (f.invalid || !this.mascota.idCliente) {
-      this.error = 'Por favor selecciona un dueño válido.';
+    if (form.invalid || !this.mascota.idCliente) {
+      this.error.set('Por favor selecciona un dueño válido.');
       return;
     }
 
-    this.cargando = true;
+    this.cargando.set(true);
 
     const dto = {
       nombre: this.mascota.nombre,
@@ -67,14 +74,14 @@ export class NvmascotaComponent implements OnInit {
 
     this.mascotaService.crearMascota(dto).subscribe({
       next: () => {
-        this.success = 'Mascota creada correctamente.';
-        this.cargando = false;
+        this.success.set('Mascota creada correctamente.');
+        this.cargando.set(false);
         setTimeout(() => this.router.navigate(['/mascotas']), 600);
       },
-      error: (err) => {
+      error: err => {
         console.error('Error creando mascota', err);
-        this.error = err?.error?.message ?? 'No se pudo crear la mascota.';
-        this.cargando = false;
+        this.error.set(err?.error?.message ?? 'No se pudo crear la mascota.');
+        this.cargando.set(false);
       }
     });
   }

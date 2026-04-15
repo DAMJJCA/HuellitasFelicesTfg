@@ -1,6 +1,7 @@
 <section class="min-h-screen bg-slate-50 dark:bg-slate-900 px-6 py-6">
 
-  <div class="relative mb-10 rounded-3xl bg-sky-200 dark:bg-sky-900/40
+  <div
+    class="relative mb-10 rounded-3xl bg-sky-200 dark:bg-sky-900/40
            px-8 py-10 flex flex-col md:flex-row items-center gap-6">
 
     <div class="flex-1">
@@ -12,47 +13,122 @@
       </p>
 
       <p class="text-sm text-slate-700 dark:text-slate-200">
-        {{ consultasHoy }} consultas ·
-        {{ citasHoy }} citas ·
-        {{ citasCanceladas }} canceladas
+        {{ consultasHoy() }} consultas ·
+        {{ citasHoy() }} citas ·
+        {{ citasCanceladas() }} canceladas
       </p>
     </div>
 
     <div class="shrink-0 rounded-3xl overflow-hidden shadow-lg">
-      <img src="assets/imgDashboard/dashboard.png" alt="Huellitas Felices" class="h-40 md:h-70 w-auto select-none" />
+      <img
+        src="assets/imgDashboard/dashboard.png"
+        alt="Huellitas Felices"
+        class="h-40 md:h-70 w-auto select-none" />
     </div>
   </div>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-
     <div class="rounded-2xl bg-yellow-100 p-5 shadow">
       <p class="text-sm text-slate-500">Consultas hoy</p>
       <h2 class="text-3xl font-bold text-slate-800">
-        {{ consultasHoy }}
+        {{ consultasHoy() }}
       </h2>
     </div>
-
 
     <div class="rounded-2xl bg-sky-100 p-5 shadow">
       <p class="text-sm text-slate-500">Citas hoy</p>
       <h2 class="text-3xl font-bold text-slate-800">
-        {{ citasHoy }}
+        {{ citasHoy() }}
       </h2>
     </div>
 
     <div class="rounded-2xl bg-indigo-100 p-5 shadow">
       <p class="text-sm text-slate-500">Mascotas registradas</p>
       <h2 class="text-3xl font-bold text-slate-800">
-        {{ totalMascotas }}
+        {{ totalMascotas() }}
       </h2>
     </div>
 
     <div class="rounded-2xl bg-emerald-100 p-5 shadow">
       <p class="text-sm text-slate-500">Citas canceladas</p>
       <h2 class="text-3xl font-bold text-rose-600">
-        {{ citasCanceladas }}
+        {{ citasCanceladas() }}
       </h2>
     </div>
+
   </div>
+
+  <!--  CALENDARIO Y BOTONES -->
+  <div class="mt-10 grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div class="lg:col-span-3 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow">
+
+      <h2 class="text-lg font-semibold mb-4">
+        Próximas 2 semanas · {{ rangoSemanas() }}
+      </h2>
+
+      <!-- Días de la semana -->
+      <div class="grid grid-cols-7 text-sm text-slate-500 mb-2">
+        <span *ngFor="let d of diasSemana">{{ d }}</span>
+      </div>
+
+      <!-- Días -->
+      <div class="grid grid-cols-7 gap-2">
+        <div *ngFor="let dia of calendario()"class="min-h-[110px] p-2 rounded-lg border text-sm cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700">
+          <div class="font-semibold">
+            {{ dia.numero }}
+          </div>
+
+          <div
+            *ngFor="let c of dia.citas"
+            class="mt-1 text-xs rounded px-1 truncate"
+            [ngClass]="{
+              'bg-sky-100 text-sky-800': c.estado === 'programada',
+              'bg-rose-100 text-rose-800': c.estado === 'cancelada'
+            }">
+            {{ c.hora }} – {{ c.mascota }}
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="space-y-4">
+
+      <div
+        class="rounded-2xl bg-sky-500 text-white
+               p-6 shadow cursor-pointer
+               hover:brightness-110 transition"
+        (click)="irACrearCita()">
+        <h3 class="text-2xl font-semibold"> Cita</h3>
+        <p class="text-sm opacity-90 mt-1">
+          Agendar una nueva cita
+        </p>
+      </div>
+
+      <div
+        class="rounded-2xl bg-emerald-500 text-white
+               p-6 shadow cursor-pointer
+               hover:brightness-110 transition"
+        (click)="irAHistorial()">
+        <h3 class="text-2xl font-semibold"> Historial</h3>
+        <p class="text-sm opacity-90 mt-1">
+          Consultar historial clínico
+        </p>
+      </div>
+
+      <div
+        class="rounded-2xl bg-violet-500 text-white
+               p-6 shadow cursor-pointer
+               hover:brightness-110 transition"
+        (click)="irATratamientos()">
+        <h3 class="text-2xl font-semibold">Tratamientos</h3>
+        <p class="text-sm opacity-90 mt-1">
+          Ver tratamientos disponibles
+        </p>
+      </div>
+    </div>
+  </div>
+
 </section>

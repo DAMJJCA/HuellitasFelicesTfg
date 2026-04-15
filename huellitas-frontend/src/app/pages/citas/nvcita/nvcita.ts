@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {ChangeDetectionStrategy,Component,signal} from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
 import { CitaService, CrearCitaDto } from '../../../service/cita';
 import { MascotaService, Mascotas } from '../../../service/mascota';
 import { VeterinarioService } from '../../../service/veterinario';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-nvcita',
@@ -24,37 +25,39 @@ export class NvcitaComponent {
     idVeterinario: ''
   };
 
-  mascotas: Mascotas[] = [];
-  veterinarios: any[] = [];
 
-  error = '';
-  success = '';
+  mascotas = signal<Mascotas[]>([]);
+  veterinarios = signal<any[]>([]);
+
+  error = signal<string>('');
+  success = signal<string>('');
 
   constructor(
     private readonly citaService: CitaService,
     private readonly mascotaService: MascotaService,
     private readonly veterinarioService: VeterinarioService,
     private readonly router: Router
-  ) { }
+  ) {}
 
   ngOnInit(): void {
+
     this.mascotaService.getMascotas().subscribe({
-      next: m => this.mascotas = m,
-      error: () => this.error = 'Error cargando mascotas.'
+      next: m => this.mascotas.set(m),
+      error: () => this.error.set('Error cargando mascotas.')
     });
 
     this.veterinarioService.getVeterinarios().subscribe({
-      next: v => this.veterinarios = v,
-      error: () => this.error = 'Error cargando veterinarios.'
+      next: v => this.veterinarios.set(v),
+      error: () => this.error.set('Error cargando veterinarios.')
     });
   }
 
   onSubmit(form: any) {
-    this.error = '';
-    this.success = '';
+    this.error.set('');
+    this.success.set('');
 
     if (form.invalid || !this.cita.idMascota || !this.cita.idVeterinario) {
-      this.error = 'Por favor selecciona una mascota y un veterinario.';
+      this.error.set('Por favor selecciona una mascota y un veterinario.');
       return;
     }
 
@@ -63,17 +66,21 @@ export class NvcitaComponent {
       hora: this.cita.hora,
       motivo: this.cita.motivo,
       estado: this.cita.estado,
-      mascota: { idMascota: Number(this.cita.idMascota) },
-      veterinario: { idVeterinario: Number(this.cita.idVeterinario) }
+      mascota: {
+        idMascota: Number(this.cita.idMascota)
+      },
+      veterinario: {
+        idVeterinario: Number(this.cita.idVeterinario)
+      }
     };
 
     this.citaService.crearCita(dto).subscribe({
       next: () => {
-        this.success = 'Cita creada exitosamente.';
+        this.success.set('Cita creada exitosamente.');
         setTimeout(() => this.router.navigate(['/citas']), 600);
       },
       error: () => {
-        this.error = 'Error creando la cita.';
+        this.error.set('Error creando la cita.');
       }
     });
   }
