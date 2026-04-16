@@ -15,4 +15,3 @@ import { CommonModule } from '@angular/common';
 export class App {
   title = signal('huellitas-frontend');
 }
-``

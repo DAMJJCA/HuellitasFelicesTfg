@@ -11,15 +11,14 @@
 
     <h1 class="mt-2 font-semibold
                text-sm md:text-base">
-      Nombre del usuario
+      {{ nombreUsuario }}
     </h1>
 
     <p class="text-xs md:text-sm text-teal-200">
-      Huellitas Felices
+      {{ rolUsuario }}
     </p>
   </div>
 
-  <!-- Menú -->
   <nav class="space-y-1">
     <a *ngFor="let item of menuItems"
        [routerLink]="item.route"
@@ -31,13 +30,12 @@
     </a>
   </nav>
 
-  <!-- Logout -->
   <button
     (click)="logout()"
     class="mt-auto px-3 py-2 rounded-lg
            hover:bg-red-600 transition
            text-sm md:text-base text-left">
-    Cerrar sesión
+    Cerrar sesion
   </button>
 
 </aside>
