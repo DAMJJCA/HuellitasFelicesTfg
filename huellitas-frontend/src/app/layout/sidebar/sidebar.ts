@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,8 +10,10 @@ import { CommonModule } from '@angular/common';
   imports: [RouterModule, CommonModule]
 })
 export class SidebarComponent {
-
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   menuItems = [
     { label: 'Dashboard', route: '/dashboard' },
@@ -20,13 +23,19 @@ export class SidebarComponent {
     { label: 'Citas', route: '/citas' },
     { label: 'Consultas', route: '/consultas' },
     { label: 'Tratamientos', route: '/tratamientos' },
-    { label: 'Historial médico' , route: '/historial' }
+    { label: 'Historial medico', route: '/historial' }
   ];
 
-  logout() {
-    // Aquí se cierra la sesión
-    console.log('Sesión cerrada');
+  get nombreUsuario(): string {
+    return this.authService.userDisplayName();
+  }
 
+  get rolUsuario(): string {
+    return this.authService.userRoleLabel();
+  }
+
+  logout() {
+    this.authService.logout();
     this.router.navigate(['/login']);
   }
 }
