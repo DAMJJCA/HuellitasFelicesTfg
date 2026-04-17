@@ -1,24 +1,30 @@
 import { Routes } from '@angular/router';
 import { ShellComponent } from './layout/shell/shell';
-import { authGuard } from './auth/auth.guard';
 
 export const routes: Routes = [
+  // ZONA PÚBLICA
+  {
+    path: '',
+    loadComponent: () =>
+      import('./pages/inicio/inicio').then(m => m.InicioComponent)
+  },
   {
     path: 'login',
     loadComponent: () =>
       import('./pages/login/login').then(m => m.LoginComponent)
   },
   {
+    path: 'registro',
+    loadComponent: () =>
+      import('./pages/registro/registro').then(m => m.RegistroComponent)
+  },
+
+  // ZONA INTERNA CON SHELL
+  {
     path: '',
     component: ShellComponent,
-    canActivate: [authGuard],
     children: [
-      {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'dashboard'
-      },
-      //clientes
+      // clientes
       {
         path: 'clientes/nuevo',
         loadComponent: () =>
@@ -29,13 +35,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/clientes/mcliente/mcliente').then(m => m.MClienteComponent)
       },
-
       {
         path: 'clientes',
         loadComponent: () =>
           import('./pages/clientes/clientes').then(m => m.ClientesComponent)
       },
-      //mascotas
+
+      // mascotas
       {
         path: 'mascotas',
         loadComponent: () =>
@@ -51,7 +57,8 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/mascotas/mmascota/mmascota').then(m => m.MmascotaComponent)
       },
-      //veterinarios
+
+      // veterinarios
       {
         path: 'veterinarios',
         loadComponent: () =>
@@ -67,7 +74,8 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/veterinarios/mveterinario/mveterinario').then(m => m.MveterinarioComponent)
       },
-      //citas
+
+      // citas
       {
         path: 'citas',
         loadComponent: () =>
@@ -76,15 +84,15 @@ export const routes: Routes = [
       {
         path: 'citas/crear',
         loadComponent: () =>
-          import('./pages/citas/nvcita/nvcita').then(m => m.NvcitaComponent
-          )
+          import('./pages/citas/nvcita/nvcita').then(m => m.NvcitaComponent)
       },
       {
         path: 'citas/:id/editar',
         loadComponent: () =>
           import('./pages/citas/mcita/mcita').then(m => m.McitaComponent)
       },
-      //consultas
+
+      // consultas
       {
         path: 'consultas',
         loadComponent: () =>
@@ -95,27 +103,29 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/consultas/mconsulta/mconsulta').then(m => m.MconsultaComponent)
       },
-      //tratamientos
+
+      // tratamientos
       {
         path: 'tratamientos',
         loadComponent: () =>
-          import('./pages/tratamientos/tratamientos')
-            .then(m => m.TratamientosComponent)
+          import('./pages/tratamientos/tratamientos').then(m => m.TratamientosComponent)
       },
-      //historial
+
+      // historial
       {
         path: 'historial',
         loadComponent: () =>
           import('./pages/historial/historial').then(m => m.HistorialComponent)
       },
-      //dashboard
+
+      // dashboard
       {
         path: 'dashboard',
         loadComponent: () =>
           import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
       },
-      { path: '**', redirectTo: 'dashboard' }
+
+      { path: '**', redirectTo: '/dashboard' }
     ]
-  },
-  { path: '**', redirectTo: 'login' }
+  }
 ];
