@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { ShellComponent } from './layout/shell/shell';
+import { authGuard } from './auth/auth.guard';  //Proteccion de rutas
 
 export const routes: Routes = [
   // ZONA PÚBLICA
@@ -23,6 +24,7 @@ export const routes: Routes = [
   {
     path: '',
     component: ShellComponent,
+    canActivate: [authGuard], //Proteccion de rutas
     children: [
       // clientes
       {
