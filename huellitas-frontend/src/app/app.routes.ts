@@ -5,6 +5,7 @@ export const routes: Routes = [
   // ZONA PÚBLICA
   {
     path: '',
+    pathMatch: 'full',
     loadComponent: () =>
       import('./pages/inicio/inicio').then(m => m.InicioComponent)
   },
@@ -123,9 +124,9 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () =>
           import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
-      },
-
-      { path: '**', redirectTo: '/dashboard' }
+      }
     ]
-  }
+  },
+
+  { path: '**', redirectTo: '' }
 ];
