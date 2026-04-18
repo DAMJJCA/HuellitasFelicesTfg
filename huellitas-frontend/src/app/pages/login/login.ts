@@ -1,15 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './login.html',
-  styleUrl: './login.css'
 })
 export class LoginComponent {
   errorMessage = '';
@@ -47,7 +46,7 @@ export class LoginComponent {
       },
       error: () => {
         this.isSubmitting = false;
-        this.errorMessage = 'No se pudo iniciar sesion. Verifica el email y la contrasena.';
+        this.errorMessage = 'No se pudo iniciar sesión. Verifica el email y la contraseña.';
       }
     });
   }
