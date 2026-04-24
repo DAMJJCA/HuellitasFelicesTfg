@@ -1,13 +1,11 @@
 package com.veterinaria.demo.model;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "consultas")
@@ -15,85 +13,98 @@ public class Consulta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_consulta")
     private Long idConsulta;
 
-    // Copiada desde la cita (NO editable)
-    @Column(nullable = false, updatable = false)
     private LocalDate fecha;
-
-    // Copiada desde la cita (NO editable)
-    @Column(nullable = false, updatable = false)
     private String hora;
-
-    @Column(columnDefinition = "TEXT")
     private String diagnostico;
-
-    @Column(columnDefinition = "TEXT")
     private String observaciones;
 
-    // Relación con la cita
-    @JsonBackReference
+
     @OneToOne
-    @JoinColumn(name = "id_cita", nullable = false, unique = true)
+    @JoinColumn(name = "id_cita")
+    @JsonBackReference
     private Cita cita;
 
-    // Relación con tratamientos
-    @OneToMany(mappedBy = "consulta", cascade = CascadeType.ALL, orphanRemoval = true)
+
+    @OneToMany(mappedBy = "consulta", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Tratamiento> tratamientos;
-    
-    
-
-    // -------------------------------------------------
-    //  GETTERS CALCULADOS (SIN DTO)
-    // -------------------------------------------------
-
-    @JsonProperty("idCita")
-    public Long getIdCita() {
-        return cita != null ? cita.getIdCita() : null;
-    }
-
-    @JsonProperty("nombreMascota")
-    public String getNombreMascota() {
-        return (cita != null && cita.getMascota() != null)
-                ? cita.getMascota().getNombre()
-                : null;
-    }
 
 
-    // Getters y setters
+	public Consulta() {
+		super();
+	}
 
-    public Long getIdConsulta() { return idConsulta; }
-    public void setIdConsulta(Long idConsulta) { this.idConsulta = idConsulta; }
 
-    public LocalDate getFecha() { return fecha; }
-    public void setFecha(LocalDate fecha) { this.fecha = fecha; }
+	public Long getIdConsulta() {
+		return idConsulta;
+	}
 
-    public String getHora() { return hora; }
-    public void setHora(String hora) { this.hora = hora; }
 
-    public String getDiagnostico() { return diagnostico; }
-    public void setDiagnostico(String diagnostico) { this.diagnostico = diagnostico; }
+	public void setIdConsulta(Long idConsulta) {
+		this.idConsulta = idConsulta;
+	}
 
-    public String getObservaciones() { return observaciones; }
-    public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
 
-    public Cita getCita() { return cita; }
-    public void setCita(Cita cita) { this.cita = cita; }
+	public LocalDate getFecha() {
+		return fecha;
+	}
 
-    public List<Tratamiento> getTratamientos() { return tratamientos; }
-    public void setTratamientos(List<Tratamiento> tratamientos) {
-        this.tratamientos = tratamientos;
-    }
-    @JsonProperty("idsTratamientos")
-    public List<Long> getIdsTratamientos() {
-        if (tratamientos == null || tratamientos.isEmpty()) {
-            return Collections.emptyList();
-        }
 
-        return tratamientos.stream()
-                .map(Tratamiento::getIdTratamiento)
-                .collect(Collectors.toList());
-    }
-    
+	public void setFecha(LocalDate fecha) {
+		this.fecha = fecha;
+	}
+
+
+	public String getHora() {
+		return hora;
+	}
+
+
+	public void setHora(String hora) {
+		this.hora = hora;
+	}
+
+
+	public String getDiagnostico() {
+		return diagnostico;
+	}
+
+
+	public void setDiagnostico(String diagnostico) {
+		this.diagnostico = diagnostico;
+	}
+
+
+	public String getObservaciones() {
+		return observaciones;
+	}
+
+
+	public void setObservaciones(String observaciones) {
+		this.observaciones = observaciones;
+	}
+
+
+	public Cita getCita() {
+		return cita;
+	}
+
+
+	public void setCita(Cita cita) {
+		this.cita = cita;
+	}
+
+
+	public List<Tratamiento> getTratamientos() {
+		return tratamientos;
+	}
+
+
+	public void setTratamientos(List<Tratamiento> tratamientos) {
+		this.tratamientos = tratamientos;
+	}
+
+ 
 }

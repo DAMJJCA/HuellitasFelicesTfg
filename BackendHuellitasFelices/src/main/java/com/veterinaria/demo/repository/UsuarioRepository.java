@@ -9,4 +9,8 @@ import com.veterinaria.demo.model.Usuario;
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findByEmailIgnoreCase(String email);
+
+    boolean existsByEmailIgnoreCase(String email);
+
+    Optional<Usuario> findByIdVeterinario(Long idVeterinario);
 }

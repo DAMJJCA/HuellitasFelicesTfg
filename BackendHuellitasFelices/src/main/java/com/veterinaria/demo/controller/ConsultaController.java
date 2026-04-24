@@ -55,4 +55,4 @@ public class ConsultaController {
     public void eliminar(@PathVariable Long id) {
         consultaService.deleteById(id);
     }
-}
+} 
