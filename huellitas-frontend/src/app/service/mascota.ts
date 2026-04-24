@@ -24,7 +24,7 @@ export type CrearMascotaDto = {
   fechaNacimiento: string | null;
   peso: number | null;
   sexo: string;
-  cliente: { idCliente: number };
+  cliente?: { idCliente: number };
 };
 
 @Injectable({ providedIn: 'root' })

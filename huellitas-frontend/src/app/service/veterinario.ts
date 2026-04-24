@@ -9,7 +9,14 @@ export interface veterinario{
     telefono: string;
     email: string;
 }
-export type CrearVeterinarioDto = Omit<veterinario, 'idVeterinario'>;
+export interface CrearVeterinarioDto {
+    nombre: string;
+    especialidad: string;
+    telefono: string;
+    email: string;
+    password: string;
+}
+export type ActualizarVeterinarioDto = Omit<CrearVeterinarioDto, 'password'>;
 
 @Injectable({ providedIn: 'root' })
 export class VeterinarioService {
@@ -29,7 +36,7 @@ export class VeterinarioService {
         return this.http.delete<void>(`${this.api}/${id}`);
     }
 
-    actualizarVeterinario(id: number, body: Partial<CrearVeterinarioDto>): Observable<veterinario> {
+    actualizarVeterinario(id: number, body: Partial<ActualizarVeterinarioDto>): Observable<veterinario> {
         return this.http.put<veterinario>(`${this.api}/${id}`, body);
     }
 

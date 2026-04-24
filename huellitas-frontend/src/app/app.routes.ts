@@ -1,41 +1,56 @@
 import { Routes } from '@angular/router';
 import { ShellComponent } from './layout/shell/shell';
-import { authGuard } from './auth/auth.guard';
+import { authGuard } from './auth/auth.guard';  //Proteccion de rutas
+import { adminGuard } from './auth/admin.guard';
+import { staffGuard } from './auth/staff.guard';
+import { nonVeterinarioGuard } from './auth/non-veterinario.guard';
 
 export const routes: Routes = [
+  // ZONA PÚBLICA
+  {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./pages/inicio/inicio').then(m => m.InicioComponent)
+  },
   {
     path: 'login',
     loadComponent: () =>
       import('./pages/login/login').then(m => m.LoginComponent)
   },
   {
+    path: 'registro',
+    loadComponent: () =>
+      import('./pages/registro/registro').then(m => m.RegistroComponent)
+  },
+
+  // ZONA INTERNA CON SHELL
+  {
     path: '',
     component: ShellComponent,
-    canActivate: [authGuard],
+    canActivate: [authGuard], //Proteccion de rutas
     children: [
-      {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'dashboard'
-      },
-      //clientes
+      // clientes
       {
         path: 'clientes/nuevo',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./pages/clientes/nvcliente/nvcliente').then(m => m.NvClienteComponent)
       },
       {
         path: 'clientes/:id/editar',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./pages/clientes/mcliente/mcliente').then(m => m.MClienteComponent)
       },
-
       {
         path: 'clientes',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./pages/clientes/clientes').then(m => m.ClientesComponent)
       },
-      //mascotas
+
+      // mascotas
       {
         path: 'mascotas',
         loadComponent: () =>
@@ -43,31 +58,38 @@ export const routes: Routes = [
       },
       {
         path: 'mascotas/nueva',
+        canActivate: [nonVeterinarioGuard],
         loadComponent: () =>
           import('./pages/mascotas/nvmascota/nvmascota').then(m => m.NvmascotaComponent)
       },
       {
         path: 'mascotas/:id/editar',
+        canActivate: [nonVeterinarioGuard],
         loadComponent: () =>
           import('./pages/mascotas/mmascota/mmascota').then(m => m.MmascotaComponent)
       },
-      //veterinarios
+
+      // modulo admin - veterinarios
       {
-        path: 'veterinarios',
+        path: 'admin/veterinarios',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./pages/veterinarios/veterinarios').then(m => m.VeterinariosComponent)
       },
       {
-        path: 'veterinarios/nuevo',
+        path: 'admin/veterinarios/nuevo',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./pages/veterinarios/nvveterinario/nvveterinario').then(m => m.NvVeterinarioComponent)
       },
       {
-        path: 'veterinarios/:id/editar',
+        path: 'admin/veterinarios/:id/editar',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./pages/veterinarios/mveterinario/mveterinario').then(m => m.MveterinarioComponent)
       },
-      //citas
+
+      // citas
       {
         path: 'citas',
         loadComponent: () =>
@@ -75,47 +97,54 @@ export const routes: Routes = [
       },
       {
         path: 'citas/crear',
+        canActivate: [nonVeterinarioGuard],
         loadComponent: () =>
-          import('./pages/citas/nvcita/nvcita').then(m => m.NvcitaComponent
-          )
+          import('./pages/citas/nvcita/nvcita').then(m => m.NvcitaComponent)
       },
       {
         path: 'citas/:id/editar',
+        canActivate: [nonVeterinarioGuard],
         loadComponent: () =>
           import('./pages/citas/mcita/mcita').then(m => m.McitaComponent)
       },
-      //consultas
+
+      // consultas
       {
         path: 'consultas',
+        canActivate: [staffGuard],
         loadComponent: () =>
           import('./pages/consultas/consultas').then(m => m.ConsultasComponent)
       },
       {
         path: 'consultas/:id/editar',
+        canActivate: [staffGuard],
         loadComponent: () =>
           import('./pages/consultas/mconsulta/mconsulta').then(m => m.MconsultaComponent)
       },
-      //tratamientos
+
+      // tratamientos
       {
         path: 'tratamientos',
+        canActivate: [staffGuard],
         loadComponent: () =>
-          import('./pages/tratamientos/tratamientos')
-            .then(m => m.TratamientosComponent)
+          import('./pages/tratamientos/tratamientos').then(m => m.TratamientosComponent)
       },
-      //historial
+
+      // historial
       {
         path: 'historial',
         loadComponent: () =>
           import('./pages/historial/historial').then(m => m.HistorialComponent)
       },
-      //dashboard
+
+      // dashboard
       {
         path: 'dashboard',
         loadComponent: () =>
           import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
-      },
-      { path: '**', redirectTo: 'dashboard' }
+      }
     ]
   },
-  { path: '**', redirectTo: 'login' }
+
+  { path: '**', redirectTo: '' }
 ];

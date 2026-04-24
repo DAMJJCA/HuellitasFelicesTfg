@@ -15,16 +15,40 @@ export class SidebarComponent {
     private authService: AuthService
   ) {}
 
-  menuItems = [
-    { label: 'Dashboard', route: '/dashboard' },
-    { label: 'Clientes', route: '/clientes' },
-    { label: 'Mascotas', route: '/mascotas' },
-    { label: 'Veterinarios', route: '/veterinarios' },
-    { label: 'Citas', route: '/citas' },
-    { label: 'Consultas', route: '/consultas' },
-    { label: 'Tratamientos', route: '/tratamientos' },
-    { label: 'Historial medico', route: '/historial' }
-  ];
+  get menuItems() {
+    if (this.authService.isCliente()) {
+      return [
+        { label: 'Dashboard', route: '/dashboard' },
+        { label: 'Mascotas', route: '/mascotas' },
+        { label: 'Citas', route: '/citas' },
+        { label: 'Historial medico', route: '/historial' }
+      ];
+    }
+
+    if (this.authService.isVeterinario()) {
+      return [
+        { label: 'Dashboard', route: '/dashboard' },
+        { label: 'Mascotas', route: '/mascotas' },
+        { label: 'Citas', route: '/citas' },
+        { label: 'Consultas', route: '/consultas' },
+        { label: 'Tratamientos', route: '/tratamientos' },
+        { label: 'Historial medico', route: '/historial' }
+      ];
+    }
+
+    const adminItems = [
+      { label: 'Dashboard', route: '/dashboard' },
+      { label: 'Clientes', route: '/clientes' },
+      { label: 'Mascotas', route: '/mascotas' },
+      { label: 'Veterinarios', route: '/admin/veterinarios' },
+      { label: 'Citas', route: '/citas' },
+      { label: 'Consultas', route: '/consultas' },
+      { label: 'Tratamientos', route: '/tratamientos' },
+      { label: 'Historial medico', route: '/historial' }
+    ];
+
+    return adminItems;
+  }
 
   get nombreUsuario(): string {
     return this.authService.userDisplayName();

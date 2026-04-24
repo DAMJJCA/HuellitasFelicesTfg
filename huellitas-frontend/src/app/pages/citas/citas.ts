@@ -4,6 +4,7 @@ import { catchError, combineLatest, map, Observable, of, shareReplay, startWith,
 import { Router } from '@angular/router';
 import { Cita, CitaService } from '../../service/cita';
 import { HttpClientModule } from '@angular/common/http';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-citas',
@@ -24,7 +25,14 @@ export class CitasComponent {
   mostrandoConfirmacion = false;
   seleccionado: Cita | null = null;
 
-  constructor(private citaService: CitaService) { }
+  constructor(
+    private citaService: CitaService,
+    private authService: AuthService
+  ) { }
+
+  get puedeGestionarCitas(): boolean {
+    return !this.authService.isVeterinario();
+  }
 
   ngOnInit(): void {
     this.citas$ = this.refrescar$.pipe(

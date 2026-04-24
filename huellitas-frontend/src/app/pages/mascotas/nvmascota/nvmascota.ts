@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 
 import { MascotaService } from '../../../service/mascota';
 import { ClienteService } from '../../../service/cliente';
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
   selector: 'app-nvmascota',
@@ -30,7 +31,6 @@ export class NvmascotaComponent implements OnInit {
     idCliente: ''
   };
 
-  // ✅ SIGNALS
   clientes = signal<any[]>([]);
   cargando = signal<boolean>(false);
   error = signal<string>('');
@@ -39,13 +39,22 @@ export class NvmascotaComponent implements OnInit {
   constructor(
     private readonly mascotaService: MascotaService,
     private readonly clienteService: ClienteService,
+    private readonly authService: AuthService,
     private readonly router: Router
   ) {}
 
+  get esCliente(): boolean {
+    return this.authService.isCliente();
+  }
+
   ngOnInit(): void {
+    if (this.esCliente) {
+      return;
+    }
+
     this.clienteService.getClientes().subscribe({
       next: c => this.clientes.set(c),
-      error: () => this.error.set('Error cargando la lista de dueños')
+      error: () => this.error.set('Error cargando la lista de duenos')
     });
   }
 
@@ -53,8 +62,8 @@ export class NvmascotaComponent implements OnInit {
     this.error.set('');
     this.success.set('');
 
-    if (form.invalid || !this.mascota.idCliente) {
-      this.error.set('Por favor selecciona un dueño válido.');
+    if (form.invalid || (!this.esCliente && !this.mascota.idCliente)) {
+      this.error.set('Por favor selecciona un dueno valido.');
       return;
     }
 
@@ -67,9 +76,11 @@ export class NvmascotaComponent implements OnInit {
       fechaNacimiento: this.mascota.fechaNacimiento,
       peso: this.mascota.peso,
       sexo: this.mascota.sexo,
-      cliente: {
-        idCliente: Number(this.mascota.idCliente)
-      }
+      cliente: this.esCliente
+        ? undefined
+        : {
+            idCliente: Number(this.mascota.idCliente)
+          }
     };
 
     this.mascotaService.crearMascota(dto).subscribe({

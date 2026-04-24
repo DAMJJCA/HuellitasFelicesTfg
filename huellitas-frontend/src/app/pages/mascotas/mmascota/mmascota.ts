@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MascotaService } from '../../../service/mascota';
 import { ClienteService } from '../../../service/cliente';
+import { AuthService } from '../../../auth/auth.service';
 import { map, switchMap, tap, catchError, filter, shareReplay } from 'rxjs';
 
 @Component({
@@ -20,6 +21,7 @@ export class MmascotaComponent implements OnInit {
   private router = inject(Router);
   private mascotaService = inject(MascotaService);
   private clienteService = inject(ClienteService);
+  private authService = inject(AuthService);
 
   form = this.fb.nonNullable.group({
     nombre:    ['', [Validators.required, Validators.minLength(2), Validators.maxLength(60)]],
@@ -59,6 +61,10 @@ export class MmascotaComponent implements OnInit {
   );
 
   ngOnInit(): void {
+    if (this.esCliente) {
+      return;
+    }
+
     this.clienteService.getClientes().subscribe({
       next: c => {
         this.clientes = c.map(x => ({
@@ -87,9 +93,11 @@ export class MmascotaComponent implements OnInit {
       fechaNacimiento: this.form.value.fechaNacimiento!,
       peso: Number(this.form.value.peso),
       sexo: this.form.value.sexo!,
-      cliente: {
-        idCliente: Number(this.form.value.idCliente)
-      }
+      cliente: this.esCliente
+        ? undefined
+        : {
+            idCliente: Number(this.form.value.idCliente)
+          }
     };
 
     this.cargando = true;
@@ -112,5 +120,9 @@ export class MmascotaComponent implements OnInit {
 
   cancelar() {
     this.router.navigate(['/mascotas']);
+  }
+
+  get esCliente(): boolean {
+    return this.authService.isCliente();
   }
 }

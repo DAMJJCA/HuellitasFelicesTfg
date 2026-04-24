@@ -1,53 +1,91 @@
-<section class="min-h-screen bg-[radial-gradient(circle_at_top,_#d1fae5,_#ecfeff_45%,_#f8fafc_85%)] px-6 py-10">
-  <div class="mx-auto flex min-h-[85vh] max-w-6xl items-center justify-center">
-    <div class="grid w-full overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-2xl shadow-teal-900/10 lg:grid-cols-[1.1fr_0.9fr]">
-      <div class="hidden bg-teal-900 px-10 py-12 text-white lg:block">
-        <p class="text-sm uppercase tracking-[0.35em] text-teal-200">Huellitas Felices</p>
-        <h1 class="mt-6 max-w-md text-5xl font-black leading-tight">
-          Panel para la gestion de la clinica.
-        </h1>
-        <p class="mt-6 max-w-lg text-base text-teal-100">
-          Inicia sesion con tu cuenta para acceder a tu area.
-        </p>
-      </div>
+<div class="min-h-screen bg-cover bg-center" style="background-image: url('/assets/imgInicio/fondo.png')">
 
-      <div class="px-6 py-10 sm:px-10 lg:px-12">
-        <div class="mx-auto max-w-md">
-          <p class="text-sm font-semibold uppercase tracking-[0.3em] text-teal-600">Acceso</p>
-          <h2 class="mt-4 text-3xl font-black text-slate-900">Iniciar sesion</h2>
+  <div class="min-h-screen bg-white/70 backdrop-blur-[2px] text-slate-800">
 
-          <form [formGroup]="form" (ngSubmit)="submit()" class="mt-8 space-y-5">
-            <label class="block">
-              <span class="mb-2 block text-sm font-semibold text-slate-700">Correo</span>
-              <input
-                type="email"
-                formControlName="email"
-                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white"
-                placeholder="admin@huellitas.felices.com" />
-            </label>
+    <div class="max-w-7xl mx-auto px-6 py-8">
 
-            <label class="block">
-              <span class="mb-2 block text-sm font-semibold text-slate-700">Contrasena</span>
-              <input
-                type="password"
-                formControlName="password"
-                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white"
-                placeholder="Tu contrasena" />
-            </label>
+      <header class="flex items-center justify-between mb-10">
 
-            <p *ngIf="errorMessage" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <!-- LOGO -->
+        <a routerLink="/" class="inline-flex items-center gap-3">
+          <img src="/assets/imgInicio/logo.png" class="w-16 h-auto">
+          <div>
+            <p class="text-2xl font-bold">Huellitas Felices</p>
+            <p class="text-sm text-slate-500">Clínica Veterinaria</p>
+          </div>
+        </a>
+
+        <!-- BOTONES DERECHA -->
+        <div class="flex items-center gap-3">
+
+          <!-- BOTÓN INICIO -->
+          <a routerLink="/" class="rounded-xl border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50 transition">
+            Inicio
+          </a>
+
+          <!-- REGISTRO -->
+          <a routerLink="/registro"
+            class="rounded-xl bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700 transition">
+            Crear cuenta
+          </a>
+
+        </div>
+
+      </header>
+
+      <!-- FORMULARIO -->
+      <div class="max-w-md mx-auto">
+        <section class="bg-white/90 rounded-3xl shadow-sm border border-slate-200 p-8">
+
+          <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold">Iniciar sesión</h1>
+            <p class="mt-3 text-slate-600">
+              Accede a tu cuenta para gestionar la clínica.
+            </p>
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-5">
+
+            <!-- EMAIL -->
+            <div>
+              <label class="block text-sm font-medium mb-2">Correo</label>
+              <input type="email" formControlName="email" class="w-full rounded-xl border px-4 py-3"
+                placeholder="correo@ejemplo.com">
+            </div>
+
+            <!-- PASSWORD -->
+            <div>
+              <label class="block text-sm font-medium mb-2">Contraseña</label>
+              <input type="password" formControlName="password" class="w-full rounded-xl border px-4 py-3"
+                placeholder="Tu contraseña">
+            </div>
+
+            <!-- ERROR -->
+            <p *ngIf="errorMessage" class="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
               {{ errorMessage }}
             </p>
 
-            <button
-              type="submit"
-              [disabled]="isSubmitting"
-              class="w-full rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-teal-400">
-              {{ isSubmitting ? 'Entrando...' : 'Entrar al panel' }}
+            <!-- BOTÓN -->
+            <button type="submit" [disabled]="isSubmitting"
+              class="w-full bg-emerald-600 text-white py-3 rounded-xl hover:bg-emerald-700 transition">
+
+              {{ isSubmitting ? 'Entrando...' : 'Entrar' }}
+
             </button>
+
           </form>
-        </div>
+
+          <!-- LINK REGISTRO -->
+          <div class="mt-6 text-center text-sm">
+            ¿No tienes cuenta?
+            <a routerLink="/registro" class="text-emerald-600 font-medium">
+              Crear cuenta
+            </a>
+          </div>
+
+        </section>
       </div>
+
     </div>
   </div>
-</section>
+</div>

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CrearVeterinarioDto, veterinario, VeterinarioService } from '../../../service/veterinario';
+import { ActualizarVeterinarioDto, veterinario, VeterinarioService } from '../../../service/veterinario';
 import { catchError, filter, map, Observable, shareReplay, switchMap, tap } from 'rxjs';
 
 @Component({
@@ -34,7 +34,7 @@ export class MveterinarioComponent {
   readonly veterinario$: Observable<veterinario> = this.id$.pipe(
     switchMap(id => this.veterinarioService.getVeterinario(id)),
     tap(v => {
-      const dto: CrearVeterinarioDto = {
+      const dto: ActualizarVeterinarioDto = {
         nombre: v.nombre ?? '',
         especialidad: v.especialidad ?? '',
         telefono: v.telefono ?? '',
@@ -60,7 +60,7 @@ export class MveterinarioComponent {
       return;
     }
 
-    const dto: CrearVeterinarioDto = {
+    const dto: ActualizarVeterinarioDto = {
       nombre: this.form.value.nombre!,
       especialidad: this.form.value.especialidad!,
       telefono: this.form.value.telefono!,
@@ -75,7 +75,7 @@ export class MveterinarioComponent {
       next: () => {
         this.successMsg = 'Veterinario actualizado correctamente.';
         this.saving = false;
-        setTimeout(() => this.router.navigate(['/veterinarios']), 500);
+        setTimeout(() => this.router.navigate(['/admin/veterinarios']), 500);
       },
       error: (e) => {
         console.error('ERROR actualizando veterinario', e);
@@ -86,6 +86,6 @@ export class MveterinarioComponent {
   }
 
   cancelar() {
-    this.router.navigate(['/veterinarios']);
+    this.router.navigate(['/admin/veterinarios']);
   }
 }

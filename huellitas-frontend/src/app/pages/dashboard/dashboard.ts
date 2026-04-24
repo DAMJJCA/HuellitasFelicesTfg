@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { CitaService, Cita } from '../../service/cita';
 import { ConsultaService } from '../../service/consulta';
 import { MascotaService } from '../../service/mascota';
+import { AuthService } from '../../auth/auth.service';
 
 type DiaCalendario = {
   fecha: Date;
@@ -27,6 +28,7 @@ export class DashboardComponent {
   private citaService = inject(CitaService);
   private consultaService = inject(ConsultaService);
   private mascotaService = inject(MascotaService);
+  private authService = inject(AuthService);
   private router = inject(Router);
 
   citasHoy = signal(0);
@@ -133,7 +135,15 @@ export class DashboardComponent {
 
   // BOTONES
   irACrearCita() {
+    if (this.authService.isVeterinario()) {
+      this.router.navigate(['/citas']);
+      return;
+    }
     this.router.navigate(['/citas/crear']);
+  }
+
+  get puedeCrearCitas(): boolean {
+    return !this.authService.isVeterinario();
   }
 
   irAHistorial() {

@@ -24,7 +24,8 @@
 
       <!-- Botones -->
       <div class="flex gap-2">
-        <button type="button"
+        <button *ngIf="puedeGestionarMascotas"
+                type="button"
                 class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-medium shadow-sm transition"
                 (click)="crear()">
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,8 +65,9 @@
                 d="M3 7h18M3 12h18M3 17h18"/>
         </svg>
         <h3 class="mt-3 text-base font-semibold">No hay mascotas para mostrar</h3>
-        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Agrega tu primera mascota.</p>
-        <button class="mt-5 inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-medium"
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">No hay mascotas para mostrar.</p>
+        <button *ngIf="puedeGestionarMascotas"
+                class="mt-5 inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-medium"
                 (click)="crear()">
           Añadir mascota
         </button>
@@ -100,7 +102,7 @@
                 <td class="px-6 py-4">{{ m.fechaNacimiento | date:'yyyy-MM-dd' }}</td>
                 <td class="px-6 py-4">{{ m.cliente.nombre }} {{ m.cliente.apellidos }}</td>
                 <td class="px-6 py-4">
-                  <div class="flex items-center justify-end gap-2">
+                  <div *ngIf="puedeGestionarMascotas" class="flex items-center justify-end gap-2">
                     <button type="button"
                             class="inline-flex items-center gap-1.5 rounded-md border bg-gray-200 border-slate-300 text-xs hover:bg-slate-50"
                             (click)="editar(m)">
@@ -136,7 +138,7 @@
             <p><span class="font-medium">Dueño:</span> {{ m.cliente.nombre }} {{ m.cliente.apellidos }}</p>
           </div>
 
-          <div class="mt-3 flex gap-2">
+          <div *ngIf="puedeGestionarMascotas" class="mt-3 flex gap-2">
             <button class="flex-1 rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-xs hover:bg-slate-50 dark:hover:bg-slate-700"
                     (click)="editar(m)">
               Editar
@@ -160,7 +162,7 @@
   </ng-template>
 
   <!-- MODAL ELIMINAR -->
-  <div *ngIf="mostrandoConfirmacion" class="fixed inset-0 z-50">
+  <div *ngIf="mostrandoConfirmacion && puedeGestionarMascotas" class="fixed inset-0 z-50">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="cancelarEliminar()"></div>
 
     <div class="absolute inset-0 grid place-items-center p-4">
