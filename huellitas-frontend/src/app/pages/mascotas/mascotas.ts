@@ -4,6 +4,7 @@ import { catchError, combineLatest, map, Observable, of, shareReplay, startWith,
 import { Router } from '@angular/router';
 import { Mascotas, MascotaService } from '../../service/mascota';
 import { HttpClientModule } from '@angular/common/http';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-mascotas',
@@ -25,7 +26,14 @@ export class MascotasComponent {
   mostrandoConfirmacion = false;
   seleccionado: Mascotas | null = null;
 
-  constructor(private mascotaService: MascotaService) {}
+  constructor(
+    private mascotaService: MascotaService,
+    private authService: AuthService
+  ) {}
+
+  get puedeGestionarMascotas(): boolean {
+    return !this.authService.isVeterinario();
+  }
 
   ngOnInit(): void {
     this.mascotas$ = this.refrescar$.pipe(

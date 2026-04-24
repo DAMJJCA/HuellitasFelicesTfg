@@ -18,8 +18,10 @@ export class NvVeterinarioComponent {
     nombre: '',
     especialidad: '',
     telefono: '',
-    email: ''
+    email: '',
+    password: ''
   };
+  repetirPassword = '';
 
   cargando = false;
   error = '';
@@ -40,13 +42,23 @@ export class NvVeterinarioComponent {
       return;
     }
 
+    if (this.veterinario.password.length < 6) {
+      this.error = 'La contrasena debe tener al menos 6 caracteres.';
+      return;
+    }
+
+    if (this.veterinario.password !== this.repetirPassword) {
+      this.error = 'Las contrasenas no coinciden.';
+      return;
+    }
+
     this.cargando = true;
 
     this.veterinarioService.crearVeterinario(this.veterinario).subscribe({
       next: () => {
         this.success = 'Veterinario creado correctamente.';
         this.cargando = false;
-        setTimeout(() => this.router.navigate(['/veterinarios']), 500);
+        setTimeout(() => this.router.navigate(['/admin/veterinarios']), 500);
       },
       error: (e) => {
         console.error('ERROR creando veterinario', e);
@@ -57,6 +69,6 @@ export class NvVeterinarioComponent {
   }
 
   cancelar() {
-    this.router.navigate(['/veterinarios']);
+    this.router.navigate(['/admin/veterinarios']);
   }
 }

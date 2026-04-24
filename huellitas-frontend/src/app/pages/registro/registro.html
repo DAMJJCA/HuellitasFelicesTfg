@@ -4,19 +4,18 @@
 
         <div class="max-w-7xl mx-auto px-6 py-8">
 
-            <!-- CABECERA SUPERIOR -->
             <header class="flex items-center justify-between mb-10">
                 <a routerLink="/" class="inline-flex items-center gap-3">
                     <img src="/logo.png" alt="Huellitas Felices" class="w-14 h-auto">
                     <div>
                         <p class="text-2xl font-bold text-slate-800">Huellitas Felices</p>
-                        <p class="text-sm text-slate-500">Clínica Veterinaria</p>
+                        <p class="text-sm text-slate-500">Clinica Veterinaria</p>
                     </div>
                 </a>
 
                 <a routerLink="/login"
                     class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
-                    Identifícate
+                    Identificate
                 </a>
             </header>
 
@@ -25,7 +24,7 @@
                     <div class="text-center mb-8">
                         <h1 class="text-3xl font-bold text-slate-800">Crear cuenta</h1>
                         <p class="mt-3 text-slate-600">
-                            Completa tus datos para preparar el acceso a la plataforma de gestión veterinaria.
+                            Completa tus datos para crear tu usuario de cliente.
                         </p>
                     </div>
 
@@ -50,7 +49,7 @@
 
                         <div>
                             <label for="email" class="block text-sm font-medium text-slate-700 mb-2">
-                                Correo electrónico
+                                Correo electronico
                             </label>
                             <input id="email" name="email" type="email" [(ngModel)]="email"
                                 placeholder="ejemplo@correo.com"
@@ -59,35 +58,52 @@
 
                         <div>
                             <label for="telefono" class="block text-sm font-medium text-slate-700 mb-2">
-                                Teléfono
+                                Telefono
                             </label>
                             <input id="telefono" name="telefono" type="text" [(ngModel)]="telefono"
-                                placeholder="Tu teléfono"
+                                placeholder="Tu telefono"
+                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="direccion" class="block text-sm font-medium text-slate-700 mb-2">
+                                Direccion
+                            </label>
+                            <input id="direccion" name="direccion" type="text" [(ngModel)]="direccion"
+                                placeholder="Tu direccion"
                                 class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
 
                         <div>
                             <label for="password" class="block text-sm font-medium text-slate-700 mb-2">
-                                Contraseña
+                                Contrasena
                             </label>
                             <input id="password" name="password" type="password" [(ngModel)]="password"
-                                placeholder="Introduce una contraseña"
+                                placeholder="Introduce una contrasena"
                                 class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
 
                         <div>
                             <label for="repetirPassword" class="block text-sm font-medium text-slate-700 mb-2">
-                                Repetir contraseña
+                                Repetir contrasena
                             </label>
                             <input id="repetirPassword" name="repetirPassword" type="password"
-                                [(ngModel)]="repetirPassword" placeholder="Repite la contraseña"
+                                [(ngModel)]="repetirPassword" placeholder="Repite la contrasena"
                                 class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
 
+                        <p *ngIf="errorMessage" class="md:col-span-2 text-sm text-red-600 bg-red-50 rounded-xl p-3">
+                            {{ errorMessage }}
+                        </p>
+
+                        <p *ngIf="successMessage" class="md:col-span-2 text-sm text-emerald-700 bg-emerald-50 rounded-xl p-3">
+                            {{ successMessage }}
+                        </p>
+
                         <div class="md:col-span-2 flex flex-col sm:flex-row gap-3 pt-2">
-                            <button type="button" (click)="crearCuenta()"
+                            <button type="button" (click)="crearCuenta()" [disabled]="isSubmitting"
                                 class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-medium text-white hover:bg-emerald-700 transition">
-                                Crear cuenta
+                                {{ isSubmitting ? 'Creando cuenta...' : 'Crear cuenta' }}
                             </button>
 
                             <a routerLink="/login"
@@ -96,13 +112,6 @@
                             </a>
                         </div>
                     </form>
-
-                    <div class="mt-6 rounded-2xl bg-slate-50 border border-slate-200 p-4">
-                        <p class="text-xs text-slate-500 text-center">
-                            El registro real quedará conectado cuando se implemente la gestión de usuarios en base de
-                            datos y backend.
-                        </p>
-                    </div>
                 </section>
             </div>
 

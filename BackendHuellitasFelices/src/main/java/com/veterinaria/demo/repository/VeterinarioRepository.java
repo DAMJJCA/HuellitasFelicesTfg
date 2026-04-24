@@ -6,4 +6,5 @@ import com.veterinaria.demo.model.Veterinario;
 
 public interface VeterinarioRepository extends JpaRepository<Veterinario, Long> {
 
+    boolean existsByEmailIgnoreCase(String email);
 }

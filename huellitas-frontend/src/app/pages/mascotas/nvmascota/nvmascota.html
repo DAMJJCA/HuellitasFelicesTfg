@@ -14,18 +14,14 @@
 
     <form #f="ngForm" (ngSubmit)="onSubmit(f)" class="mt-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow">
 
-      <!-- Nombre Mascota -->
       <div class="mb-4">
         <label class="block text-sm mb-1">Nombre de la mascota <span class="text-rose-600">*</span></label>
-        <input type="text" required name="nombre" [(ngModel)]="mascota.nombre"
-          class="w-full rounded-md border px-3 py-2 text-sm">
+        <input type="text" required name="nombre" [(ngModel)]="mascota.nombre" class="w-full rounded-md border px-3 py-2 text-sm">
       </div>
 
-      <!-- Cliente -->
-      <div class="mb-4">
-        <label class="block text-sm mb-1">Dueño <span class="text-rose-600">*</span></label>
-        <select name="idCliente" required [(ngModel)]="mascota.idCliente"
-          class="w-full rounded-md border px-3 py-2 text-sm">
+      <div *ngIf="!esCliente" class="mb-4">
+        <label class="block text-sm mb-1">Dueno <span class="text-rose-600">*</span></label>
+        <select name="idCliente" required [(ngModel)]="mascota.idCliente" class="w-full rounded-md border px-3 py-2 text-sm">
           <option value="" disabled selected>Seleccione...</option>
           <option *ngFor="let c of clientes()" [value]="c.idCliente">
             {{ c.nombre }} {{ c.apellidos }}
@@ -33,18 +29,14 @@
         </select>
       </div>
 
-      <!-- Fecha nacimiento -->
       <div class="mb-4">
         <label class="block text-sm mb-1">Fecha de nacimiento</label>
-        <input type="date" name="fechaNacimiento" [(ngModel)]="mascota.fechaNacimiento"
-          class="w-full rounded-md border px-3 py-2 text-sm">
+        <input type="date" name="fechaNacimiento" [(ngModel)]="mascota.fechaNacimiento" class="w-full rounded-md border px-3 py-2 text-sm">
       </div>
 
-      <!-- Sexo -->
       <div class="mb-4">
         <label class="block text-sm mb-1">Sexo</label>
-        <select name="sexo" [(ngModel)]="mascota.sexo"
-          class="w-full rounded-md border px-3 py-2 text-sm">
+        <select name="sexo" [(ngModel)]="mascota.sexo" class="w-full rounded-md border px-3 py-2 text-sm">
           <option value="">Seleccione...</option>
           <option value="Macho">Macho</option>
           <option value="Hembra">Hembra</option>
@@ -53,20 +45,17 @@
 
       <div class="mb-4">
         <label class="block text-sm mb-1">Especie <span class="text-rose-600">*</span></label>
-        <input type="text" required name="especie" [(ngModel)]="mascota.especie"
-          class="w-full rounded-md border px-3 py-2 text-sm">
+        <input type="text" required name="especie" [(ngModel)]="mascota.especie" class="w-full rounded-md border px-3 py-2 text-sm">
       </div>
 
       <div class="mb-4">
         <label class="block text-sm mb-1">Raza</label>
-        <input type="text" name="raza" [(ngModel)]="mascota.raza"
-          class="w-full rounded-md border px-3 py-2 text-sm">
+        <input type="text" name="raza" [(ngModel)]="mascota.raza" class="w-full rounded-md border px-3 py-2 text-sm">
       </div>
 
       <div class="mb-4">
         <label class="block text-sm mb-1">Peso (kg)</label>
-        <input type="number" step="0.01" name="peso" [(ngModel)]="mascota.peso"
-          class="w-full rounded-md border px-3 py-2 text-sm">
+        <input type="number" step="0.01" name="peso" [(ngModel)]="mascota.peso" class="w-full rounded-md border px-3 py-2 text-sm">
       </div>
 
       <div class="mt-6 flex justify-end gap-2">

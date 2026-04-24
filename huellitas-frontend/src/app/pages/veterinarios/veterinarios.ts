@@ -66,12 +66,12 @@ export class VeterinariosComponent {
   }
 
   crear() {
-    this.router.navigate(['/veterinarios/nuevo']);
+    this.router.navigate(['/admin/veterinarios/nuevo']);
   }
 
   editar(c: veterinario) {
     if (!c.idVeterinario) return;
-    this.router.navigate(['/veterinarios', c.idVeterinario, 'editar']);
+    this.router.navigate(['/admin/veterinarios', c.idVeterinario, 'editar']);
   }
 
   abrirEliminar(c: veterinario) {

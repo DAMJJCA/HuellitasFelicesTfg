@@ -7,6 +7,15 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterClienteRequest {
+  nombre: string;
+  apellidos: string;
+  email: string;
+  telefono: string;
+  direccion: string;
+  password: string;
+}
+
 export interface LoginResponse {
   token: string;
   type: string;
@@ -26,6 +35,12 @@ export class AuthService {
 
   login(payload: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.api}/login`, payload).pipe(
+      tap(response => this.persistSession(response))
+    );
+  }
+
+  registerCliente(payload: RegisterClienteRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.api}/register-cliente`, payload).pipe(
       tap(response => this.persistSession(response))
     );
   }
@@ -59,6 +74,23 @@ export class AuthService {
   userRoleLabel(): string {
     const role = this.currentUser()?.rol;
     return role ? `Rol: ${role}` : 'Sin sesion';
+  }
+
+  hasRole(role: string): boolean {
+    const currentRole = this.currentUser()?.rol;
+    return !!currentRole && currentRole.toLowerCase() === role.toLowerCase();
+  }
+
+  isAdmin(): boolean {
+    return this.hasRole('admin');
+  }
+
+  isCliente(): boolean {
+    return this.hasRole('cliente');
+  }
+
+  isVeterinario(): boolean {
+    return this.hasRole('veterinario');
   }
 
   private persistSession(response: LoginResponse): void {
