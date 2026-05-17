@@ -6,6 +6,7 @@ import java.util.List;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "consultas")
@@ -104,6 +105,13 @@ public class Consulta {
 
 	public void setTratamientos(List<Tratamiento> tratamientos) {
 		this.tratamientos = tratamientos;
+	}
+
+	@JsonProperty("nombreMascota")
+	public String getNombreMascota() {
+		return cita != null && cita.getMascota() != null
+				? cita.getMascota().getNombre()
+				: null;
 	}
 
  

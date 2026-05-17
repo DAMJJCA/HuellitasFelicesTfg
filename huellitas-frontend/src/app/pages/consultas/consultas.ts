@@ -41,6 +41,7 @@ export class ConsultasComponent {
       map(([lista, term]) => {
         const t = term.toLowerCase();
         return lista.filter(c =>
+          (c.nombreMascota ?? '').toLowerCase().includes(t) ||
           (c.diagnostico ?? '').toLowerCase().includes(t) ||
           (c.observaciones ?? '').toLowerCase().includes(t)
         );
