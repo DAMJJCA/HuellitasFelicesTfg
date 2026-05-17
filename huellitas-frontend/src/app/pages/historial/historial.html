@@ -51,8 +51,8 @@
             <tr *ngFor="let c of consultas">
               <td class="px-6 py-4 font-medium text-slate-700">{{ c.idCita }}</td>
               <td class="px-6 py-4">
-                <span *ngIf="c.idsTratamientos.length > 0; else sinTrat">
-                  <span *ngFor="let id of c.idsTratamientos; let last = last">
+                <span *ngIf="(c.idsTratamientos ?? []).length > 0; else sinTrat">
+                  <span *ngFor="let id of (c.idsTratamientos ?? []); let last = last">
                     {{ id }}<span *ngIf="!last">, </span>
                   </span>
                 </span>

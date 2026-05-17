@@ -61,7 +61,7 @@ export class MconsultaComponent {
       next: (c: Consulta) => {
         this.fecha = c.fecha;
         this.hora = c.hora;
-        this.idCita = c.idCita;
+        this.idCita = c.idCita ?? 0;
         this.nombreMascota = c.nombreMascota;
 
         this.form.patchValue({

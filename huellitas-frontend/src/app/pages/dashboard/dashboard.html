@@ -97,6 +97,30 @@
     <div class="space-y-4">
 
       <div
+        *ngIf="esAdmin"
+        class="rounded-2xl bg-amber-500 text-white
+               p-6 shadow cursor-pointer
+               hover:brightness-110 transition"
+        (click)="irAClientes()">
+        <h3 class="text-2xl font-semibold">Clientes</h3>
+        <p class="text-sm opacity-90 mt-1">
+          Gestionar clientes
+        </p>
+      </div>
+
+      <div
+        *ngIf="esAdmin"
+        class="rounded-2xl bg-cyan-600 text-white
+               p-6 shadow cursor-pointer
+               hover:brightness-110 transition"
+        (click)="irAVeterinarios()">
+        <h3 class="text-2xl font-semibold">Veterinarios</h3>
+        <p class="text-sm opacity-90 mt-1">
+          Gestionar veterinarios
+        </p>
+      </div>
+
+      <div
         class="rounded-2xl bg-sky-500 text-white
                p-6 shadow cursor-pointer
                hover:brightness-110 transition"

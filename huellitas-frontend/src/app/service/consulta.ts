@@ -10,9 +10,9 @@ export interface Consulta {
   observaciones: string;
   tratamiento: boolean;
 
-  idCita: number;
+  idCita?: number;
   nombreMascota: string;
-  idsTratamientos: number[];
+  idsTratamientos?: number[];
 }
 
 @Injectable({ providedIn: 'root' })
