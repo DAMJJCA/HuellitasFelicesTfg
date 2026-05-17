@@ -114,5 +114,10 @@ public class Consulta {
 				: null;
 	}
 
+	@JsonProperty("idCita")
+	public Long getIdCita() {
+		return cita != null ? cita.getIdCita() : null;
+	}
+
  
 }

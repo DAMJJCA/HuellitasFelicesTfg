@@ -146,6 +146,18 @@ export class DashboardComponent {
     return !this.authService.isVeterinario();
   }
 
+  get esAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
+
+  irAClientes() {
+    this.router.navigate(['/clientes']);
+  }
+
+  irAVeterinarios() {
+    this.router.navigate(['/admin/veterinarios']);
+  }
+
   irAHistorial() {
     this.router.navigate(['/historial']);
   }
