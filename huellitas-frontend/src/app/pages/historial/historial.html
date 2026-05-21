@@ -1,122 +1,181 @@
-<section class="min-h-screen bg-slate-50 dark:bg-slate-900
-         text-slate-800 dark:text-slate-100
-         px-6 py-6 md:px-10 md:py-8">
+<section class="min-h-screen bg-slate-50 px-6 py-6 text-slate-800 dark:bg-slate-900 dark:text-slate-100 md:px-10 md:py-8">
 
-  <!-- HEADER -->
-  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+  <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
     <div>
-      <h1 class="text-4xl font-semibold tracking-tight">
-        Historial Médico
-      </h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400">
-        Historial clínico completo de la mascota seleccionada.
+      <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Historial medico</h1>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        Linea temporal clinica con citas, consultas, tratamientos y cuidados preventivos.
       </p>
     </div>
 
-    <!-- Selector mascota -->
-    <select class="rounded-lg border border-slate-300 bg-white dark:bg-slate-800
-             px-5 py-2.5 text-sm" (change)="seleccionarMascota($any($event.target).value)">
-      <option value="">-- Selecciona una mascota --</option>
-      <option *ngFor="let m of mascotas$ | async" [value]="m.idMascota">
-        {{ m.nombre }}
-      </option>
-    </select>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <input #buscadorMascotas
+             type="text"
+             placeholder="Filtrar mascotas por dueño, ID..."
+             class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 sm:w-72"
+             (input)="onBuscarMascota(buscadorMascotas.value)">
+
+      <select class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-800"
+              (change)="seleccionarMascota($any($event.target).value)">
+        <option value="">Selecciona una mascota</option>
+        <option *ngFor="let m of mascotasFiltradas()" [value]="m.idMascota">
+          {{ etiquetaMascota(m) }}
+        </option>
+      </select>
+
+      <input #buscador
+             type="text"
+             placeholder="Buscar en historial..."
+             class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 sm:w-72"
+             (input)="onBuscar(buscador.value)">
+    </div>
   </div>
 
-  <ng-container *ngIf="mascotaSeleccionadaId; else sinSeleccion">
+  <div *ngIf="errorMsg()" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-100">
+    {{ errorMsg() }}
+  </div>
 
-    <!-- CONSULTAS -->
-    <h2 class="text-xl font-semibold mb-3">Consultas</h2>
-    <div *ngIf="consultasFiltradas$ | async as consultas">
-      <div *ngIf="consultas.length === 0" class="text-sm text-slate-500 mb-6">
-        No hay consultas registradas.
+  <ng-container *ngIf="mascotaSeleccionada() as mascota; else sinSeleccion">
+    <div class="mb-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Paciente</p>
+          <div class="mt-1 flex flex-wrap items-center gap-2">
+            <h2 class="text-2xl font-semibold">{{ mascota.nombre }}</h2>
+            <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-100">
+              #{{ mascota.idMascota }}
+            </span>
+          </div>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {{ mascota.especie || 'Sin especie' }} - {{ mascota.raza || 'Sin raza' }}
+          </p>
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            Dueño: {{ mascota.cliente.nombre }} {{ mascota.cliente.apellidos }}
+            <span class="text-slate-400 dark:text-slate-500">#{{ mascota.cliente.idCliente }}</span>
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-5">
+          <div class="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900/50">
+            <p class="text-xs text-slate-500 dark:text-slate-400">Citas</p>
+            <p class="text-xl font-semibold">{{ totalPorTipo('cita') }}</p>
+          </div>
+          <div class="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900/50">
+            <p class="text-xs text-slate-500 dark:text-slate-400">Consultas</p>
+            <p class="text-xl font-semibold">{{ totalPorTipo('consulta') }}</p>
+          </div>
+          <div class="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900/50">
+            <p class="text-xs text-slate-500 dark:text-slate-400">Tratamientos</p>
+            <p class="text-xl font-semibold">{{ totalPorTipo('tratamiento') }}</p>
+          </div>
+          <div class="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900/50">
+            <p class="text-xs text-slate-500 dark:text-slate-400">Vacunas</p>
+            <p class="text-xl font-semibold">{{ totalPorTipo('vacuna') }}</p>
+          </div>
+          <div class="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900/50">
+            <p class="text-xs text-slate-500 dark:text-slate-400">Desparas.</p>
+            <p class="text-xl font-semibold">{{ totalPorTipo('desparasitacion') }}</p>
+          </div>
+        </div>
       </div>
-      <div *ngIf="consultas.length > 0" class="overflow-hidden rounded-xl border
-                  border-slate-200 dark:border-slate-700
-                  bg-white dark:bg-slate-800 shadow mb-10">
+    </div>
 
-        <table class="min-w-full text-sm text-left">
-          <thead class="bg-slate-50 dark:bg-slate-900/40 text-xs uppercase">
-            <tr>
-              <th class="px-6 py-3">ID Cita</th>
-              <th class="px-6 py-3">ID Tratamiento</th>
-              <th class="px-6 py-3">Mascota</th>
-              <th class="px-6 py-3">Fecha</th>
-              <th class="px-6 py-3">Hora</th>
-              <th class="px-6 py-3">Diagnóstico</th>
-            </tr>
-          </thead>
+    <div class="mb-5 flex flex-wrap gap-2">
+      <button type="button"
+              class="rounded-full px-3 py-1.5 text-sm ring-1 ring-inset"
+              [ngClass]="tipoActivo === 'todos' ? 'bg-slate-900 text-white ring-slate-900' : 'bg-white text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700'"
+              (click)="filtrarTipo('todos')">
+        Todos
+      </button>
+      <button type="button"
+              class="rounded-full px-3 py-1.5 text-sm ring-1 ring-inset"
+              [ngClass]="tipoActivo === 'cita' ? claseTipo('cita') : 'bg-white text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700'"
+              (click)="filtrarTipo('cita')">
+        Citas
+      </button>
+      <button type="button"
+              class="rounded-full px-3 py-1.5 text-sm ring-1 ring-inset"
+              [ngClass]="tipoActivo === 'consulta' ? claseTipo('consulta') : 'bg-white text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700'"
+              (click)="filtrarTipo('consulta')">
+        Consultas
+      </button>
+      <button type="button"
+              class="rounded-full px-3 py-1.5 text-sm ring-1 ring-inset"
+              [ngClass]="tipoActivo === 'tratamiento' ? claseTipo('tratamiento') : 'bg-white text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700'"
+              (click)="filtrarTipo('tratamiento')">
+        Tratamientos
+      </button>
+      <button type="button"
+              class="rounded-full px-3 py-1.5 text-sm ring-1 ring-inset"
+              [ngClass]="tipoActivo === 'vacuna' ? claseTipo('vacuna') : 'bg-white text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700'"
+              (click)="filtrarTipo('vacuna')">
+        Vacunas
+      </button>
+      <button type="button"
+              class="rounded-full px-3 py-1.5 text-sm ring-1 ring-inset"
+              [ngClass]="tipoActivo === 'desparasitacion' ? claseTipo('desparasitacion') : 'bg-white text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700'"
+              (click)="filtrarTipo('desparasitacion')">
+        Desparasitaciones
+      </button>
+    </div>
 
-          <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-            <tr *ngFor="let c of consultas">
-              <td class="px-6 py-4 font-medium text-slate-700">{{ c.idCita }}</td>
-              <td class="px-6 py-4">
-                <span *ngIf="(c.idsTratamientos ?? []).length > 0; else sinTrat">
-                  <span *ngFor="let id of (c.idsTratamientos ?? []); let last = last">
-                    {{ id }}<span *ngIf="!last">, </span>
+    <div *ngIf="cargando()" class="space-y-3">
+      <div class="h-10 animate-pulse rounded bg-slate-200 dark:bg-slate-700"></div>
+      <div class="h-28 animate-pulse rounded bg-slate-200 dark:bg-slate-700"></div>
+    </div>
+
+    <div *ngIf="!cargando() && eventosFiltrados().length === 0"
+         class="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center dark:border-slate-700 dark:bg-slate-800">
+      <h3 class="text-base font-semibold">No hay eventos para mostrar</h3>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Prueba con otro filtro o registra actividad clinica.</p>
+    </div>
+
+    <div *ngIf="!cargando() && eventosFiltrados().length > 0" class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div class="relative space-y-5 before:absolute before:bottom-0 before:left-4 before:top-0 before:w-px before:bg-slate-200 dark:before:bg-slate-700">
+        <article *ngFor="let evento of eventosFiltrados()" class="relative pl-11">
+          <div class="absolute left-0 top-1 flex h-8 w-8 items-center justify-center rounded-full ring-4 ring-white dark:ring-slate-800"
+               [ngClass]="claseTipo(evento.tipo)">
+            <span class="text-xs font-semibold">{{ etiquetaTipo(evento.tipo).charAt(0) }}</span>
+          </div>
+
+          <div class="rounded-lg border border-slate-100 p-4 dark:border-slate-700">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset" [ngClass]="claseTipo(evento.tipo)">
+                    {{ etiquetaTipo(evento.tipo) }}
                   </span>
-                </span>
+                  <span *ngIf="evento.estado"
+                        class="rounded-full px-2.5 py-1 text-xs font-medium"
+                        [ngClass]="claseEstado(evento.estado)">
+                    {{ evento.estado }}
+                  </span>
+                </div>
 
-                <ng-template #sinTrat>—</ng-template>
-              </td>
-              <td class="px-6 py-4">{{ c.nombreMascota }}
-              </td>
-              <td class="px-6 py-4">{{ c.fecha }}</td>
-              <td class="px-6 py-4">{{ c.hora }}</td>
-              <td class="px-6 py-4">{{ c.diagnostico }}</td>
-            </tr>
-          </tbody>
-        </table>
+                <h3 class="mt-2 text-base font-semibold">{{ evento.titulo }}</h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ evento.subtitulo }}</p>
+              </div>
+
+              <div class="text-left text-sm text-slate-500 dark:text-slate-400 sm:text-right">
+                <p>{{ formatearFecha(evento.fecha) }}</p>
+                <p *ngIf="evento.hora">{{ evento.hora }}</p>
+              </div>
+            </div>
+
+            <p *ngIf="evento.descripcion" class="mt-3 text-sm text-slate-700 dark:text-slate-200">
+              {{ evento.descripcion }}
+            </p>
+          </div>
+        </article>
       </div>
     </div>
-
-    <!-- TRATAMIENTOS -->
-    <h2 class="text-xl font-semibold mb-3">Tratamientos</h2>
-
-    <div *ngIf="tratamientosFiltrados$ | async as tratamientos">
-
-      <div *ngIf="tratamientos.length === 0" class="text-sm text-slate-500">
-        No hay tratamientos registrados.
-      </div>
-
-      <div *ngIf="tratamientos.length > 0" class="overflow-hidden rounded-xl border
-                  border-slate-200 dark:border-slate-700
-                  bg-white dark:bg-slate-800 shadow">
-
-        <table class="min-w-full text-sm text-left">
-          <thead class="bg-slate-50 dark:bg-slate-900/40 text-xs uppercase">
-            <tr>
-              <th class="px-6 py-3">ID Tratamiento</th>
-              <th class="px-6 py-3">Mascota</th>
-              <th class="px-6 py-3">Nombre</th>
-              <th class="px-6 py-3">Medicamento</th>
-              <th class="px-6 py-3">Dosis</th>
-              <th class="px-6 py-3">Duración</th>
-              <th class="px-6 py-3">Descripción</th>
-            </tr>
-          </thead>
-
-          <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-            <tr *ngFor="let t of tratamientos">
-              <td class="px-6 py-4 font-medium text-slate-700">{{ t.idTratamiento }}</td>
-              <td class="px-6 py-4">{{ t.nombreMascota }}</td>
-              <td class="px-6 py-4">{{ t.nombre }}</td>
-              <td class="px-6 py-4">{{ t.medicamento }}</td>
-              <td class="px-6 py-4">{{ t.dosis }}</td>
-              <td class="px-6 py-4">{{ t.duracion }}</td>
-              <td class="px-6 py-4">{{ t.descripcion }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
   </ng-container>
 
   <ng-template #sinSeleccion>
-    <p class="text-sm text-slate-500">
-      Selecciona una mascota para ver su historial médico.
-    </p>
+    <div class="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center dark:border-slate-700 dark:bg-slate-800">
+      <h3 class="text-base font-semibold">Selecciona una mascota</h3>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        El historial se mostrara como una linea temporal clinica completa.
+      </p>
+    </div>
   </ng-template>
-
 </section>

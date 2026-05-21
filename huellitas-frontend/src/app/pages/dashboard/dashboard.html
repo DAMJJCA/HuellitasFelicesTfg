@@ -1,158 +1,237 @@
-<section class="min-h-screen bg-slate-50 dark:bg-slate-900 px-6 py-6">
+<section class="min-h-screen bg-slate-50 px-6 py-6 text-slate-800 dark:bg-slate-900 dark:text-slate-100 md:px-10 md:py-8">
 
-  <div
-    class="relative mb-10 rounded-3xl bg-sky-200 dark:bg-sky-900/40
-           px-8 py-10 flex flex-col md:flex-row items-center gap-6">
-
-    <div class="flex-1">
-      <h1 class="text-4xl font-bold mb-2">
-        ¡Bienvenido!
-      </h1>
-      <p class="text-slate-600 dark:text-slate-300 mb-4">
-        Resumen general de la clínica veterinaria
-      </p>
-
-      <p class="text-sm text-slate-700 dark:text-slate-200">
-        {{ consultasHoy() }} consultas ·
-        {{ citasHoy() }} citas ·
-        {{ citasCanceladas() }} canceladas
-      </p>
+  <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div>
+      <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">{{ tituloRol }}</h1>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ descripcionRol }}</p>
     </div>
 
-    <div class="shrink-0 rounded-3xl overflow-hidden shadow-lg">
-      <img
-        src="assets/imgDashboard/dashboard.png"
-        alt="Huellitas Felices"
-        class="h-40 md:h-70 w-auto select-none" />
+    <div class="flex flex-wrap gap-2">
+      <button type="button"
+              class="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-emerald-700"
+              (click)="irACrearCita()">
+        {{ puedeCrearCitas ? 'Nueva cita' : 'Ver citas' }}
+      </button>
+      <button type="button"
+              class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              (click)="irAPreventivos()">
+        Vacunas
+      </button>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
-    <div class="rounded-2xl bg-yellow-100 p-5 shadow">
-      <p class="text-sm text-slate-500">Consultas hoy</p>
-      <h2 class="text-3xl font-bold text-slate-800">
-        {{ consultasHoy() }}
-      </h2>
-    </div>
-
-    <div class="rounded-2xl bg-sky-100 p-5 shadow">
-      <p class="text-sm text-slate-500">Citas hoy</p>
-      <h2 class="text-3xl font-bold text-slate-800">
-        {{ citasHoy() }}
-      </h2>
-    </div>
-
-    <div class="rounded-2xl bg-indigo-100 p-5 shadow">
-      <p class="text-sm text-slate-500">Mascotas registradas</p>
-      <h2 class="text-3xl font-bold text-slate-800">
-        {{ totalMascotas() }}
-      </h2>
-    </div>
-
-    <div class="rounded-2xl bg-emerald-100 p-5 shadow">
-      <p class="text-sm text-slate-500">Citas canceladas</p>
-      <h2 class="text-3xl font-bold text-rose-600">
-        {{ citasCanceladas() }}
-      </h2>
-    </div>
-
+  <div *ngIf="errorMsg()" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-100">
+    {{ errorMsg() }}
   </div>
 
-  <!--  CALENDARIO Y BOTONES -->
-  <div class="mt-10 grid grid-cols-1 lg:grid-cols-4 gap-6">
-    <div class="lg:col-span-3 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow">
+  <div *ngIf="successMsg()" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-100">
+    {{ successMsg() }}
+  </div>
 
-      <h2 class="text-lg font-semibold mb-4">
-        Próximas 2 semanas · {{ rangoSemanas() }}
-      </h2>
+  <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <p class="text-sm text-slate-500 dark:text-slate-400">Citas hoy</p>
+      <h2 class="mt-2 text-3xl font-semibold">{{ citasHoy().length }}</h2>
+    </div>
 
-      <!-- Días de la semana -->
-      <div class="grid grid-cols-7 text-sm text-slate-500 mb-2">
+    <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <p class="text-sm text-slate-500 dark:text-slate-400">Proximas citas</p>
+      <h2 class="mt-2 text-3xl font-semibold">{{ proximasCitas().length }}</h2>
+    </div>
+
+    <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <p class="text-sm text-slate-500 dark:text-slate-400">Consultas hoy</p>
+      <h2 class="mt-2 text-3xl font-semibold">{{ consultasHoy() }}</h2>
+    </div>
+
+    <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <p class="text-sm text-slate-500 dark:text-slate-400">Mascotas</p>
+      <h2 class="mt-2 text-3xl font-semibold">{{ totalMascotas() }}</h2>
+    </div>
+
+    <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <p class="text-sm text-slate-500 dark:text-slate-400">Preventivos proximos</p>
+      <h2 class="mt-2 text-3xl font-semibold">{{ preventivosProximos().length }}</h2>
+    </div>
+  </div>
+
+  <div class="mb-6 grid grid-cols-1 gap-3 md:grid-cols-5">
+    <div *ngFor="let item of estadosResumen()"
+         class="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <p class="text-xs text-slate-500 dark:text-slate-400">{{ item.label }}</p>
+      <p class="mt-1 text-2xl font-semibold">{{ item.total }}</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+    <div class="xl:col-span-2 rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold">Agenda de 2 semanas</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400">{{ rangoSemanas() }}</p>
+        </div>
+        <button type="button"
+                class="rounded-lg border border-slate-300 px-3 py-2 text-sm hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
+                (click)="irACitas()">
+          Ver agenda
+        </button>
+      </div>
+
+      <div class="grid grid-cols-7 text-xs font-medium text-slate-500 dark:text-slate-400">
         <span *ngFor="let d of diasSemana">{{ d }}</span>
       </div>
 
-      <!-- Días -->
-      <div class="grid grid-cols-7 gap-2">
-        <div *ngFor="let dia of calendario()"class="min-h-[110px] p-2 rounded-lg border text-sm cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700">
-          <div class="font-semibold">
-            {{ dia.numero }}
-          </div>
+      <div class="mt-2 grid grid-cols-7 gap-2">
+        <div *ngFor="let dia of calendario()"
+             class="min-h-[112px] rounded-lg border p-2 text-sm dark:border-slate-700"
+             [ngClass]="dia.esHoy ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20' : 'border-slate-200 bg-slate-50 dark:bg-slate-900/40'">
+          <div class="font-semibold">{{ dia.numero }}</div>
 
-          <div
-            *ngFor="let c of dia.citas"
-            class="mt-1 text-xs rounded px-1 truncate"
-            [ngClass]="{
-              'bg-sky-100 text-sky-800': c.estado === 'programada',
-              'bg-rose-100 text-rose-800': c.estado === 'cancelada'
-            }">
-            {{ c.hora }} – {{ c.mascota }}
+          <div *ngFor="let c of dia.citas"
+               class="mt-1 truncate rounded px-1.5 py-1 text-xs"
+               [ngClass]="claseEstado(c.estado)">
+            {{ c.hora }} - {{ c.mascota }}
           </div>
-
         </div>
       </div>
     </div>
 
-    <!-- Botones -->
-    <div class="space-y-4">
+    <div class="space-y-6">
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-semibold">Citas de hoy</h2>
+          <button type="button" class="text-sm font-medium text-teal-700 dark:text-teal-300" (click)="irACitas()">Ver</button>
+        </div>
 
-      <div
-        *ngIf="esAdmin"
-        class="rounded-2xl bg-amber-500 text-white
-               p-6 shadow cursor-pointer
-               hover:brightness-110 transition"
-        (click)="irAClientes()">
-        <h3 class="text-2xl font-semibold">Clientes</h3>
-        <p class="text-sm opacity-90 mt-1">
-          Gestionar clientes
-        </p>
+        <div *ngIf="citasHoy().length === 0" class="text-sm text-slate-500 dark:text-slate-400">
+          No hay citas para hoy.
+        </div>
+
+        <div class="space-y-3">
+          <div *ngFor="let cita of citasHoy()"
+               class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="font-medium">{{ cita.hora }} - {{ cita.mascota.nombre }}</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400">{{ cita.motivo }}</p>
+              </div>
+              <span class="rounded-full px-2 py-1 text-xs" [ngClass]="claseEstado(cita.estado)">
+                {{ etiquetaEstado(cita.estado) }}
+              </span>
+            </div>
+            <div *ngIf="esCliente && (puedeConfirmarRapido(cita) || puedeCancelarRapido(cita))" class="mt-3 flex gap-2">
+              <button *ngIf="puedeConfirmarRapido(cita)"
+                      type="button"
+                      class="flex-1 rounded-md bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700"
+                      (click)="confirmarRapido(cita)">
+                Confirmar
+              </button>
+              <button *ngIf="puedeCancelarRapido(cita)"
+                      type="button"
+                      class="flex-1 rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 hover:bg-rose-100"
+                      (click)="cancelarRapido(cita)">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div
-        *ngIf="esAdmin"
-        class="rounded-2xl bg-cyan-600 text-white
-               p-6 shadow cursor-pointer
-               hover:brightness-110 transition"
-        (click)="irAVeterinarios()">
-        <h3 class="text-2xl font-semibold">Veterinarios</h3>
-        <p class="text-sm opacity-90 mt-1">
-          Gestionar veterinarios
-        </p>
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-semibold">Proximas citas</h2>
+          <button type="button" class="text-sm font-medium text-teal-700 dark:text-teal-300" (click)="irACitas()">Ver</button>
+        </div>
+
+        <div *ngIf="proximasCitas().length === 0" class="text-sm text-slate-500 dark:text-slate-400">
+          No hay citas proximas activas.
+        </div>
+
+        <div class="space-y-3">
+          <div *ngFor="let cita of proximasCitas()"
+               class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
+            <p class="font-medium">{{ formatearFecha(cita.fecha) }} - {{ cita.hora }}</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              {{ cita.mascota.nombre }} con {{ cita.veterinario.nombre }}
+            </p>
+            <div *ngIf="esCliente && (puedeConfirmarRapido(cita) || puedeCancelarRapido(cita))" class="mt-3 flex gap-2">
+              <button *ngIf="puedeConfirmarRapido(cita)"
+                      type="button"
+                      class="flex-1 rounded-md bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700"
+                      (click)="confirmarRapido(cita)">
+                Confirmar
+              </button>
+              <button *ngIf="puedeCancelarRapido(cita)"
+                      type="button"
+                      class="flex-1 rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 hover:bg-rose-100"
+                      (click)="cancelarRapido(cita)">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div
-        class="rounded-2xl bg-sky-500 text-white
-               p-6 shadow cursor-pointer
-               hover:brightness-110 transition"
-        (click)="irACrearCita()">
-        <h3 class="text-2xl font-semibold">{{ puedeCrearCitas ? 'Cita' : 'Citas' }}</h3>
-        <p class="text-sm opacity-90 mt-1">
-          {{ puedeCrearCitas ? 'Agendar una nueva cita' : 'Ver citas asignadas' }}
-        </p>
-      </div>
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-semibold">Preventivos proximos</h2>
+          <button type="button" class="text-sm font-medium text-teal-700 dark:text-teal-300" (click)="irAPreventivos()">Ver</button>
+        </div>
 
-      <div
-        class="rounded-2xl bg-emerald-500 text-white
-               p-6 shadow cursor-pointer
-               hover:brightness-110 transition"
-        (click)="irAHistorial()">
-        <h3 class="text-2xl font-semibold"> Historial</h3>
-        <p class="text-sm opacity-90 mt-1">
-          Consultar historial clínico
-        </p>
-      </div>
+        <div *ngIf="preventivosProximos().length === 0" class="text-sm text-slate-500 dark:text-slate-400">
+          No hay proximas dosis en los proximos 30 dias.
+        </div>
 
-      <div
-        class="rounded-2xl bg-violet-500 text-white
-               p-6 shadow cursor-pointer
-               hover:brightness-110 transition"
-        (click)="irATratamientos()">
-        <h3 class="text-2xl font-semibold">Tratamientos</h3>
-        <p class="text-sm opacity-90 mt-1">
-          Ver tratamientos disponibles
-        </p>
+        <div class="space-y-3">
+          <div *ngFor="let item of preventivosProximos()"
+               class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
+            <p class="font-medium">{{ item.nombre }}</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              {{ item.nombreMascota }} - {{ formatearFecha(item.proximaDosis) }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
+  <div class="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+    <button *ngIf="esAdmin"
+            type="button"
+            class="rounded-lg bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 hover:ring-teal-500 dark:bg-slate-800 dark:ring-slate-700"
+            (click)="irAClientes()">
+      <span class="block font-semibold">Clientes</span>
+      <span class="text-sm text-slate-500 dark:text-slate-400">Gestionar clientes</span>
+    </button>
+
+    <button *ngIf="esAdmin"
+            type="button"
+            class="rounded-lg bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 hover:ring-teal-500 dark:bg-slate-800 dark:ring-slate-700"
+            (click)="irAVeterinarios()">
+      <span class="block font-semibold">Veterinarios</span>
+      <span class="text-sm text-slate-500 dark:text-slate-400">Gestionar equipo</span>
+    </button>
+
+    <button type="button"
+            class="rounded-lg bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 hover:ring-teal-500 dark:bg-slate-800 dark:ring-slate-700"
+            (click)="irACitas()">
+      <span class="block font-semibold">Citas</span>
+      <span class="text-sm text-slate-500 dark:text-slate-400">Abrir agenda</span>
+    </button>
+
+    <button type="button"
+            class="rounded-lg bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 hover:ring-teal-500 dark:bg-slate-800 dark:ring-slate-700"
+            (click)="irAHistorial()">
+      <span class="block font-semibold">Historial</span>
+      <span class="text-sm text-slate-500 dark:text-slate-400">Consultar historial</span>
+    </button>
+
+    <button *ngIf="esStaff"
+            type="button"
+            class="rounded-lg bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 hover:ring-teal-500 dark:bg-slate-800 dark:ring-slate-700"
+            (click)="irATratamientos()">
+      <span class="block font-semibold">Tratamientos</span>
+      <span class="text-sm text-slate-500 dark:text-slate-400">Ver tratamientos</span>
+    </button>
+  </div>
 </section>

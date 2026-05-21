@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CitaService } from '../../../service/cita';
+import { CitaService, EstadoCita } from '../../../service/cita';
 import { MascotaService, Mascotas } from '../../../service/mascota';
 import { VeterinarioService } from '../../../service/veterinario';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,6 +25,13 @@ export class McitaComponent {
 
   mascotas: Mascotas[] = [];
   veterinarios: any[] = [];
+  estados = [
+    { value: 'programada', label: 'Programada' },
+    { value: 'confirmada', label: 'Confirmada' },
+    { value: 'en_consulta', label: 'En consulta' },
+    { value: 'realizada', label: 'Realizada' },
+    { value: 'cancelada', label: 'Cancelada' }
+  ];
 
   form = this.fb.nonNullable.group({
     fecha: ['', Validators.required],
@@ -38,6 +45,7 @@ export class McitaComponent {
   cargando = false;
   errorMsg = '';
   successMsg = '';
+  minFecha = this.fechaHoy();
 
   readonly id$ = this.route.paramMap.pipe(
     map(p => Number(p.get('id'))),
@@ -79,11 +87,17 @@ export class McitaComponent {
       return;
     }
 
+    const errorFecha = this.validarFechaHora();
+    if (errorFecha) {
+      this.errorMsg = errorFecha;
+      return;
+    }
+
     const dto = {
       fecha: this.form.value.fecha!,
       hora: this.form.value.hora!,
       motivo: this.form.value.motivo!,
-      estado: this.form.value.estado!,
+      estado: this.form.value.estado! as EstadoCita,
       mascota: { idMascota: Number(this.form.value.idMascota) },
       veterinario: { idVeterinario: Number(this.form.value.idVeterinario) }
     };
@@ -99,7 +113,7 @@ export class McitaComponent {
           setTimeout(() => this.router.navigate(['/citas']), 500);
         },
         error: (err) => {
-          this.errorMsg = err?.error?.message ?? 'No se pudo actualizar la cita.';
+          this.errorMsg = this.extraerMensajeError(err, 'No se pudo actualizar la cita.');
           this.cargando = false;
         }
       });
@@ -107,5 +121,30 @@ export class McitaComponent {
 
   cancelar() {
     this.router.navigate(['/citas']);
+  }
+
+  private extraerMensajeError(err: any, fallback: string): string {
+    return err?.error?.detail || err?.error?.message || err?.error?.error || fallback;
+  }
+
+  private validarFechaHora(): string {
+    const fecha = this.form.value.fecha;
+    const hora = this.form.value.hora;
+    const estado = this.form.value.estado;
+    if (!fecha || !hora) return 'Indica fecha y hora de la cita.';
+
+    if (estado === 'programada' || estado === 'confirmada' || estado === 'en_consulta') {
+      const fechaHora = new Date(`${fecha}T${hora}`);
+      if (fechaHora < new Date()) {
+        return 'No se puede guardar una cita activa en una fecha u hora pasada.';
+      }
+    }
+
+    return '';
+  }
+
+  private fechaHoy(): string {
+    const hoy = new Date();
+    return `${hoy.getFullYear()}-${(hoy.getMonth() + 1).toString().padStart(2, '0')}-${hoy.getDate().toString().padStart(2, '0')}`;
   }
 }

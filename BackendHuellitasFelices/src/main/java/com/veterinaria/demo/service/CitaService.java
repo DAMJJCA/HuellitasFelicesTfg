@@ -9,6 +9,7 @@ public interface CitaService {
     List<Cita> findAll();
     Cita findById(Long id);
     Cita save(Cita cita);
+    Cita updateEstado(Long id, String estado);
     void deleteById(Long id);
 
 }

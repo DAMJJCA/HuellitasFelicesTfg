@@ -27,7 +27,7 @@
       <!-- FECHA -->
       <div>
         <label class="block text-sm mb-1">Fecha de la cita *</label>
-        <input type="date" formControlName="fecha"
+        <input type="date" formControlName="fecha" [min]="minFecha"
                class="w-full rounded-lg border border-slate-300 dark:border-slate-700
                       bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
       </div>
@@ -54,9 +54,9 @@
         <select formControlName="estado"
                 class="w-full rounded-lg border border-slate-300 dark:border-slate-700
                        bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
-          <option value="programada">Programada</option>
-          <option value="cancelada">Cancelada</option>
-          <option value="realizada">Realizada</option>
+          <option *ngFor="let estado of estados" [value]="estado.value">
+            {{ estado.label }}
+          </option>
         </select>
       </div>
 
@@ -70,7 +70,7 @@
           <option value="" disabled>Seleccione...</option>
 
           <option *ngFor="let m of mascotas" [value]="m.idMascota">
-            {{ m.nombre }} ({{ m.especie }})
+            {{ m.nombre }} - {{ m.cliente.nombre }} {{ m.cliente.apellidos }} - {{ m.especie }} - #{{ m.idMascota }}
           </option>
 
         </select>
@@ -86,7 +86,7 @@
           <option value="" disabled>Seleccione...</option>
 
           <option *ngFor="let v of veterinarios" [value]="v.idVeterinario">
-            {{ v.nombre }} — {{ v.especialidad }}
+            {{ v.nombre }} - {{ v.especialidad }} - #{{ v.idVeterinario }}
           </option>
 
         </select>

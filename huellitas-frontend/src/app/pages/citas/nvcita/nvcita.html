@@ -24,7 +24,7 @@
                        bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
           <option value="" disabled selected>Seleccione una mascota...</option>
           <option *ngFor="let m of mascotas()" [value]="m.idMascota">
-            {{ m.nombre }} - Especie: {{ m.especie }}
+            {{ m.nombre }} - {{ m.cliente.nombre }} {{ m.cliente.apellidos }} - {{ m.especie }} - #{{ m.idMascota }}
           </option>
         </select>
       </div>
@@ -37,7 +37,7 @@
                        bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
           <option value="" disabled selected>Seleccione un veterinario...</option>
           <option *ngFor="let v of veterinarios()" [value]="v.idVeterinario">
-            {{ v.nombre }} — {{ v.especialidad }}
+            {{ v.nombre }} - {{ v.especialidad }} - #{{ v.idVeterinario }}
           </option>
         </select>
       </div>
@@ -46,7 +46,7 @@
         <div class="grow">
           <label class="block text-sm mb-1">Fecha de la cita <span class="text-rose-600">*</span></label>
 
-          <input type="date" name="fecha" required [(ngModel)]="cita.fecha" class="w-full rounded-lg border border-slate-300 dark:border-slate-700
+          <input type="date" name="fecha" required [min]="minFecha" [(ngModel)]="cita.fecha" class="w-full rounded-lg border border-slate-300 dark:border-slate-700
                       bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500
                       focus:outline-none shadow-sm">
         </div>
@@ -64,6 +64,16 @@
         <label class="block text-sm mb-1">Motivo <span class="text-rose-600">*</span></label>
         <input type="text" name="motivo" required minlength="3" [(ngModel)]="cita.motivo" class="w-full rounded-lg border border-slate-300 dark:border-slate-700
                       bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">Estado inicial</label>
+        <select name="estado" required [(ngModel)]="cita.estado" class="w-full rounded-lg border border-slate-300 dark:border-slate-700
+                       bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
+          <option *ngFor="let estado of estados" [value]="estado.value">
+            {{ estado.label }}
+          </option>
+        </select>
       </div>
 
       <div class="flex justify-end gap-2 pt-4">

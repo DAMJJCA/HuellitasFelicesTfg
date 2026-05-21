@@ -1,11 +1,13 @@
 package com.veterinaria.demo.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.veterinaria.demo.model.Cita;
+import com.veterinaria.demo.dto.ReminderResponse;
 import com.veterinaria.demo.service.CitaService;
+import com.veterinaria.demo.service.CitaReminderService;
 
 @RestController
 @RequestMapping("/api/citas")
@@ -22,9 +26,11 @@ import com.veterinaria.demo.service.CitaService;
 public class CitaController {
 
     private final CitaService service;
+    private final CitaReminderService reminderService;
 
-    public CitaController(CitaService service) {
+    public CitaController(CitaService service, CitaReminderService reminderService) {
         this.service = service;
+        this.reminderService = reminderService;
     }
 
     @GetMapping
@@ -48,6 +54,18 @@ public class CitaController {
     public Cita editar(@PathVariable Long id, @RequestBody Cita cita) {
         cita.setIdCita(id);
         return service.save(cita);
+    }
+
+    @PatchMapping("/{id}/estado")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE', 'VETERINARIO')")
+    public Cita cambiarEstado(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        return service.updateEstado(id, body.get("estado"));
+    }
+
+    @PostMapping("/recordatorios/proximas")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ReminderResponse enviarRecordatoriosProximas() {
+        return reminderService.enviarRecordatoriosProximasCitas();
     }
 
     @DeleteMapping("/{id}")

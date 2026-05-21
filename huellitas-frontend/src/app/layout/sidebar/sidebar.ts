@@ -21,6 +21,8 @@ export class SidebarComponent {
         { label: 'Dashboard', route: '/dashboard' },
         { label: 'Mascotas', route: '/mascotas' },
         { label: 'Citas', route: '/citas' },
+        { label: 'Vacunas', route: '/preventivos' },
+        { label: 'Documentos', route: '/documentos-medicos' },
         { label: 'Historial medico', route: '/historial' }
       ];
     }
@@ -32,6 +34,8 @@ export class SidebarComponent {
         { label: 'Citas', route: '/citas' },
         { label: 'Consultas', route: '/consultas' },
         { label: 'Tratamientos', route: '/tratamientos' },
+        { label: 'Vacunas', route: '/preventivos' },
+        { label: 'Documentos', route: '/documentos-medicos' },
         { label: 'Historial medico', route: '/historial' }
       ];
     }
@@ -41,9 +45,12 @@ export class SidebarComponent {
       { label: 'Clientes', route: '/clientes' },
       { label: 'Mascotas', route: '/mascotas' },
       { label: 'Veterinarios', route: '/admin/veterinarios' },
+      { label: 'Disponibilidad', route: '/admin/disponibilidad-veterinarios' },
       { label: 'Citas', route: '/citas' },
       { label: 'Consultas', route: '/consultas' },
       { label: 'Tratamientos', route: '/tratamientos' },
+      { label: 'Vacunas', route: '/preventivos' },
+      { label: 'Documentos', route: '/documentos-medicos' },
       { label: 'Historial medico', route: '/historial' }
     ];
 

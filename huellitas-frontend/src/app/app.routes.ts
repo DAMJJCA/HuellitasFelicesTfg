@@ -68,6 +68,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/mascotas/mmascota/mmascota').then(m => m.MmascotaComponent)
       },
+      {
+        path: 'mascotas/:id',
+        loadComponent: () =>
+          import('./pages/mascotas/detalle-mascota/detalle-mascota').then(m => m.DetalleMascotaComponent)
+      },
 
       // modulo admin - veterinarios
       {
@@ -87,6 +92,12 @@ export const routes: Routes = [
         canActivate: [adminGuard],
         loadComponent: () =>
           import('./pages/veterinarios/mveterinario/mveterinario').then(m => m.MveterinarioComponent)
+      },
+      {
+        path: 'admin/disponibilidad-veterinarios',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/disponibilidad-veterinarios/disponibilidad-veterinarios').then(m => m.DisponibilidadVeterinariosComponent)
       },
 
       // citas
@@ -128,6 +139,20 @@ export const routes: Routes = [
         canActivate: [staffGuard],
         loadComponent: () =>
           import('./pages/tratamientos/tratamientos').then(m => m.TratamientosComponent)
+      },
+
+      // vacunas y desparasitaciones
+      {
+        path: 'preventivos',
+        loadComponent: () =>
+          import('./pages/preventivos/preventivos').then(m => m.PreventivosComponent)
+      },
+
+      // documentos medicos
+      {
+        path: 'documentos-medicos',
+        loadComponent: () =>
+          import('./pages/documentos-medicos/documentos-medicos').then(m => m.DocumentosMedicosComponent)
       },
 
       // historial
