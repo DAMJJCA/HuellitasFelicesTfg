@@ -1,4 +1,4 @@
-<div class="min-h-screen flex bg-gray-200">
+<div class="min-h-screen flex bg-gray-200 dark:bg-slate-950">
 
 
   <app-sidebar
@@ -8,6 +8,10 @@
 
 
   <main class="ml-[clamp(14rem,18vw,16rem)] flex-1 p-6">
+    <div class="sticky top-0 z-30 mb-5 rounded-lg border border-slate-200 bg-white/90 p-3 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-900/90">
+      <app-global-search></app-global-search>
+    </div>
+
     <router-outlet></router-outlet>
   </main>
 </div>

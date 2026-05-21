@@ -2,11 +2,20 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 
+export type EstadoCita = 'programada' | 'confirmada' | 'en_consulta' | 'realizada' | 'cancelada';
+
+export interface ReminderResponse {
+  encontradas: number;
+  enviadas: number;
+  omitidas: number;
+  mensaje: string;
+}
+
 export interface Cita {
   idCita?: number;
   fecha: string;
   hora: string;
-  estado: string;
+  estado: EstadoCita | string;
   motivo: string;
 
   mascota: {
@@ -38,6 +47,12 @@ export class CitaService {
   }
   actualizarCita(id: number, body: Partial<CrearCitaDto>): Observable<Cita> {
     return this.http.put<Cita>(`${this.api}/${id}`, body);
+  }
+  actualizarEstado(id: number, estado: EstadoCita): Observable<Cita> {
+    return this.http.patch<Cita>(`${this.api}/${id}/estado`, { estado });
+  }
+  enviarRecordatoriosProximas(): Observable<ReminderResponse> {
+    return this.http.post<ReminderResponse>(`${this.api}/recordatorios/proximas`, {});
   }
   getCita(id: number): Observable<Cita> {
     return this.http.get<Cita>(`${this.api}/${id}`);

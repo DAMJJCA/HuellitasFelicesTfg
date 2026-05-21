@@ -68,6 +68,9 @@ export class MascotasComponent {
   recargar() { this.refrescar$.next(); }
 
   crear() { this.router.navigate(['/mascotas/nueva']); }
+  verFicha(m: Mascotas) {
+    this.router.navigate(['/mascotas', m.idMascota]);
+  }
 editar(m: Mascotas) {
   this.router.navigate(['/mascotas', m.idMascota, 'editar']);
 }

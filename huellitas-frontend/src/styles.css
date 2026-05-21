@@ -1,3 +1,48 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #0f172a;
+    color: #f8fafc;
+  }
+
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  select,
+  textarea {
+    border-color: #334155;
+    background-color: #0f172a;
+    color: #f8fafc;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #94a3b8;
+  }
+
+  input[readonly],
+  textarea[readonly] {
+    background-color: #1e293b;
+    color: #cbd5e1;
+  }
+}
+
+.dark input:not([type='checkbox']):not([type='radio']):not([type='range']),
+.dark select,
+.dark textarea {
+  border-color: #334155;
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #94a3b8;
+}
+
+.dark input[readonly],
+.dark textarea[readonly] {
+  background-color: #1e293b;
+  color: #cbd5e1;
+}

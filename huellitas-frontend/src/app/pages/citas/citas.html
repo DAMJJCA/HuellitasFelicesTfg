@@ -1,48 +1,72 @@
 <section class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 px-6 py-6 md:px-10 md:py-8">
 
-  <!-- Header -->
-  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+  <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between mb-6">
     <div>
-      <h1 class="text-4xl font-semibold tracking-tight">Listado de Citas</h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400">Gestión de las citas programadas en la clínica.</p>
+      <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Agenda de citas</h1>
+      <p class="text-sm text-slate-500 dark:text-slate-400">Seguimiento diario de citas, estados y proximas consultas.</p>
     </div>
 
-    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
+      <div class="inline-flex rounded-lg border border-slate-300 bg-white p-1 dark:border-slate-700 dark:bg-slate-800">
+        <button type="button"
+                class="rounded-md px-3 py-2 text-sm transition"
+                [ngClass]="vista === 'agenda' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'text-slate-700 dark:text-slate-200'"
+                (click)="cambiarVista('agenda')">
+          Agenda
+        </button>
+        <button type="button"
+                class="rounded-md px-3 py-2 text-sm transition"
+                [ngClass]="vista === 'calendario' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'text-slate-700 dark:text-slate-200'"
+                (click)="cambiarVista('calendario')">
+          Calendario
+        </button>
+        <button type="button"
+                class="rounded-md px-3 py-2 text-sm transition"
+                [ngClass]="vista === 'tabla' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'text-slate-700 dark:text-slate-200'"
+                (click)="cambiarVista('tabla')">
+          Tabla
+        </button>
+      </div>
 
-      <!-- Buscador -->
       <div class="relative">
-        <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"
+        <svg class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
              fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
 
-        <input type="text"
-               (input)="onBuscar($event.target.value)"
-               placeholder="Buscar por motivo, estado, mascota, veterinario..."
-               class="w-full sm:w-80 rounded-lg border border-slate-300 dark:border-slate-700
-                      bg-white dark:bg-slate-800 pl-10 pr-3 py-2.5 text-sm placeholder-slate-400
-                      focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <input #buscador
+               type="text"
+               (input)="onBuscar(buscador.value)"
+               placeholder="Buscar por motivo, estado, mascota..."
+               class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 sm:w-80">
       </div>
 
-      <!-- Botones -->
       <div class="flex gap-2">
+        <button *ngIf="puedeEnviarRecordatorios"
+                type="button"
+                class="inline-flex items-center gap-2 rounded-lg border border-teal-300 bg-teal-50 px-4 py-2.5 text-sm font-medium text-teal-800 transition hover:bg-teal-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-100 dark:hover:bg-teal-900/50"
+                [disabled]="enviandoRecordatorios"
+                (click)="enviarRecordatorios()">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          {{ enviandoRecordatorios ? 'Enviando...' : 'Recordatorios' }}
+        </button>
 
         <button *ngIf="puedeGestionarCitas"
                 type="button"
-                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700
-                       text-white px-4 py-2.5 text-sm font-medium shadow-sm transition"
+                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700"
                 (click)="crear()">
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          Crear Cita
+          Crear cita
         </button>
 
         <button type="button"
-                class="inline-flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-700
-                       bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700
-                       text-slate-700 dark:text-slate-200 px-4 py-2.5 text-sm font-medium transition"
+                class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                 (click)="recargar()">
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -50,169 +74,305 @@
           </svg>
           Recargar
         </button>
-
       </div>
     </div>
   </div>
 
-  <!-- Contenido principal -->
-  <ng-container *ngIf="citasFiltrados$ | async as citas; else cargando">
+  <div *ngIf="errorMsg" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-100">
+    {{ errorMsg }}
+  </div>
 
-    <!-- Contador -->
-    <div class="mb-4 text-sm">
-      <span class="inline-flex items-center gap-2 rounded-full bg-indigo-50 dark:bg-indigo-900/30
-                   text-indigo-700 dark:text-indigo-300 px-3 py-1.5">
-        <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
-        {{ citas.length }} registro{{ citas.length === 1 ? '' : 's' }}
-      </span>
+  <div *ngIf="successMsg" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-100">
+    {{ successMsg }}
+  </div>
+
+  <ng-container *ngIf="resumen$ | async as resumen">
+    <div class="mb-5 grid grid-cols-2 gap-3 md:grid-cols-5">
+      <button *ngFor="let estado of estados"
+              type="button"
+              class="rounded-lg border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition hover:border-teal-500 dark:border-slate-700 dark:bg-slate-800"
+              [class.ring-2]="estadoActivo === estado.value"
+              [class.ring-teal-500]="estadoActivo === estado.value"
+              (click)="filtrarEstado(estado.value)">
+        <span class="block text-xs text-slate-500 dark:text-slate-400">{{ estado.label }}</span>
+        <span class="mt-1 block text-2xl font-semibold">{{ resumen[estado.value] }}</span>
+      </button>
+    </div>
+  </ng-container>
+
+  <div class="mb-5 flex flex-wrap gap-2">
+    <button type="button"
+            class="rounded-full px-3 py-1.5 text-sm ring-1 ring-inset transition"
+            [ngClass]="estadoActivo === 'todas' ? 'bg-slate-900 text-white ring-slate-900' : 'bg-white text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700'"
+            (click)="filtrarEstado('todas')">
+      Todas
+    </button>
+    <button *ngFor="let estado of estados"
+            type="button"
+            class="rounded-full px-3 py-1.5 text-sm ring-1 ring-inset transition"
+            [ngClass]="estadoActivo === estado.value ? clasesEstado(estado.value) : 'bg-white text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700'"
+            (click)="filtrarEstado(estado.value)">
+      {{ estado.label }}
+    </button>
+  </div>
+
+  <ng-container *ngIf="citasFiltrados$ | async as citas; else cargando">
+    <div class="mb-4 text-sm text-slate-500 dark:text-slate-400">
+      {{ citas.length }} cita{{ citas.length === 1 ? '' : 's' }} visible{{ citas.length === 1 ? '' : 's' }}
     </div>
 
-    <!-- Estado vacío -->
-    <ng-container *ngIf="citas.length === 0; else listado">
-      <div class="rounded-xl border border-dashed border-slate-300 dark:border-slate-700
-                  bg-white dark:bg-slate-800 p-10 text-center">
-
-        <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3 7h18M3 12h18M3 17h18" />
-        </svg>
-
-        <h3 class="mt-3 text-base font-semibold">No hay citas registradas</h3>
-        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">No hay citas para mostrar.</p>
-
+    <ng-container *ngIf="citas.length === 0; else contenido">
+      <div class="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center dark:border-slate-700 dark:bg-slate-800">
+        <h3 class="text-base font-semibold">No hay citas para mostrar</h3>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Prueba con otro filtro o crea una nueva cita.</p>
         <button *ngIf="puedeGestionarCitas"
-                class="mt-5 inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700
-                       text-white px-4 py-2.5 text-sm font-medium"
+                class="mt-5 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
                 (click)="crear()">
           Crear cita
         </button>
-
       </div>
     </ng-container>
 
-    <!-- LISTADO -->
-    <ng-template #listado>
-
-      <!-- TABLA -->
-      <div class="hidden md:block overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700
-                  bg-white dark:bg-slate-800 shadow">
-        <div class="overflow-x-auto">
-          <table class="min-w-full text-left text-sm">
-
-            <thead class="bg-slate-50 dark:bg-slate-900/40 text-slate-600 dark:text-slate-300 text-xs uppercase tracking-wide">
-              <tr>
-                <th class="px-6 py-3">ID</th>
-                <th class="px-6 py-3">Fecha</th>
-                <th class="px-6 py-3">Hora</th>
-                <th class="px-6 py-3">Motivo</th>
-                <th class="px-6 py-3">Estado</th>
-                <th class="px-6 py-3">Mascota</th>
-                <th class="px-6 py-3">Veterinario</th>
-                <th class="px-6 py-3 text-center">Acciones</th>
-              </tr>
-            </thead>
-
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-
-              <tr *ngFor="let c of citas" class="hover:bg-slate-50/60 dark:hover:bg-slate-700/30 transition">
-
-                <td class="px-6 py-4 font-mono text-xs text-slate-500">#{{ c.idCita }}</td>
-                <td class="px-6 py-4">{{ formatearFecha(c.fecha) }}</td>
-                <td class="px-6 py-4">{{ c.hora }}</td>
-                <td class="px-6 py-4">{{ c.motivo }}</td>
-                <td class="px-6 py-4 capitalize">{{ c.estado }}</td>
-                <td class="px-6 py-4">{{ c.mascota.nombre }}</td>
-                <td class="px-6 py-4">{{ c.veterinario.nombre }}</td>
-
-                <td class="px-6 py-4">
-                  <div class="flex items-center justify-end gap-2">
-                    <button *ngIf="puedeGestionarCitas"
-                            type="button"
-                            class="inline-flex items-center gap-1.5 rounded-md border bg-gray-200 border-slate-300 text-xs hover:bg-slate-50"
-                            (click)="editar(c)">
-                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4h2m2 0h2m-8 0H7m1 12l9-9a2.121 2.121 0 013 3l-9 9H8v-3z"/></svg>
-                      Editar
-                    </button>
-                    <button *ngIf="puedeGestionarCitas"
-                            type="button"
-                            class="inline-flex items-center rounded-md bg-rose-600 hover:bg-rose-700 text-xs "
-                            (click)="abrirEliminar(c)">
-                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
-
-              </tr>
-            </tbody>
-
-          </table>
-        </div>
-      </div>
-
-      <!-- MOBILE CARDS -->
-      <div class="md:hidden grid grid-cols-1 gap-3">
-
+    <ng-template #contenido>
+      <div *ngIf="vista === 'agenda'" class="grid grid-cols-1 gap-3 lg:grid-cols-2 2xl:grid-cols-3">
         <article *ngFor="let c of citas"
-                 class="rounded-xl border border-slate-200 dark:border-slate-700
-                        bg-white dark:bg-slate-800 p-4 shadow-sm">
-
-          <div class="flex items-start justify-between">
-            <h3 class="text-base font-semibold">
-              {{ c.mascota.nombre }} — {{ c.motivo }}
-            </h3>
-            <span class="ml-3 text-xs font-mono text-slate-500">#{{ c.idCita }}</span>
+                 class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ formatearFecha(c.fecha) }} - {{ c.hora }}</p>
+              <h2 class="mt-1 text-lg font-semibold">{{ c.mascota.nombre }}</h2>
+            </div>
+            <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset" [ngClass]="clasesEstado(c.estado)">
+              {{ etiquetaEstado(c.estado) }}
+            </span>
           </div>
 
-          <div class="mt-2 text-sm text-slate-600 dark:text-slate-300 space-y-1">
+          <p class="mt-3 text-sm text-slate-700 dark:text-slate-200">{{ c.motivo }}</p>
+          <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Veterinario: {{ c.veterinario.nombre }}</p>
 
-            <p><span class="font-medium">Fecha:</span> {{ formatearFecha(c.fecha) }}</p>
-            <p><span class="font-medium">Hora:</span> {{ c.hora }}</p>
-            <p><span class="font-medium">Estado:</span> {{ c.estado }}</p>
-
-            <p><span class="font-medium">Veterinario:</span> {{ c.veterinario.nombre }}</p>
-
+          <div *ngIf="esCliente && (puedeConfirmarRapido(c) || puedeCancelarRapido(c))"
+               class="mt-4 flex flex-wrap gap-2">
+            <button *ngIf="puedeConfirmarRapido(c)"
+                    type="button"
+                    class="rounded-md bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700"
+                    (click)="confirmarRapido(c)">
+              Confirmar
+            </button>
+            <button *ngIf="puedeCancelarRapido(c)"
+                    type="button"
+                    class="rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 hover:bg-rose-100"
+                    (click)="cancelarRapido(c)">
+              Cancelar cita
+            </button>
           </div>
 
-          <div *ngIf="puedeGestionarCitas" class="mt-3 flex gap-2">
-            <button class="flex-1 rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-xs hover:bg-slate-50 dark:hover:bg-slate-700"
+          <div *ngIf="!esCliente" class="mt-4 flex flex-wrap gap-2">
+            <button *ngFor="let estado of estados"
+                    type="button"
+                    class="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-700"
+                    [disabled]="!puedeCambiarEstado(c, estado.value)"
+                    (click)="actualizarEstado(c, estado.value)">
+              {{ estado.label }}
+            </button>
+          </div>
+
+          <div *ngIf="puedeGestionarCitas" class="mt-4 flex justify-end gap-2 border-t border-slate-100 pt-3 dark:border-slate-700">
+            <button type="button"
+                    class="rounded-md border border-slate-300 px-3 py-2 text-xs hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
                     (click)="editar(c)">
               Editar
             </button>
-            <button class="flex-1 rounded-md bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 text-xs"
+            <button type="button"
+                    class="rounded-md bg-rose-600 px-3 py-2 text-xs text-white hover:bg-rose-700"
                     (click)="abrirEliminar(c)">
               Eliminar
             </button>
           </div>
         </article>
       </div>
+
+      <div *ngIf="vista === 'calendario'" class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 class="text-xl font-semibold capitalize">{{ tituloCalendario }}</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Vista mensual con las citas filtradas actualmente.</p>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button type="button"
+                    class="rounded-md border border-slate-300 px-3 py-2 text-sm hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
+                    (click)="cambiarMes(-1)">
+              Anterior
+            </button>
+            <button type="button"
+                    class="rounded-md border border-slate-300 px-3 py-2 text-sm hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
+                    (click)="irHoy()">
+              Hoy
+            </button>
+            <button type="button"
+                    class="rounded-md border border-slate-300 px-3 py-2 text-sm hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
+                    (click)="cambiarMes(1)">
+              Siguiente
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-7 border-b border-slate-200 pb-2 text-center text-xs font-semibold uppercase text-slate-500 dark:border-slate-700 dark:text-slate-400">
+          <div *ngFor="let dia of diasSemana">{{ dia }}</div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 pt-3 md:grid-cols-7 md:gap-0">
+          <section *ngFor="let dia of diasCalendario(citas)"
+                   class="min-h-[132px] border border-slate-200 bg-slate-50 p-2 md:-ml-px md:-mt-px dark:border-slate-700 dark:bg-slate-900/40"
+                   [ngClass]="{
+                     'opacity-55': !dia.esMesActual,
+                     'ring-2 ring-teal-500 ring-inset': dia.esHoy
+                   }">
+            <div class="mb-2 flex items-center justify-between">
+              <span class="grid h-7 w-7 place-items-center rounded-full text-sm font-semibold"
+                    [ngClass]="dia.esHoy ? 'bg-teal-600 text-white' : 'text-slate-700 dark:text-slate-200'">
+                {{ dia.numero }}
+              </span>
+              <span *ngIf="dia.citas.length > 0"
+                    class="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">
+                {{ dia.citas.length }}
+              </span>
+            </div>
+
+            <div class="space-y-1.5">
+              <button *ngFor="let c of dia.citas.slice(0, 4)"
+                      type="button"
+                      class="block w-full rounded-md px-2 py-1.5 text-left text-xs ring-1 ring-inset transition hover:scale-[1.01]"
+                      [ngClass]="clasesEstado(c.estado)"
+                      (click)="puedeGestionarCitas ? editar(c) : null">
+                <span class="block font-semibold">{{ c.hora }} · {{ c.mascota.nombre }}</span>
+                <span class="block truncate opacity-90">{{ c.veterinario.nombre }} · {{ c.motivo }}</span>
+              </button>
+
+              <div *ngIf="dia.citas.length > 4"
+                   class="rounded-md bg-white px-2 py-1 text-xs text-slate-500 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:ring-slate-700">
+                +{{ dia.citas.length - 4 }} más
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <ng-container *ngIf="vista === 'tabla'">
+        <div class="hidden overflow-hidden rounded-lg border border-slate-200 bg-white shadow md:block dark:border-slate-700 dark:bg-slate-800">
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm">
+              <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-600 dark:bg-slate-900/40 dark:text-slate-300">
+                <tr>
+                  <th class="px-6 py-3">ID</th>
+                  <th class="px-6 py-3">Fecha</th>
+                  <th class="px-6 py-3">Hora</th>
+                  <th class="px-6 py-3">Motivo</th>
+                  <th class="px-6 py-3">Estado</th>
+                  <th class="px-6 py-3">Mascota</th>
+                  <th class="px-6 py-3">Veterinario</th>
+                  <th class="px-6 py-3 text-right">Acciones</th>
+                </tr>
+              </thead>
+
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                <tr *ngFor="let c of citas" class="transition hover:bg-slate-50/60 dark:hover:bg-slate-700/30">
+                  <td class="px-6 py-4 font-mono text-xs text-slate-500">#{{ c.idCita }}</td>
+                  <td class="px-6 py-4">{{ formatearFecha(c.fecha) }}</td>
+                  <td class="px-6 py-4">{{ c.hora }}</td>
+                  <td class="px-6 py-4">{{ c.motivo }}</td>
+                  <td class="px-6 py-4">
+                    <span class="rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset" [ngClass]="clasesEstado(c.estado)">
+                      {{ etiquetaEstado(c.estado) }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4">{{ c.mascota.nombre }}</td>
+                  <td class="px-6 py-4">{{ c.veterinario.nombre }}</td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center justify-end gap-2">
+                      <button *ngIf="puedeConfirmarRapido(c)"
+                              type="button"
+                              class="rounded-md bg-emerald-600 px-3 py-2 text-xs text-white hover:bg-emerald-700"
+                              (click)="confirmarRapido(c)">
+                        Confirmar
+                      </button>
+                      <button *ngIf="puedeCancelarRapido(c)"
+                              type="button"
+                              class="rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-700 hover:bg-rose-100"
+                              (click)="cancelarRapido(c)">
+                        Cancelar
+                      </button>
+                      <button *ngIf="puedeGestionarCitas"
+                              type="button"
+                              class="rounded-md border border-slate-300 px-3 py-2 text-xs hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
+                              (click)="editar(c)">
+                        Editar
+                      </button>
+                      <button *ngIf="puedeGestionarCitas"
+                              type="button"
+                              class="rounded-md bg-rose-600 px-3 py-2 text-xs text-white hover:bg-rose-700"
+                              (click)="abrirEliminar(c)">
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 md:hidden">
+          <article *ngFor="let c of citas"
+                   class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="text-base font-semibold">{{ c.mascota.nombre }} - {{ c.motivo }}</h3>
+              <span class="font-mono text-xs text-slate-500">#{{ c.idCita }}</span>
+            </div>
+            <div class="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+              <p><span class="font-medium">Fecha:</span> {{ formatearFecha(c.fecha) }}</p>
+              <p><span class="font-medium">Hora:</span> {{ c.hora }}</p>
+              <p><span class="font-medium">Estado:</span> {{ etiquetaEstado(c.estado) }}</p>
+              <p><span class="font-medium">Veterinario:</span> {{ c.veterinario.nombre }}</p>
+            </div>
+            <div *ngIf="esCliente && (puedeConfirmarRapido(c) || puedeCancelarRapido(c))" class="mt-3 flex gap-2">
+              <button *ngIf="puedeConfirmarRapido(c)"
+                      class="flex-1 rounded-md bg-emerald-600 px-3 py-2 text-xs text-white hover:bg-emerald-700"
+                      (click)="confirmarRapido(c)">
+                Confirmar
+              </button>
+              <button *ngIf="puedeCancelarRapido(c)"
+                      class="flex-1 rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-700 hover:bg-rose-100"
+                      (click)="cancelarRapido(c)">
+                Cancelar
+              </button>
+            </div>
+          </article>
+        </div>
+      </ng-container>
     </ng-template>
   </ng-container>
 
-  <!-- LOADING -->
   <ng-template #cargando>
     <div class="space-y-3">
-      <div class="h-8 w-56 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
+      <div class="h-8 w-56 animate-pulse rounded bg-slate-200 dark:bg-slate-700"></div>
+      <div class="h-32 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700"></div>
     </div>
   </ng-template>
 
-  <!-- MODAL ELIMINAR -->
   <div *ngIf="mostrandoConfirmacion && puedeGestionarCitas" class="fixed inset-0 z-50">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="cerrarEliminar()"></div>
 
     <div class="absolute inset-0 grid place-items-center p-4">
-      <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-800
-                  text-slate-800 dark:text-slate-100 shadow-xl p-6">
-
-        <h3 class="text-base font-semibold">¿Eliminar cita?</h3>
-        <p class="mt-1 text-sm text-slate-600">Esta acción no se puede deshacer.</p>
+      <div class="w-full max-w-md rounded-lg bg-white p-6 text-slate-800 shadow-xl dark:bg-slate-800 dark:text-slate-100">
+        <h3 class="text-base font-semibold">Eliminar cita</h3>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Esta accion no se puede deshacer.</p>
 
         <div class="mt-6 flex justify-end gap-2">
           <button class="rounded-md border px-4 py-2 text-sm"
                   (click)="cerrarEliminar()">Cancelar</button>
 
-          <button class="rounded-md bg-rose-600 hover:bg-rose-700
-                         text-white px-4 py-2 text-sm"
+          <button class="rounded-md bg-rose-600 px-4 py-2 text-sm text-white hover:bg-rose-700"
                   (click)="confirmarEliminar()">Eliminar</button>
         </div>
       </div>

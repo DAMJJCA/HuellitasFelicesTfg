@@ -1,5 +1,6 @@
 package com.veterinaria.demo.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,4 +17,12 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
     List<Cita> findByVeterinario_IdVeterinario(Long idVeterinario);
 
     Optional<Cita> findByIdCitaAndVeterinario_IdVeterinario(Long idCita, Long idVeterinario);
+
+    List<Cita> findByFechaAndEstadoNotIn(LocalDate fecha, List<String> estados);
+
+    List<Cita> findByVeterinario_IdVeterinarioAndFechaAndHoraAndEstadoIn(
+            Long idVeterinario,
+            LocalDate fecha,
+            String hora,
+            List<String> estados);
 }

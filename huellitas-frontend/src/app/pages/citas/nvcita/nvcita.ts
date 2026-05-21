@@ -28,9 +28,15 @@ export class NvcitaComponent {
 
   mascotas = signal<Mascotas[]>([]);
   veterinarios = signal<any[]>([]);
+  estados = [
+    { value: 'programada', label: 'Programada' },
+    { value: 'confirmada', label: 'Confirmada' },
+    { value: 'cancelada', label: 'Cancelada' }
+  ];
 
   error = signal<string>('');
   success = signal<string>('');
+  minFecha = this.fechaHoy();
 
   constructor(
     private readonly citaService: CitaService,
@@ -61,6 +67,12 @@ export class NvcitaComponent {
       return;
     }
 
+    const errorFecha = this.validarFechaHora();
+    if (errorFecha) {
+      this.error.set(errorFecha);
+      return;
+    }
+
     const dto: CrearCitaDto = {
       fecha: this.cita.fecha,
       hora: this.cita.hora,
@@ -79,13 +91,34 @@ export class NvcitaComponent {
         this.success.set('Cita creada exitosamente.');
         setTimeout(() => this.router.navigate(['/citas']), 600);
       },
-      error: () => {
-        this.error.set('Error creando la cita.');
+      error: (err) => {
+        this.error.set(this.extraerMensajeError(err, 'Error creando la cita.'));
       }
     });
   }
 
   cancelar() {
     this.router.navigate(['/citas']);
+  }
+
+  private extraerMensajeError(err: any, fallback: string): string {
+    return err?.error?.detail || err?.error?.message || err?.error?.error || fallback;
+  }
+
+  private validarFechaHora(): string {
+    if (!this.cita.fecha || !this.cita.hora) return 'Indica fecha y hora de la cita.';
+
+    const ahora = new Date();
+    const fechaHora = new Date(`${this.cita.fecha}T${this.cita.hora}`);
+    if (fechaHora < ahora && this.cita.estado !== 'cancelada') {
+      return 'No se puede crear una cita activa en una fecha u hora pasada.';
+    }
+
+    return '';
+  }
+
+  private fechaHoy(): string {
+    const hoy = new Date();
+    return `${hoy.getFullYear()}-${(hoy.getMonth() + 1).toString().padStart(2, '0')}-${hoy.getDate().toString().padStart(2, '0')}`;
   }
 }
