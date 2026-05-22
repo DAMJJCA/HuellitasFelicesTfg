@@ -60,6 +60,7 @@ export class DocumentosMedicosComponent {
   mostrandoFormulario = false;
   editando: DocumentoMedico | null = null;
   guardando = false;
+  archivoSeleccionado: File | null = null;
   maxFecha = this.fechaHoy();
 
   tipos: { value: TipoDocumentoMedico; label: string }[] = [
@@ -97,6 +98,7 @@ export class DocumentosMedicosComponent {
   abrirNuevo() {
     this.editando = null;
     this.form = this.crearFormVacio();
+    this.archivoSeleccionado = null;
     this.mostrandoFormulario = true;
   }
 
@@ -111,6 +113,7 @@ export class DocumentosMedicosComponent {
       fecha: doc.fecha || '',
       observaciones: doc.observaciones || ''
     };
+    this.archivoSeleccionado = null;
     this.mostrandoFormulario = true;
   }
 
@@ -118,6 +121,7 @@ export class DocumentosMedicosComponent {
     this.mostrandoFormulario = false;
     this.editando = null;
     this.guardando = false;
+    this.archivoSeleccionado = null;
   }
 
   guardar() {
@@ -127,6 +131,25 @@ export class DocumentosMedicosComponent {
     const error = this.validarFormulario();
     if (error) {
       this.errorMsg = error;
+      return;
+    }
+
+    this.guardando = true;
+
+    if (!this.editando && this.archivoSeleccionado) {
+      const formData = this.crearFormData();
+      this.documentoService.subirDocumento(formData).subscribe({
+        next: () => {
+          this.successMsg = 'Documento subido correctamente.';
+          this.cerrarFormulario();
+          this.refrescar$.next();
+        },
+        error: err => {
+          console.error('Error subiendo documento medico', err);
+          this.errorMsg = this.extraerMensajeError(err, 'No se pudo subir el documento.');
+          this.guardando = false;
+        }
+      });
       return;
     }
 
@@ -140,7 +163,6 @@ export class DocumentosMedicosComponent {
       observaciones: this.form.observaciones || null
     };
 
-    this.guardando = true;
     const request$ = this.editando?.idDocumento
       ? this.documentoService.actualizarDocumento(this.editando.idDocumento, dto)
       : this.documentoService.crearDocumento(dto);
@@ -174,8 +196,38 @@ export class DocumentosMedicosComponent {
     });
   }
 
-  abrirUrl(url: string) {
-    window.open(url, '_blank', 'noopener,noreferrer');
+  onArchivoSeleccionado(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const archivo = input.files?.[0] || null;
+    this.archivoSeleccionado = archivo;
+    if (archivo && !this.form.nombre.trim()) {
+      this.form.nombre = archivo.name.replace(/\.[^/.]+$/, '');
+    }
+  }
+
+  abrirDocumento(doc: DocumentoMedico) {
+    if (doc.idDocumento && doc.rutaStorage) {
+      this.documentoService.descargarArchivo(doc.idDocumento).subscribe({
+        next: blob => {
+          const url = URL.createObjectURL(blob);
+          window.open(url, '_blank', 'noopener,noreferrer');
+          setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        },
+        error: err => {
+          console.error('Error abriendo archivo', err);
+          this.errorMsg = 'No se pudo abrir el archivo.';
+        }
+      });
+      return;
+    }
+    window.open(doc.url, '_blank', 'noopener,noreferrer');
+  }
+
+  formatearTamano(bytes: number | null | undefined): string {
+    if (!bytes) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   etiquetaTipo(tipo: TipoDocumentoMedico): string {
@@ -189,16 +241,44 @@ export class DocumentosMedicosComponent {
   }
 
   private validarFormulario(): string {
-    if (!this.form.idMascota || !this.form.tipo || !this.form.nombre || !this.form.url) {
-      return 'Completa mascota, tipo, nombre y URL.';
+    if (!this.form.idMascota || !this.form.tipo || !this.form.nombre) {
+      return 'Completa mascota, tipo y nombre.';
     }
-    if (!/^https?:\/\/.+/i.test(this.form.url)) {
+    if (!this.editando && !this.archivoSeleccionado && !this.form.url.trim()) {
+      return 'Indica una URL o selecciona un archivo.';
+    }
+    if ((this.editando || !this.archivoSeleccionado) && !this.form.url.trim()) {
+      return 'Indica la URL del documento.';
+    }
+    if (this.form.url && !/^https?:\/\/.+/i.test(this.form.url) && !this.form.url.startsWith('/api/')) {
       return 'La URL debe empezar por http:// o https://.';
+    }
+    if (this.archivoSeleccionado && !this.archivoValido(this.archivoSeleccionado)) {
+      return 'Solo se permiten archivos PDF, JPG, PNG o WEBP.';
     }
     if (this.form.fecha && this.form.fecha > this.maxFecha) {
       return 'La fecha del documento no puede ser futura.';
     }
     return '';
+  }
+
+  private crearFormData(): FormData {
+    const formData = new FormData();
+    formData.append('idMascota', this.form.idMascota);
+    if (this.form.idConsulta) formData.append('idConsulta', this.form.idConsulta);
+    formData.append('tipo', this.form.tipo);
+    formData.append('nombre', this.form.nombre);
+    if (this.form.fecha) formData.append('fecha', this.form.fecha);
+    if (this.form.observaciones) formData.append('observaciones', this.form.observaciones);
+    formData.append('archivo', this.archivoSeleccionado as File);
+    return formData;
+  }
+
+  private archivoValido(archivo: File): boolean {
+    const tiposPermitidos = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+    const extensionesPermitidas = ['.pdf', '.jpg', '.jpeg', '.png', '.webp'];
+    const nombre = archivo.name.toLowerCase();
+    return tiposPermitidos.includes(archivo.type) || extensionesPermitidas.some(ext => nombre.endsWith(ext));
   }
 
   private crearFormVacio() {

@@ -25,4 +25,9 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
             LocalDate fecha,
             String hora,
             List<String> estados);
+
+    List<Cita> findByVeterinario_IdVeterinarioAndFechaAndEstadoIn(
+            Long idVeterinario,
+            LocalDate fecha,
+            List<String> estados);
 }

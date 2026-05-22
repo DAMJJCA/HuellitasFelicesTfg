@@ -1,0 +1,188 @@
+<section class="min-h-screen bg-slate-50 px-6 py-6 text-slate-800 dark:bg-slate-900 dark:text-slate-100 md:px-10 md:py-8">
+  <div class="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div>
+      <button type="button" class="mb-3 text-sm font-medium text-teal-700 dark:text-teal-300" (click)="volver()">
+        Volver a consultas
+      </button>
+      <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Ficha de consulta</h1>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        Resumen clinico, paciente, tratamientos y documentos asociados.
+      </p>
+    </div>
+
+    <button type="button"
+            class="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+            (click)="editar()">
+      Editar consulta
+    </button>
+  </div>
+
+  <div *ngIf="errorMsg()" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-100">
+    {{ errorMsg() }}
+  </div>
+
+  <div *ngIf="successMsg()" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-100">
+    {{ successMsg() }}
+  </div>
+
+  <div *ngIf="cargando()" class="space-y-3">
+    <div class="h-8 w-56 animate-pulse rounded bg-slate-200 dark:bg-slate-700"></div>
+    <div class="h-32 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700"></div>
+  </div>
+
+  <ng-container *ngIf="!cargando() && consulta() as consulta">
+    <div class="grid gap-5 xl:grid-cols-[1.2fr,0.8fr]">
+      <div class="space-y-5">
+        <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Paciente</p>
+              <h2 class="text-2xl font-semibold">{{ mascotaNombre() }}</h2>
+              <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Dueño: {{ duenioNombre() }}</p>
+            </div>
+            <div class="text-sm text-slate-500 dark:text-slate-400 md:text-right">
+              <p>Consulta #{{ consulta.idConsulta }}</p>
+              <p>{{ formatearFecha(consulta.fecha) }} · {{ consulta.hora }}</p>
+              <p *ngIf="consulta.idCita">Cita #{{ consulta.idCita }}</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <h2 class="text-lg font-semibold">Datos clinicos</h2>
+          <div class="mt-4 grid gap-4">
+            <div>
+              <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Diagnostico</p>
+              <p class="mt-1 text-sm">{{ consulta.diagnostico || 'Sin diagnostico' }}</p>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Observaciones</p>
+              <p class="mt-1 whitespace-pre-line text-sm">{{ consulta.observaciones || 'Sin observaciones' }}</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <h2 class="text-lg font-semibold">Tratamientos</h2>
+          <div *ngIf="tratamientos().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">
+            No hay tratamientos asociados.
+          </div>
+          <div class="mt-3 grid gap-3">
+            <article *ngFor="let t of tratamientos()" class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
+              <h3 class="font-semibold">{{ t.nombre }}</h3>
+              <p class="text-sm text-slate-500 dark:text-slate-400">{{ t.medicamento || 'Sin medicamento' }}</p>
+              <p class="mt-2 text-sm">{{ resumenTratamiento(t) }}</p>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <div class="space-y-5">
+        <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <h2 class="text-lg font-semibold">Cita relacionada</h2>
+          <ng-container *ngIf="cita() as cita; else sinCita">
+            <p class="mt-3 text-sm"><span class="font-medium">Motivo:</span> {{ cita.motivo || 'Sin motivo' }}</p>
+            <p class="mt-2 text-sm"><span class="font-medium">Estado:</span> {{ cita.estado }}</p>
+            <p class="mt-2 text-sm"><span class="font-medium">Veterinario:</span> {{ cita.veterinario.nombre || 'Sin asignar' }}</p>
+          </ng-container>
+          <ng-template #sinCita>
+            <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">No hay datos de cita.</p>
+          </ng-template>
+        </section>
+
+        <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-lg font-semibold">Documentos</h2>
+            <button type="button"
+                    class="rounded-md border border-teal-300 bg-teal-50 px-3 py-2 text-xs font-medium text-teal-800 hover:bg-teal-100 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-100"
+                    (click)="abrirDocumentoForm()">
+              Asociar documento
+            </button>
+          </div>
+
+          <form *ngIf="mostrandoDocumentoForm()"
+                class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50"
+                (ngSubmit)="guardarDocumento()">
+            <div class="grid gap-3">
+              <label class="block text-sm">
+                <span class="mb-1 block font-medium">Tipo</span>
+                <select name="tipoDocumento" [(ngModel)]="documentoForm.tipo"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+                  <option *ngFor="let tipo of tiposDocumento" [ngValue]="tipo.value">{{ tipo.label }}</option>
+                </select>
+              </label>
+
+              <label class="block text-sm">
+                <span class="mb-1 block font-medium">Nombre</span>
+                <input name="nombreDocumento" required [(ngModel)]="documentoForm.nombre"
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+              </label>
+
+              <label class="block text-sm">
+                <span class="mb-1 block font-medium">URL {{ archivoDocumento ? '' : '*' }}</span>
+                <input name="urlDocumento" [required]="!archivoDocumento" [(ngModel)]="documentoForm.url"
+                       placeholder="https://..."
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+              </label>
+
+              <label class="block text-sm">
+                <span class="mb-1 block font-medium">Archivo PDF o imagen</span>
+                <input type="file"
+                       accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                       (change)="onArchivoDocumentoSeleccionado($event)">
+                <span *ngIf="archivoDocumento" class="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+                  {{ archivoDocumento.name }} ({{ formatearTamano(archivoDocumento.size) }})
+                </span>
+              </label>
+
+              <label class="block text-sm">
+                <span class="mb-1 block font-medium">Fecha</span>
+                <input type="date" name="fechaDocumento" [(ngModel)]="documentoForm.fecha"
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+              </label>
+
+              <label class="block text-sm">
+                <span class="mb-1 block font-medium">Observaciones</span>
+                <textarea name="observacionesDocumento" rows="2" [(ngModel)]="documentoForm.observaciones"
+                          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"></textarea>
+              </label>
+            </div>
+
+            <div class="mt-4 flex justify-end gap-2">
+              <button type="button"
+                      class="rounded-md border border-slate-300 px-3 py-2 text-xs hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
+                      (click)="cancelarDocumentoForm()">
+                Cancelar
+              </button>
+              <button type="submit"
+                      class="rounded-md bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700">
+                Guardar documento
+              </button>
+            </div>
+          </form>
+
+          <div *ngIf="documentos().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">
+            No hay documentos asociados.
+          </div>
+          <div class="mt-3 grid gap-3">
+            <article *ngFor="let doc of documentos()" class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="font-semibold">{{ doc.nombre }}</h3>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">{{ doc.tipo }} · {{ formatearFecha(doc.fecha) }}</p>
+                  <p *ngIf="doc.nombreArchivo" class="text-sm text-slate-500 dark:text-slate-400">
+                    {{ doc.nombreArchivo }} <span *ngIf="doc.tamanoBytes">({{ formatearTamano(doc.tamanoBytes) }})</span>
+                  </p>
+                </div>
+                <button type="button" class="text-sm font-medium text-teal-700 dark:text-teal-300" (click)="abrirDocumentoMedico(doc)">
+                  Abrir
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </div>
+  </ng-container>
+</section>

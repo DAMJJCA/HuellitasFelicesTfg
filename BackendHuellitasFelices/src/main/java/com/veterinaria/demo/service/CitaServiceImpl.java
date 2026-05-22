@@ -40,18 +40,21 @@ public class CitaServiceImpl implements CitaService {
     private final MascotaRepository mascotaRepository;
     private final CurrentUserService currentUserService;
     private final DisponibilidadVeterinarioService disponibilidadVeterinarioService;
+    private final CitaDuracionService citaDuracionService;
 
     public CitaServiceImpl(
             CitaRepository citaRepo,
             ConsultaRepository consultaRepo,
             MascotaRepository mascotaRepository,
             CurrentUserService currentUserService,
-            DisponibilidadVeterinarioService disponibilidadVeterinarioService) {
+            DisponibilidadVeterinarioService disponibilidadVeterinarioService,
+            CitaDuracionService citaDuracionService) {
         this.citaRepo = citaRepo;
         this.consultaRepo = consultaRepo;
         this.mascotaRepository = mascotaRepository;
         this.currentUserService = currentUserService;
         this.disponibilidadVeterinarioService = disponibilidadVeterinarioService;
+        this.citaDuracionService = citaDuracionService;
     }
 
     @Override
@@ -182,12 +185,11 @@ public class CitaServiceImpl implements CitaService {
             throw new IllegalArgumentException("Debes indicar fecha y hora de la cita");
         }
 
-        boolean horarioOcupado = citaRepo.findByVeterinario_IdVeterinarioAndFechaAndHoraAndEstadoIn(
+        boolean horarioOcupado = citaRepo.findByVeterinario_IdVeterinarioAndFechaAndEstadoIn(
                 cita.getVeterinario().getIdVeterinario(),
                 cita.getFecha(),
-                cita.getHora(),
                 ESTADOS_QUE_OCUPAN_HORARIO).stream()
-                .anyMatch(existente -> !existente.getIdCita().equals(cita.getIdCita()));
+                .anyMatch(existente -> haySolape(cita, existente));
 
         if (horarioOcupado) {
             throw new ResponseStatusException(
@@ -232,6 +234,22 @@ public class CitaServiceImpl implements CitaService {
             } catch (Exception ex) {
                 throw new IllegalArgumentException("La hora de la cita no tiene un formato valido");
             }
+        }
+    }
+
+    private boolean haySolape(Cita cita, Cita existente) {
+        if (existente.getIdCita() != null && existente.getIdCita().equals(cita.getIdCita())) {
+            return false;
+        }
+
+        try {
+            LocalTime inicioNueva = LocalTime.parse(cita.getHora());
+            LocalTime finNueva = inicioNueva.plusMinutes(citaDuracionService.duracionMinutos(null, cita.getDuracionMinutos()));
+            LocalTime inicioExistente = LocalTime.parse(existente.getHora());
+            LocalTime finExistente = inicioExistente.plusMinutes(citaDuracionService.duracionMinutos(existente.getIdCita(), 30));
+            return inicioNueva.isBefore(finExistente) && inicioExistente.isBefore(finNueva);
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("La hora de la cita no tiene un formato valido");
         }
     }
 }

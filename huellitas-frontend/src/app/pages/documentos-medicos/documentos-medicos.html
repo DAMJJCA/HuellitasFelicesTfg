@@ -70,6 +70,9 @@
         <p *ngIf="doc.idConsulta" class="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Consulta #{{ doc.idConsulta }}
         </p>
+        <p *ngIf="doc.nombreArchivo" class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Archivo: {{ doc.nombreArchivo }} <span *ngIf="doc.tamanoBytes">({{ formatearTamano(doc.tamanoBytes) }})</span>
+        </p>
         <p *ngIf="doc.observaciones" class="mt-2 text-sm text-slate-700 dark:text-slate-200">
           {{ doc.observaciones }}
         </p>
@@ -77,7 +80,7 @@
         <div class="mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3 dark:border-slate-700">
           <button type="button"
                   class="rounded-md border border-teal-300 bg-teal-50 px-3 py-2 text-xs font-medium text-teal-800 hover:bg-teal-100"
-                  (click)="abrirUrl(doc.url)">
+                  (click)="abrirDocumento(doc)">
             Abrir
           </button>
           <button *ngIf="puedeGestionar"
@@ -148,11 +151,25 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium">URL *</label>
-            <input name="url" required [(ngModel)]="form.url"
+            <label class="block text-sm font-medium">URL {{ archivoSeleccionado ? '' : '*' }}</label>
+            <input name="url" [required]="!archivoSeleccionado" [(ngModel)]="form.url"
                    class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900"
                    placeholder="https://...">
           </div>
+        </div>
+
+        <div *ngIf="!editando" class="mt-4 rounded-lg border border-dashed border-slate-300 p-4 dark:border-slate-700">
+          <label class="block text-sm font-medium">Archivo PDF o imagen</label>
+          <input type="file"
+                 accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+                 class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                 (change)="onArchivoSeleccionado($event)">
+          <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+            Puedes subir un archivo o pegar una URL externa. Maximo configurado en backend: 10 MB.
+          </p>
+          <p *ngIf="archivoSeleccionado" class="mt-2 text-sm text-slate-700 dark:text-slate-200">
+            Seleccionado: {{ archivoSeleccionado.name }} ({{ formatearTamano(archivoSeleccionado.size) }})
+          </p>
         </div>
 
         <div class="mt-4">

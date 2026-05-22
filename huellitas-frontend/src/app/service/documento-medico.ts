@@ -12,6 +12,10 @@ export interface DocumentoMedico {
   tipo: TipoDocumentoMedico;
   nombre: string;
   url: string;
+  nombreArchivo?: string | null;
+  mimeType?: string | null;
+  tamanoBytes?: number | null;
+  rutaStorage?: string | null;
   fecha: string | null;
   observaciones: string | null;
 }
@@ -36,8 +40,16 @@ export class DocumentoMedicoService {
     return this.http.post<DocumentoMedico>(this.api, body);
   }
 
+  subirDocumento(formData: FormData): Observable<DocumentoMedico> {
+    return this.http.post<DocumentoMedico>(`${this.api}/upload`, formData);
+  }
+
   actualizarDocumento(id: number, body: DocumentoMedicoDto): Observable<DocumentoMedico> {
     return this.http.put<DocumentoMedico>(`${this.api}/${id}`, body);
+  }
+
+  descargarArchivo(id: number): Observable<Blob> {
+    return this.http.get(`${this.api}/${id}/archivo`, { responseType: 'blob' });
   }
 
   eliminarDocumento(id: number): Observable<void> {

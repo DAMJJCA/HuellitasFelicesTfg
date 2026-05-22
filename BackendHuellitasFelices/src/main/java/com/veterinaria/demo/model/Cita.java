@@ -26,6 +26,9 @@ public class Cita {
     private String estado;
     private String motivo;
 
+    @Transient
+    private Integer duracionMinutos;
+
     @JsonManagedReference
     @OneToOne(mappedBy = "cita", cascade = CascadeType.ALL)
     private Consulta consulta;
@@ -52,6 +55,9 @@ public class Cita {
 
     public String getMotivo() { return motivo; }
     public void setMotivo(String motivo) { this.motivo = motivo; }
+
+    public Integer getDuracionMinutos() { return duracionMinutos; }
+    public void setDuracionMinutos(Integer duracionMinutos) { this.duracionMinutos = duracionMinutos; }
 
     public Consulta getConsulta() { return consulta; }
     public void setConsulta(Consulta consulta) { this.consulta = consulta; }

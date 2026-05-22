@@ -69,6 +69,11 @@ export const routes: Routes = [
           import('./pages/mascotas/mmascota/mmascota').then(m => m.MmascotaComponent)
       },
       {
+        path: 'mascotas/:id/historial-pdf',
+        loadComponent: () =>
+          import('./pages/mascotas/historial-pdf/historial-pdf').then(m => m.HistorialPdfComponent)
+      },
+      {
         path: 'mascotas/:id',
         loadComponent: () =>
           import('./pages/mascotas/detalle-mascota/detalle-mascota').then(m => m.DetalleMascotaComponent)
@@ -131,6 +136,12 @@ export const routes: Routes = [
         canActivate: [staffGuard],
         loadComponent: () =>
           import('./pages/consultas/mconsulta/mconsulta').then(m => m.MconsultaComponent)
+      },
+      {
+        path: 'consultas/:id',
+        canActivate: [staffGuard],
+        loadComponent: () =>
+          import('./pages/consultas/detalle-consulta/detalle-consulta').then(m => m.DetalleConsultaComponent)
       },
 
       // tratamientos

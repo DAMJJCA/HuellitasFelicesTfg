@@ -48,6 +48,17 @@
                       bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
       </div>
 
+      <div>
+        <label class="block text-sm mb-1">Duración *</label>
+        <select formControlName="duracionMinutos"
+                class="w-full rounded-lg border border-slate-300 dark:border-slate-700
+                       bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
+          <option *ngFor="let duracion of duraciones" [ngValue]="duracion">
+            {{ duracion }} minutos
+          </option>
+        </select>
+      </div>
+
       <!-- ESTADO -->
       <div>
         <label class="block text-sm mb-1">Estado</label>

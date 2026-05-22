@@ -7,10 +7,20 @@ create table if not exists public.documentos_medicos (
     ),
     nombre varchar(160) not null,
     url text not null,
+    nombre_archivo varchar(255) null,
+    mime_type varchar(120) null,
+    tamano_bytes bigint null,
+    ruta_storage text null,
     fecha date null,
     observaciones text null,
     creado_en timestamp without time zone not null default current_timestamp
 );
+
+alter table public.documentos_medicos
+    add column if not exists nombre_archivo varchar(255),
+    add column if not exists mime_type varchar(120),
+    add column if not exists tamano_bytes bigint,
+    add column if not exists ruta_storage text;
 
 create index if not exists idx_documentos_medicos_mascota
     on public.documentos_medicos(id_mascota);

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Cita, CitaService, EstadoCita } from '../../service/cita';
 import { HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../../auth/auth.service';
+import { VeterinarioService, veterinario } from '../../service/veterinario';
 
 type VistaCitas = 'agenda' | 'calendario' | 'tabla';
 
@@ -33,6 +34,7 @@ export class CitasComponent {
   private refrescar$ = new Subject<void>();
   private buscarTerm$ = new Subject<string>();
   private estadoFiltro$ = new BehaviorSubject<EstadoCita | 'todas'>('todas');
+  private veterinarioFiltro$ = new BehaviorSubject<number | 'todos'>('todos');
   private router = inject(Router);
 
   citas$!: Observable<Cita[]>;
@@ -43,6 +45,9 @@ export class CitasComponent {
   enviandoRecordatorios = false;
   vista: VistaCitas = 'agenda';
   estadoActivo: EstadoCita | 'todas' = 'todas';
+  veterinarioActivo: number | 'todos' = 'todos';
+  veterinarios: veterinario[] = [];
+  duracionesCitas = new Map<number, number>();
   fechaCalendario = new Date();
   diasSemana = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
 
@@ -59,6 +64,7 @@ export class CitasComponent {
 
   constructor(
     private citaService: CitaService,
+    private veterinarioService: VeterinarioService,
     private authService: AuthService
   ) { }
 
@@ -90,19 +96,21 @@ export class CitasComponent {
     this.citasFiltrados$ = combineLatest([
       this.citas$,
       this.buscarTerm$.pipe(startWith('')),
-      this.estadoFiltro$
+      this.estadoFiltro$,
+      this.veterinarioFiltro$
     ]).pipe(
-      map(([lista, term, estado]) => {
+      map(([lista, term, estado, veterinario]) => {
         const t = term.trim().toLowerCase();
         return lista.filter(c => {
           const coincideEstado = estado === 'todas' || this.normalizarEstado(c.estado) === estado;
+          const coincideVeterinario = veterinario === 'todos' || c.veterinario?.idVeterinario === veterinario;
           const coincideTexto = !t ||
           (c.motivo ?? '').toLowerCase().includes(t) ||
           (c.estado ?? '').toLowerCase().includes(t) ||
           (c.mascota?.nombre ?? '').toLowerCase().includes(t) ||
           (c.veterinario?.nombre ?? '').toLowerCase().includes(t);
 
-          return coincideEstado && coincideTexto;
+          return coincideEstado && coincideVeterinario && coincideTexto;
         });
       }),
       shareReplay({ bufferSize: 1, refCount: true })
@@ -120,6 +128,16 @@ export class CitasComponent {
         cancelada: 0
       } as Record<EstadoCita, number>))
     );
+
+    this.veterinarioService.getVeterinarios().subscribe({
+      next: veterinarios => this.veterinarios = veterinarios,
+      error: () => this.veterinarios = []
+    });
+
+    this.citaService.getDuraciones().subscribe({
+      next: duraciones => this.duracionesCitas = new Map(duraciones.map(item => [item.idCita, item.duracionMinutos])),
+      error: () => this.duracionesCitas = new Map()
+    });
   }
 
   onBuscar(valor: string) { this.buscarTerm$.next(valor); }
@@ -170,6 +188,11 @@ export class CitasComponent {
     this.estadoFiltro$.next(estado);
   }
 
+  filtrarVeterinario(valor: string) {
+    this.veterinarioActivo = valor === 'todos' ? 'todos' : Number(valor);
+    this.veterinarioFiltro$.next(this.veterinarioActivo);
+  }
+
   crear() { this.router.navigate(['/citas/crear']); }
   editar(c: Cita) { this.router.navigate(['/citas', c.idCita, 'editar']); }
 
@@ -191,6 +214,10 @@ export class CitasComponent {
 
   etiquetaEstado(estado: string): string {
     return this.estados.find(e => e.value === this.normalizarEstado(estado))?.label ?? estado;
+  }
+
+  duracionCita(cita: Cita): number {
+    return cita.idCita ? (this.duracionesCitas.get(cita.idCita) || cita.duracionMinutos || 30) : (cita.duracionMinutos || 30);
   }
 
   clasesEstado(estado: string): string {

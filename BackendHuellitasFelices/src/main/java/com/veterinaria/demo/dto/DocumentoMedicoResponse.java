@@ -11,6 +11,10 @@ public class DocumentoMedicoResponse {
     private String tipo;
     private String nombre;
     private String url;
+    private String nombreArchivo;
+    private String mimeType;
+    private Long tamanoBytes;
+    private String rutaStorage;
     private LocalDate fecha;
     private String observaciones;
 
@@ -68,6 +72,38 @@ public class DocumentoMedicoResponse {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getNombreArchivo() {
+        return nombreArchivo;
+    }
+
+    public void setNombreArchivo(String nombreArchivo) {
+        this.nombreArchivo = nombreArchivo;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public Long getTamanoBytes() {
+        return tamanoBytes;
+    }
+
+    public void setTamanoBytes(Long tamanoBytes) {
+        this.tamanoBytes = tamanoBytes;
+    }
+
+    public String getRutaStorage() {
+        return rutaStorage;
+    }
+
+    public void setRutaStorage(String rutaStorage) {
+        this.rutaStorage = rutaStorage;
     }
 
     public LocalDate getFecha() {
