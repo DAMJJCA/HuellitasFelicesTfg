@@ -56,4 +56,8 @@ export class ConsultasComponent {
   editar(c: Consulta) {
     this.router.navigate(['/consultas', c.idConsulta, 'editar']);
   }
+
+  verDetalle(c: Consulta) {
+    this.router.navigate(['/consultas', c.idConsulta]);
+  }
 }

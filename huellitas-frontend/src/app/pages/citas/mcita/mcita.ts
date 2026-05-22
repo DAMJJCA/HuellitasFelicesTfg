@@ -38,6 +38,7 @@ export class McitaComponent {
     hora: ['', Validators.required],
     motivo: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(200)]],
     estado: ['programada', Validators.required],
+    duracionMinutos: [30, Validators.required],
     idMascota: ['', Validators.required],
     idVeterinario: ['', Validators.required]
   });
@@ -46,6 +47,7 @@ export class McitaComponent {
   errorMsg = '';
   successMsg = '';
   minFecha = this.fechaHoy();
+  duraciones = [15, 30, 45, 60];
 
   readonly id$ = this.route.paramMap.pipe(
     map(p => Number(p.get('id'))),
@@ -58,10 +60,14 @@ export class McitaComponent {
     combineLatest([
       this.mascotaService.getMascotas(),
       this.veterinarioService.getVeterinarios(),
-      this.id$.pipe(switchMap(id => this.citaService.getCita(id)))
+      this.id$.pipe(switchMap(id => this.citaService.getCita(id))),
+      this.id$.pipe(switchMap(id => this.citaService.getDuraciones().pipe(
+        map(items => items.find(item => item.idCita === id)?.duracionMinutos || 30),
+        catchError(() => [30])
+      )))
     ])
     .subscribe({
-      next: ([mascotas, veterinarios, cita]) => {
+      next: ([mascotas, veterinarios, cita, duracionMinutos]) => {
         this.mascotas = mascotas;
         this.veterinarios = veterinarios;
 
@@ -69,6 +75,7 @@ export class McitaComponent {
         this.form.patchValue({
           fecha: cita.fecha,
           hora: cita.hora,
+          duracionMinutos,
           motivo: cita.motivo,
           estado: cita.estado,
           idMascota: String(cita.mascota.idMascota),
@@ -96,6 +103,7 @@ export class McitaComponent {
     const dto = {
       fecha: this.form.value.fecha!,
       hora: this.form.value.hora!,
+      duracionMinutos: Number(this.form.value.duracionMinutos) || 30,
       motivo: this.form.value.motivo!,
       estado: this.form.value.estado! as EstadoCita,
       mascota: { idMascota: Number(this.form.value.idMascota) },
@@ -105,7 +113,9 @@ export class McitaComponent {
     this.cargando = true;
 
     this.id$
-      .pipe(switchMap(id => this.citaService.actualizarCita(id, dto)))
+      .pipe(switchMap(id => this.citaService.actualizarCita(id, dto).pipe(
+        switchMap(() => this.citaService.guardarDuracion(id, Number(this.form.value.duracionMinutos) || 30))
+      )))
       .subscribe({
         next: () => {
           this.cargando = false;

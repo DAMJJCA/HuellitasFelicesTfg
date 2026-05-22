@@ -117,8 +117,27 @@ export class DetalleMascotaComponent {
     this.router.navigate(['/documentos-medicos']);
   }
 
-  abrirDocumento(url: string) {
-    window.open(url, '_blank', 'noopener,noreferrer');
+  exportarHistorial() {
+    const id = this.mascota()?.idMascota;
+    if (id) this.router.navigate(['/mascotas', id, 'historial-pdf']);
+  }
+
+  abrirDocumento(doc: DocumentoMedico) {
+    if (doc.idDocumento && doc.rutaStorage) {
+      this.documentoService.descargarArchivo(doc.idDocumento).subscribe({
+        next: blob => {
+          const url = URL.createObjectURL(blob);
+          window.open(url, '_blank', 'noopener,noreferrer');
+          setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        },
+        error: err => {
+          console.error('Error abriendo documento', err);
+          this.errorMsg.set('No se pudo abrir el archivo.');
+        }
+      });
+      return;
+    }
+    window.open(doc.url, '_blank', 'noopener,noreferrer');
   }
 
   etiquetaTipoDocumento(tipo: string): string {

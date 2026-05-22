@@ -12,5 +12,6 @@ public interface DocumentoMedicoService {
     DocumentoMedicoResponse findById(Long id);
     DocumentoMedicoResponse save(DocumentoMedicoRequest request);
     DocumentoMedicoResponse update(Long id, DocumentoMedicoRequest request);
+    DocumentoMedicoResponse updateArchivo(Long id, String url, String nombreArchivo, String mimeType, Long tamanoBytes, String rutaStorage);
     void deleteById(Long id);
 }

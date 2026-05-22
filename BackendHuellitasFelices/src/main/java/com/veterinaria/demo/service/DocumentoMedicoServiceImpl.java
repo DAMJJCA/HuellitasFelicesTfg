@@ -45,6 +45,11 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
         response.setTipo(rs.getString("tipo"));
         response.setNombre(rs.getString("nombre"));
         response.setUrl(rs.getString("url"));
+        response.setNombreArchivo(rs.getString("nombre_archivo"));
+        response.setMimeType(rs.getString("mime_type"));
+        long tamanoBytes = rs.getLong("tamano_bytes");
+        response.setTamanoBytes(rs.wasNull() ? null : tamanoBytes);
+        response.setRutaStorage(rs.getString("ruta_storage"));
         Date fecha = rs.getDate("fecha");
         response.setFecha(fecha != null ? fecha.toLocalDate() : null);
         response.setObservaciones(rs.getString("observaciones"));
@@ -101,8 +106,8 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement("""
                     insert into documentos_medicos
-                    (id_mascota, id_consulta, tipo, nombre, url, fecha, observaciones)
-                    values (?, ?, ?, ?, ?, ?, ?)
+                    (id_mascota, id_consulta, tipo, nombre, url, nombre_archivo, mime_type, tamano_bytes, ruta_storage, fecha, observaciones)
+                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, new String[] { "id_documento" });
             rellenarStatement(ps, request);
             return ps;
@@ -122,7 +127,9 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
 
         jdbcTemplate.update("""
                 update documentos_medicos
-                set id_mascota = ?, id_consulta = ?, tipo = ?, nombre = ?, url = ?, fecha = ?, observaciones = ?
+                set id_mascota = ?, id_consulta = ?, tipo = ?, nombre = ?, url = ?,
+                    nombre_archivo = ?, mime_type = ?, tamano_bytes = ?, ruta_storage = ?,
+                    fecha = ?, observaciones = ?
                 where id_documento = ?
                 """,
                 request.getIdMascota(),
@@ -130,8 +137,38 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
                 normalizarTipo(request.getTipo()),
                 request.getNombre(),
                 request.getUrl(),
+                request.getNombreArchivo(),
+                request.getMimeType(),
+                request.getTamanoBytes(),
+                request.getRutaStorage(),
                 request.getFecha(),
                 request.getObservaciones(),
+                id);
+
+        return findById(id);
+    }
+
+    @Override
+    @Transactional
+    public DocumentoMedicoResponse updateArchivo(Long id, String url, String nombreArchivo, String mimeType, Long tamanoBytes, String rutaStorage) {
+        DocumentoMedicoResponse actual = findById(id);
+        if (actual == null) {
+            throw new IllegalArgumentException("El documento medico no existe");
+        }
+        if (currentUserService.isCliente()) {
+            throw new AccessDeniedException("Los clientes no pueden modificar documentos medicos");
+        }
+
+        jdbcTemplate.update("""
+                update documentos_medicos
+                set url = ?, nombre_archivo = ?, mime_type = ?, tamano_bytes = ?, ruta_storage = ?
+                where id_documento = ?
+                """,
+                url,
+                nombreArchivo,
+                mimeType,
+                tamanoBytes,
+                rutaStorage,
                 id);
 
         return findById(id);
@@ -148,7 +185,8 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
     private String baseSql() {
         return """
                 select d.id_documento, d.id_mascota, m.nombre as nombre_mascota,
-                       d.id_consulta, d.tipo, d.nombre, d.url, d.fecha, d.observaciones
+                       d.id_consulta, d.tipo, d.nombre, d.url, d.nombre_archivo, d.mime_type,
+                       d.tamano_bytes, d.ruta_storage, d.fecha, d.observaciones
                 from documentos_medicos d
                 join mascotas m on m.id_mascota = d.id_mascota
                 """;
@@ -169,6 +207,9 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
         }
         if (request.getUrl() == null || request.getUrl().isBlank()) {
             throw new IllegalArgumentException("Debes indicar la URL del documento");
+        }
+        if (request.getIdConsulta() != null && !consultaPerteneceAMascota(request.getIdConsulta(), request.getIdMascota())) {
+            throw new IllegalArgumentException("La consulta indicada no pertenece a la mascota seleccionada");
         }
         if (request.getFecha() != null && request.getFecha().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("La fecha del documento no puede ser futura");
@@ -196,8 +237,22 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
         ps.setString(3, normalizarTipo(request.getTipo()));
         ps.setString(4, request.getNombre());
         ps.setString(5, request.getUrl());
-        ps.setObject(6, request.getFecha());
-        ps.setString(7, request.getObservaciones());
+        ps.setString(6, request.getNombreArchivo());
+        ps.setString(7, request.getMimeType());
+        ps.setObject(8, request.getTamanoBytes());
+        ps.setString(9, request.getRutaStorage());
+        ps.setObject(10, request.getFecha());
+        ps.setString(11, request.getObservaciones());
+    }
+
+    private boolean consultaPerteneceAMascota(Long idConsulta, Long idMascota) {
+        Integer total = jdbcTemplate.queryForObject("""
+                select count(*)
+                from consultas co
+                join citas ci on ci.id_cita = co.id_cita
+                where co.id_consulta = ? and ci.id_mascota = ?
+                """, Integer.class, idConsulta, idMascota);
+        return total != null && total > 0;
     }
 
     private String normalizarTipo(String tipo) {
