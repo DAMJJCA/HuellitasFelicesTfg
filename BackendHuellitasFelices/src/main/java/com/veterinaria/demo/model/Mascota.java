@@ -17,6 +17,9 @@ public class Mascota {
     private Double peso;
     private String sexo;
 
+    @Column(name = "numero_chip")
+    private String numeroChip;
+
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
 
@@ -76,6 +79,14 @@ public class Mascota {
 
     public void setSexo(String sexo) {
         this.sexo = sexo;
+    }
+
+    public String getNumeroChip() {
+        return numeroChip;
+    }
+
+    public void setNumeroChip(String numeroChip) {
+        this.numeroChip = numeroChip;
     }
 
     public LocalDate getFechaNacimiento() {

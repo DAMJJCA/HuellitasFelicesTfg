@@ -14,5 +14,9 @@ public interface MascotaRepository extends JpaRepository<Mascota, Long> {
 
     boolean existsByIdMascotaAndCliente_IdCliente(Long idMascota, Long idCliente);
 
+    boolean existsByNumeroChipIgnoreCase(String numeroChip);
+
+    boolean existsByNumeroChipIgnoreCaseAndIdMascotaNot(String numeroChip, Long idMascota);
+
     long countByCliente_IdCliente(Long idCliente);
 }

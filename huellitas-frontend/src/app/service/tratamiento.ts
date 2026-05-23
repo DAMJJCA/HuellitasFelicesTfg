@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../core/api.config';
 
 export interface Tratamiento {
   idTratamiento?: number;
@@ -24,7 +25,7 @@ export interface Tratamiento {
 })
 export class TratamientoService {
 
-  private api = 'http://localhost:8080/api/tratamientos';
+  private api = `${API_BASE_URL}/tratamientos`;
 
   constructor(private http: HttpClient) {}
 

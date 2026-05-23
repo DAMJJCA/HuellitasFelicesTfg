@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { Subject, Observable, of, combineLatest } from 'rxjs';
 import { startWith, switchMap, catchError, map } from 'rxjs/operators';
 import { Consulta, ConsultaService } from '../../service/consulta';
+import { PageHeaderComponent } from '../../shared/page-header/page-header';
 
 @Component({
   selector: 'app-consultas',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PageHeaderComponent],
   templateUrl: './consultas.html'
 })
 export class ConsultasComponent {
@@ -59,5 +60,9 @@ export class ConsultasComponent {
 
   verDetalle(c: Consulta) {
     this.router.navigate(['/consultas', c.idConsulta]);
+  }
+
+  verInforme(c: Consulta) {
+    this.router.navigate(['/consultas', c.idConsulta, 'informe']);
   }
 }

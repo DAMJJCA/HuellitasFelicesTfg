@@ -10,11 +10,18 @@
       </p>
     </div>
 
-    <button type="button"
-            class="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
-            (click)="editar()">
-      Editar consulta
-    </button>
+    <div class="flex flex-wrap gap-2">
+      <button type="button"
+              class="rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2.5 text-sm font-medium text-indigo-800 hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-100 dark:hover:bg-indigo-900/60"
+              (click)="imprimirInforme()">
+        Imprimir informe
+      </button>
+      <button type="button"
+              class="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+              (click)="editar()">
+        Editar consulta
+      </button>
+    </div>
   </div>
 
   <div *ngIf="errorMsg()" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-100">
@@ -94,7 +101,7 @@
           <div class="flex items-center justify-between gap-3">
             <h2 class="text-lg font-semibold">Documentos</h2>
             <button type="button"
-                    class="rounded-md border border-teal-300 bg-teal-50 px-3 py-2 text-xs font-medium text-teal-800 hover:bg-teal-100 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-100"
+                    class="rounded-md border border-teal-300 bg-teal-50 px-3 py-2 text-xs font-medium text-teal-800 hover:bg-teal-100 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-100 dark:hover:bg-teal-900/60"
                     (click)="abrirDocumentoForm()">
               Asociar documento
             </button>

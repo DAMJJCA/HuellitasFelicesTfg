@@ -1,6 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { API_BASE_URL } from "../core/api.config";
 
 export interface veterinario{
     idVeterinario?: number;
@@ -20,7 +21,7 @@ export type ActualizarVeterinarioDto = Omit<CrearVeterinarioDto, 'password'>;
 
 @Injectable({ providedIn: 'root' })
 export class VeterinarioService {
-    private api = 'http://localhost:8080/api/veterinarios';
+    private api = `${API_BASE_URL}/veterinarios`;
 
     constructor(private http: HttpClient) {}
 

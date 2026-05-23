@@ -2,28 +2,28 @@
 <section class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 px-6 py-6 md:px-10 md:py-8">
 
   <!-- Header -->
-  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-    <div>
-      <h1 class="text-4xl font-semibold tracking-tight">Listado de Mascotas</h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400">Administrador de mascotas registradas.</p>
+  <div class="mb-6 space-y-4">
+    <div class="max-w-3xl">
+      <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Mascotas</h1>
+      <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">Administrador de mascotas registradas, fichas clinicas y chip identificativo.</p>
     </div>
 
-    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
+    <div class="grid gap-3 lg:grid-cols-[minmax(260px,1fr)_auto] lg:items-center">
 
       <!-- Buscador -->
-      <div class="relative">
+      <div class="relative min-w-0">
         <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
         <input type="text"
                (input)="onBuscar($event.target.value)"
-               placeholder="Buscar por nombre, especie o raza…"
-               class="w-full sm:w-80 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-3 py-2.5 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+               placeholder="Buscar por nombre, chip, especie o raza..."
+               class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-3 py-2.5 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
       </div>
 
       <!-- Botones -->
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2 lg:justify-end">
         <button *ngIf="puedeGestionarMascotas"
                 type="button"
                 class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-medium shadow-sm transition"
@@ -64,8 +64,8 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M3 7h18M3 12h18M3 17h18"/>
         </svg>
-        <h3 class="mt-3 text-base font-semibold">No hay mascotas para mostrar</h3>
-        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">No hay mascotas para mostrar.</p>
+        <h3 class="mt-3 text-base font-semibold">No hay mascotas registradas</h3>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Crea la primera ficha de mascota para empezar el seguimiento clinico.</p>
         <button *ngIf="puedeGestionarMascotas"
                 class="mt-5 inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-medium"
                 (click)="crear()">
@@ -85,6 +85,7 @@
               <tr>
                 <th class="px-6 py-3">ID</th>
                 <th class="px-6 py-3">Nombre</th>
+                <th class="px-6 py-3">Chip</th>
                 <th class="px-6 py-3">Especie</th>
                 <th class="px-6 py-3">Raza</th>
                 <th class="px-6 py-3">Fecha de nacimiento</th>
@@ -97,6 +98,7 @@
               <tr *ngFor="let m of mascotas" class="hover:bg-slate-50/60 dark:hover:bg-slate-700/30 transition">
                 <td class="px-6 py-4 font-mono text-xs text-slate-500">#{{ m.idMascota }}</td>
                 <td class="px-6 py-4 font-medium">{{ m.nombre }}</td>
+                <td class="px-6 py-4 font-mono text-xs">{{ etiquetaChip(m) }}</td>
                 <td class="px-6 py-4">{{ m.especie }}</td>
                 <td class="px-6 py-4">{{ m.raza }}</td>
                 <td class="px-6 py-4">{{ m.fechaNacimiento | date:'yyyy-MM-dd' }}</td>
@@ -104,7 +106,7 @@
                 <td class="px-6 py-4">
                   <div class="flex items-center justify-end gap-2">
                     <button type="button"
-                            class="inline-flex items-center gap-1.5 rounded-md border border-teal-300 bg-teal-50 px-2 py-1.5 text-xs text-teal-800 hover:bg-teal-100"
+                            class="inline-flex items-center gap-1.5 rounded-md border border-teal-300 bg-teal-50 px-2 py-1.5 text-xs text-teal-800 hover:bg-teal-100 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-100 dark:hover:bg-teal-900/60"
                             (click)="verFicha(m)">
                       Ficha
                     </button>
@@ -140,13 +142,14 @@
 
           <div class="mt-2 text-sm text-slate-600 dark:text-slate-300 space-y-1">
             <p><span class="font-medium">Especie:</span> {{ m.especie }}</p>
+            <p><span class="font-medium">Chip:</span> {{ etiquetaChip(m) }}</p>
             <p><span class="font-medium">Raza:</span> {{ m.raza }}</p>
             <p><span class="font-medium">Fecha de nacimiento:</span> {{ m.fechaNacimiento | date:'yyyy-MM-dd' }}</p>
             <p><span class="font-medium">Dueño:</span> {{ m.cliente.nombre }} {{ m.cliente.apellidos }}</p>
           </div>
 
           <div class="mt-3 flex gap-2">
-            <button class="flex-1 rounded-md border border-teal-300 bg-teal-50 px-3 py-2 text-xs text-teal-800 hover:bg-teal-100"
+            <button class="flex-1 rounded-md border border-teal-300 bg-teal-50 px-3 py-2 text-xs text-teal-800 hover:bg-teal-100 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-100 dark:hover:bg-teal-900/60"
                     (click)="verFicha(m)">
               Ficha
             </button>

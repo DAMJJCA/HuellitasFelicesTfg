@@ -1,12 +1,14 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { API_BASE_URL } from "../core/api.config";
 
 export interface Mascotas {
   idMascota?: number;
   nombre: string;
   especie: string;
   raza: string;
+  numeroChip?: string | null;
   fechaNacimiento: string | null;
   peso: number | null;
   sexo: string;
@@ -21,6 +23,7 @@ export type CrearMascotaDto = {
   nombre: string;
   especie: string;
   raza: string;
+  numeroChip?: string | null;
   fechaNacimiento: string | null;
   peso: number | null;
   sexo: string;
@@ -29,7 +32,7 @@ export type CrearMascotaDto = {
 
 @Injectable({ providedIn: 'root' })
 export class MascotaService {
-  private api = 'http://localhost:8080/api/mascotas';
+  private api = `${API_BASE_URL}/mascotas`;
 
   constructor(private http: HttpClient) {}
 

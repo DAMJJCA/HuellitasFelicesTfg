@@ -44,6 +44,12 @@ export const routes: Routes = [
           import('./pages/clientes/mcliente/mcliente').then(m => m.MClienteComponent)
       },
       {
+        path: 'clientes/:id',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/clientes/detalle-cliente/detalle-cliente').then(m => m.DetalleClienteComponent)
+      },
+      {
         path: 'clientes',
         canActivate: [adminGuard],
         loadComponent: () =>
@@ -99,6 +105,12 @@ export const routes: Routes = [
           import('./pages/veterinarios/mveterinario/mveterinario').then(m => m.MveterinarioComponent)
       },
       {
+        path: 'admin/veterinarios/:id',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/veterinarios/detalle-veterinario/detalle-veterinario').then(m => m.DetalleVeterinarioComponent)
+      },
+      {
         path: 'admin/disponibilidad-veterinarios',
         canActivate: [adminGuard],
         loadComponent: () =>
@@ -136,6 +148,12 @@ export const routes: Routes = [
         canActivate: [staffGuard],
         loadComponent: () =>
           import('./pages/consultas/mconsulta/mconsulta').then(m => m.MconsultaComponent)
+      },
+      {
+        path: 'consultas/:id/informe',
+        canActivate: [staffGuard],
+        loadComponent: () =>
+          import('./pages/consultas/informe-consulta/informe-consulta').then(m => m.InformeConsultaComponent)
       },
       {
         path: 'consultas/:id',

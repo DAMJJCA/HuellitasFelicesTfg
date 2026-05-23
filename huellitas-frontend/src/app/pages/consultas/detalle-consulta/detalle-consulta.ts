@@ -100,6 +100,11 @@ export class DetalleConsultaComponent {
     if (id) this.router.navigate(['/consultas', id, 'editar']);
   }
 
+  imprimirInforme(): void {
+    const id = this.consulta()?.idConsulta;
+    if (id) this.router.navigate(['/consultas', id, 'informe']);
+  }
+
   volver(): void {
     this.router.navigate(['/consultas']);
   }
@@ -221,7 +226,10 @@ export class DetalleConsultaComponent {
   }
 
   mascotaNombre(): string {
-    return (this.cita()?.mascota as any)?.nombre || this.consulta()?.nombreMascota || 'Mascota';
+    const mascota = this.cita()?.mascota as any;
+    if (!mascota) return this.consulta()?.nombreMascota || 'Mascota';
+    const chip = mascota.numeroChip ? `Chip ${mascota.numeroChip}` : 'Sin chip';
+    return `${mascota.nombre || 'Mascota'} - ${chip}`;
   }
 
   duenioNombre(): string {

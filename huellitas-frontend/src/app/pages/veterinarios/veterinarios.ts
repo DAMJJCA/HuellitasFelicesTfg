@@ -74,6 +74,11 @@ export class VeterinariosComponent {
     this.router.navigate(['/admin/veterinarios', c.idVeterinario, 'editar']);
   }
 
+  verFicha(c: veterinario) {
+    if (!c.idVeterinario) return;
+    this.router.navigate(['/admin/veterinarios', c.idVeterinario]);
+  }
+
   abrirEliminar(c: veterinario) {
     this.seleccionado = c;
     this.mostrandoConfirmacion = true;

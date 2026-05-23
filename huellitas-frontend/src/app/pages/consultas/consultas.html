@@ -4,16 +4,10 @@
          px-6 py-6 md:px-10 md:py-8">
 
   <!-- Header / acciones -->
-  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-    <div>
-      <h1 class="text-4xl font-semibold tracking-tight">Listado de Consultas</h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400">
-        Lista de consultas registradas.
-      </p>
-    </div>
+  <app-page-header title="Consultas" description="Seguimiento clinico de consultas, diagnosticos y tratamientos asociados.">
 
     <!-- Buscador -->
-    <div class="relative">
+    <div class="relative min-w-0">
       <svg
         class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2
                h-5 w-5 text-slate-400"
@@ -25,13 +19,13 @@
       <input
         type="text"
         placeholder="Buscar por mascota, diagnóstico u observaciones…"
-        class="w-full sm:w-80 rounded-lg border border-slate-300 dark:border-slate-700
+        class="w-full rounded-lg border border-slate-300 dark:border-slate-700
                bg-white dark:bg-slate-800 pl-10 pr-3 py-2.5 text-sm
                placeholder-slate-400 focus:outline-none
                focus:ring-2 focus:ring-indigo-500"
         (input)="buscar($any($event.target).value)" />
     </div>
-  </div>
+  </app-page-header>
 
   <!-- Contenido -->
   <ng-container *ngIf="consultasFiltradas$ | async as consultas; else cargando">
@@ -107,14 +101,22 @@
                 </td>
 
                 <td class="px-6 py-4">
-                  <div class="flex justify-center">
+                  <div class="flex flex-wrap justify-center gap-2">
                     <button
-                      class="mr-2 inline-flex items-center gap-1.5
+                      class="inline-flex items-center gap-1.5
                              rounded-md border border-slate-300
                              hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700
                              px-4 py-1.5 text-sm"
                       (click)="verDetalle(c)">
                       Ver ficha
+                    </button>
+                    <button
+                      class="inline-flex items-center gap-1.5
+                             rounded-md border border-indigo-300 bg-indigo-50
+                             hover:bg-indigo-100 text-indigo-800
+                             px-4 py-1.5 text-sm dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-100 dark:hover:bg-indigo-900/60"
+                      (click)="verInforme(c)">
+                      Informe
                     </button>
                     <button
                       class="inline-flex items-center gap-1.5
@@ -164,6 +166,13 @@
                    hover:bg-slate-50 dark:hover:bg-slate-700"
             (click)="verDetalle(c)">
             Ver ficha
+          </button>
+
+          <button
+            class="mt-2 w-full rounded-md border px-3 py-2 text-xs
+                   hover:bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-100 dark:hover:bg-indigo-900/60"
+            (click)="verInforme(c)">
+            Informe
           </button>
 
           <button

@@ -163,12 +163,13 @@ export class GlobalSearchComponent {
     return mascotas.map(mascota => {
       const duenio = mascota.cliente ? `${mascota.cliente.nombre} ${mascota.cliente.apellidos}` : 'Sin duenio';
       const id = mascota.idMascota || 0;
+      const chip = mascota.numeroChip ? `Chip ${mascota.numeroChip}` : 'Sin chip';
       return {
         tipo: 'Mascota',
-        titulo: `${mascota.nombre} #${id}`,
-        detalle: `${duenio} - ${mascota.especie || 'Sin especie'} - ${mascota.raza || 'Sin raza'}`,
+        titulo: `${mascota.nombre} - ${chip}`,
+        detalle: `${duenio} - ${mascota.especie || 'Sin especie'} - ${mascota.raza || 'Sin raza'} - #${id}`,
         ruta: `/mascotas/${id}`,
-        texto: this.normalizar(`${id} ${mascota.nombre} ${mascota.especie} ${mascota.raza} ${duenio} ${mascota.cliente?.idCliente || ''}`)
+        texto: this.normalizar(`${id} ${mascota.nombre} ${mascota.numeroChip} ${mascota.especie} ${mascota.raza} ${duenio} ${mascota.cliente?.idCliente || ''}`)
       };
     });
   }
@@ -189,7 +190,7 @@ export class GlobalSearchComponent {
       titulo: `${cita.mascota?.nombre || 'Mascota'} - ${cita.fecha} ${cita.hora}`,
       detalle: `${cita.motivo || 'Sin motivo'} - ${cita.estado} - ${cita.veterinario?.nombre || 'Sin veterinario'} - #${cita.idCita}`,
       ruta: this.authService.isVeterinario() ? '/citas' : `/citas/${cita.idCita}/editar`,
-      texto: this.normalizar(`${cita.idCita} ${cita.fecha} ${cita.hora} ${cita.estado} ${cita.motivo} ${cita.mascota?.nombre} ${cita.mascota?.idMascota} ${cita.veterinario?.nombre} ${cita.veterinario?.idVeterinario}`)
+      texto: this.normalizar(`${cita.idCita} ${cita.fecha} ${cita.hora} ${cita.estado} ${cita.motivo} ${cita.mascota?.nombre} ${cita.mascota?.numeroChip} ${cita.mascota?.idMascota} ${cita.veterinario?.nombre} ${cita.veterinario?.idVeterinario}`)
     }));
   }
 

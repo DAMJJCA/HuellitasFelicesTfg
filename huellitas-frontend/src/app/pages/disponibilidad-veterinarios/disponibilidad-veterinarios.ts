@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 
 import {
   DisponibilidadVeterinario,
@@ -27,6 +27,7 @@ export class DisponibilidadVeterinariosComponent {
   excepciones = signal<ExcepcionDisponibilidadVeterinario[]>([]);
   veterinarios = signal<veterinario[]>([]);
   cargando = signal(false);
+  veterinarioActivo = signal<number>(0);
   errorMsg = '';
   successMsg = '';
   editandoId: number | null = null;
@@ -55,9 +56,27 @@ export class DisponibilidadVeterinariosComponent {
     this.errorMsg = '';
 
     forkJoin({
-      disponibilidades: this.disponibilidadService.getDisponibilidades(),
-      excepciones: this.disponibilidadService.getExcepciones(),
-      veterinarios: this.veterinarioService.getVeterinarios()
+      disponibilidades: this.disponibilidadService.getDisponibilidades().pipe(
+        catchError(err => {
+          console.error('Error cargando horarios semanales', err);
+          this.errorMsg = 'No se pudieron cargar los horarios semanales.';
+          return of([] as DisponibilidadVeterinario[]);
+        })
+      ),
+      excepciones: this.disponibilidadService.getExcepciones().pipe(
+        catchError(err => {
+          console.error('Error cargando excepciones de disponibilidad', err);
+          this.errorMsg = this.errorMsg || 'No se pudieron cargar los cambios puntuales.';
+          return of([] as ExcepcionDisponibilidadVeterinario[]);
+        })
+      ),
+      veterinarios: this.veterinarioService.getVeterinarios().pipe(
+        catchError(err => {
+          console.error('Error cargando veterinarios', err);
+          this.errorMsg = this.errorMsg || 'No se pudieron cargar los veterinarios.';
+          return of([] as veterinario[]);
+        })
+      )
     }).subscribe({
       next: data => {
         this.disponibilidades.set(data.disponibilidades);
@@ -68,6 +87,14 @@ export class DisponibilidadVeterinariosComponent {
         }
         if (!this.excepcionForm.idVeterinario && data.veterinarios[0]?.idVeterinario) {
           this.excepcionForm.idVeterinario = data.veterinarios[0].idVeterinario;
+        }
+        if (!this.veterinarioActivo() && data.veterinarios[0]?.idVeterinario) {
+          this.veterinarioActivo.set(data.veterinarios[0].idVeterinario);
+        }
+        if (!this.veterinarioActivo() && data.disponibilidades[0]?.idVeterinario) {
+          this.veterinarioActivo.set(data.disponibilidades[0].idVeterinario);
+          this.form.idVeterinario = data.disponibilidades[0].idVeterinario;
+          this.excepcionForm.idVeterinario = data.disponibilidades[0].idVeterinario;
         }
         this.cargando.set(false);
       },
@@ -117,6 +144,12 @@ export class DisponibilidadVeterinariosComponent {
     });
   }
 
+  seleccionarVeterinario(idVeterinario: number): void {
+    this.veterinarioActivo.set(idVeterinario);
+    if (!this.editandoId) this.form.idVeterinario = idVeterinario;
+    if (!this.editandoExcepcionId) this.excepcionForm.idVeterinario = idVeterinario;
+  }
+
   guardar(): void {
     this.errorMsg = '';
     this.successMsg = '';
@@ -158,6 +191,7 @@ export class DisponibilidadVeterinariosComponent {
       horaFin: item.horaFin,
       activo: item.activo
     };
+    this.veterinarioActivo.set(item.idVeterinario);
   }
 
   eliminar(item: DisponibilidadVeterinario): void {
@@ -186,6 +220,7 @@ export class DisponibilidadVeterinariosComponent {
       motivo: item.motivo,
       activo: item.activo
     };
+    this.veterinarioActivo.set(item.idVeterinario);
   }
 
   eliminarExcepcion(item: ExcepcionDisponibilidadVeterinario): void {
@@ -229,6 +264,10 @@ export class DisponibilidadVeterinariosComponent {
     return this.dias.find(d => d.value === dia)?.label || 'Dia';
   }
 
+  diaCorto(dia: number): string {
+    return this.etiquetaDia(dia).slice(0, 3);
+  }
+
   nombreVeterinario(idVeterinario: number): string {
     return this.veterinarios().find(v => v.idVeterinario === idVeterinario)?.nombre || 'Veterinario';
   }
@@ -239,14 +278,49 @@ export class DisponibilidadVeterinariosComponent {
     );
   }
 
+  disponibilidadesVeterinario(): DisponibilidadVeterinario[] {
+    return this.disponibilidadesOrdenadas().filter(item => item.idVeterinario === this.veterinarioActivo());
+  }
+
+  disponibilidadesDia(diaSemana: number): DisponibilidadVeterinario[] {
+    return this.disponibilidadesVeterinario()
+      .filter(item => item.diaSemana === diaSemana)
+      .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio));
+  }
+
   excepcionesOrdenadas(): ExcepcionDisponibilidadVeterinario[] {
     return [...this.excepciones()].sort((a, b) =>
       `${b.fecha}-${a.nombreVeterinario || ''}-${a.horaInicio || ''}`.localeCompare(`${a.fecha}-${b.nombreVeterinario || ''}-${b.horaInicio || ''}`)
     );
   }
 
+  excepcionesVeterinario(): ExcepcionDisponibilidadVeterinario[] {
+    return this.excepcionesOrdenadas().filter(item => item.idVeterinario === this.veterinarioActivo());
+  }
+
   etiquetaTipoExcepcion(tipo: TipoExcepcionDisponibilidad): string {
     return tipo === 'disponible' ? 'Horario especial' : 'No disponible';
+  }
+
+  previewHuecos(inicio: string | null | undefined, fin: string | null | undefined, intervalo = 30): string[] {
+    if (!inicio || !fin || inicio >= fin) return [];
+    const [hi, mi] = inicio.split(':').map(Number);
+    const [hf, mf] = fin.split(':').map(Number);
+    const huecos: string[] = [];
+    let actual = hi * 60 + mi;
+    const limite = hf * 60 + mf;
+    while (actual + intervalo <= limite && huecos.length < 12) {
+      huecos.push(`${Math.floor(actual / 60).toString().padStart(2, '0')}:${(actual % 60).toString().padStart(2, '0')}`);
+      actual += intervalo;
+    }
+    return huecos;
+  }
+
+  resumenVeterinario(): string {
+    const totalTramos = this.disponibilidadesVeterinario().filter(item => item.activo).length;
+    const diasActivos = new Set(this.disponibilidadesVeterinario().filter(item => item.activo).map(item => item.diaSemana)).size;
+    const excepcionesActivas = this.excepcionesVeterinario().filter(item => item.activo).length;
+    return `${totalTramos} tramo${totalTramos === 1 ? '' : 's'} activo${totalTramos === 1 ? '' : 's'} en ${diasActivos} dia${diasActivos === 1 ? '' : 's'} - ${excepcionesActivas} excepcion${excepcionesActivas === 1 ? '' : 'es'}`;
   }
 
   private formVacio(idVeterinario = 0): DisponibilidadVeterinarioDto {

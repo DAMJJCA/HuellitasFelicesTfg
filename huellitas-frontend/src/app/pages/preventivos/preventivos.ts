@@ -1,16 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Subject, catchError, combineLatest, map, of, shareReplay, startWith, switchMap } from 'rxjs';
 import { AuthService } from '../../auth/auth.service';
 import { MascotaService, Mascotas } from '../../service/mascota';
 import { Preventivo, PreventivoDto, PreventivoService, TipoPreventivo } from '../../service/preventivo';
 import { VeterinarioService } from '../../service/veterinario';
+import { EmptyStateComponent } from '../../shared/empty-state/empty-state';
+import { PageHeaderComponent } from '../../shared/page-header/page-header';
 
 @Component({
   selector: 'app-preventivos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EmptyStateComponent, PageHeaderComponent],
   templateUrl: './preventivos.html'
 })
 export class PreventivosComponent {
@@ -18,6 +21,7 @@ export class PreventivosComponent {
   private mascotaService = inject(MascotaService);
   private veterinarioService = inject(VeterinarioService);
   private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
 
   private refrescar$ = new Subject<void>();
   private buscar$ = new BehaviorSubject<string>('');
@@ -47,6 +51,7 @@ export class PreventivosComponent {
         const coincideTexto = !texto ||
           item.nombre.toLowerCase().includes(texto) ||
           (item.nombreMascota || '').toLowerCase().includes(texto) ||
+          this.etiquetaMascotaPorId(item.idMascota).toLowerCase().includes(texto) ||
           (item.nombreVeterinario || '').toLowerCase().includes(texto) ||
           (item.observaciones || '').toLowerCase().includes(texto);
         return coincideTipo && coincideTexto;
@@ -76,8 +81,16 @@ export class PreventivosComponent {
   }
 
   ngOnInit(): void {
+    const mascotaParam = this.route.snapshot.queryParamMap.get('mascota');
+    const abrirNuevo = this.route.snapshot.queryParamMap.get('nuevo') === '1';
+
     this.mascotaService.getMascotas().subscribe({
-      next: mascotas => this.mascotas = mascotas,
+      next: mascotas => {
+        this.mascotas = mascotas;
+        if (mascotaParam && abrirNuevo && this.puedeGestionar) {
+          this.abrirNuevo(mascotaParam);
+        }
+      },
       error: () => this.errorMsg = 'No se pudieron cargar las mascotas.'
     });
 
@@ -98,9 +111,10 @@ export class PreventivosComponent {
     this.tipoFiltro$.next(tipo);
   }
 
-  abrirNuevo() {
+  abrirNuevo(idMascota = '') {
     this.editando = null;
     this.form = this.crearFormVacio();
+    if (idMascota) this.form.idMascota = idMascota;
     this.mostrandoFormulario = true;
   }
 
@@ -228,6 +242,18 @@ export class PreventivosComponent {
 
   etiquetaTipo(tipo: TipoPreventivo): string {
     return tipo === 'vacuna' ? 'Vacuna' : 'Desparasitacion';
+  }
+
+  etiquetaMascotaPorId(idMascota: number): string {
+    const mascota = this.mascotas.find(m => m.idMascota === idMascota);
+    if (!mascota) return '';
+    return this.etiquetaMascota(mascota);
+  }
+
+  etiquetaMascota(mascota: Mascotas): string {
+    const duenio = mascota.cliente ? `${mascota.cliente.nombre} ${mascota.cliente.apellidos}` : 'Sin duenio';
+    const chip = mascota.numeroChip ? `Chip ${mascota.numeroChip}` : 'Sin chip';
+    return `${mascota.nombre} - ${chip} - ${duenio} - ${mascota.especie || 'Sin especie'} - #${mascota.idMascota}`;
   }
 
   private crearFormVacio() {

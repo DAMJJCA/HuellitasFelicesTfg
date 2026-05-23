@@ -25,6 +25,7 @@
       <div class="mt-4 grid gap-3 text-sm md:grid-cols-2">
         <div>
           <p><span class="font-semibold">Paciente:</span> {{ m.nombre }} #{{ m.idMascota }}</p>
+          <p><span class="font-semibold">Chip:</span> {{ m.numeroChip || 'Sin chip' }}</p>
           <p><span class="font-semibold">Especie:</span> {{ m.especie || 'Sin especie' }}</p>
           <p><span class="font-semibold">Raza:</span> {{ m.raza || 'Sin raza' }}</p>
           <p><span class="font-semibold">Nacimiento:</span> {{ formatearFecha(m.fechaNacimiento) }}</p>

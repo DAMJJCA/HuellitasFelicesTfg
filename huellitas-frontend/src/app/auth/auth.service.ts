@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { API_BASE_URL } from '../core/api.config';
 
 export interface LoginRequest {
   email: string;
@@ -29,7 +30,7 @@ const USER_KEY = 'huellitas_user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly api = 'http://localhost:8080/api/auth';
+  private readonly api = `${API_BASE_URL}/auth`;
 
   constructor(private http: HttpClient) {}
 

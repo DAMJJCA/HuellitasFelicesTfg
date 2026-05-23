@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../core/api.config';
 
 export interface DisponibilidadVeterinario {
   idDisponibilidad?: number;
@@ -32,7 +33,7 @@ export type ExcepcionDisponibilidadVeterinarioDto = Omit<ExcepcionDisponibilidad
 
 @Injectable({ providedIn: 'root' })
 export class DisponibilidadVeterinarioService {
-  private api = 'http://localhost:8080/api/disponibilidad-veterinarios';
+  private api = `${API_BASE_URL}/disponibilidad-veterinarios`;
 
   constructor(private http: HttpClient) {}
 

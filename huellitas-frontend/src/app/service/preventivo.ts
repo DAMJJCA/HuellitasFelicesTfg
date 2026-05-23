@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../core/api.config';
 
 export type TipoPreventivo = 'vacuna' | 'desparasitacion';
 
@@ -28,7 +29,7 @@ export interface ReminderResponse {
 
 @Injectable({ providedIn: 'root' })
 export class PreventivoService {
-  private api = 'http://localhost:8080/api/preventivos';
+  private api = `${API_BASE_URL}/preventivos`;
 
   constructor(private http: HttpClient) {}
 

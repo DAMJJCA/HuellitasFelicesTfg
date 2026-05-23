@@ -72,6 +72,11 @@ export class ClientesComponent {
     this.router.navigate(['/clientes', c.idCliente, 'editar']);
   }
 
+  verFicha(c: Cliente) {
+    if (!c.idCliente) return;
+    this.router.navigate(['/clientes', c.idCliente]);
+  }
+
   abrirEliminar(c: Cliente) {
     this.seleccionado = c;
     this.mostrandoConfirmacion = true;

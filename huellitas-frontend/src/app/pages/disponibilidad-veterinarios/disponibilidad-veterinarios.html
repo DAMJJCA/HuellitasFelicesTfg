@@ -1,8 +1,8 @@
 <section class="min-h-screen bg-slate-50 px-6 py-6 text-slate-800 dark:bg-slate-900 dark:text-slate-100 md:px-10 md:py-8">
   <div class="mb-6">
-    <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Disponibilidad veterinaria</h1>
+    <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Agenda de disponibilidad</h1>
     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-      Define los tramos horarios en los que cada veterinario puede recibir citas.
+      Configura el horario habitual semanal y los cambios puntuales por fecha.
     </p>
   </div>
 
@@ -14,24 +14,34 @@
     {{ successMsg }}
   </div>
 
+  <div class="mb-5 rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <h2 class="text-lg font-semibold">Veterinario</h2>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ resumenVeterinario() }}</p>
+      </div>
+
+      <select [ngModel]="veterinarioActivo()"
+              (ngModelChange)="seleccionarVeterinario($event)"
+              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900 lg:w-96">
+        <option *ngFor="let v of veterinarios()" [ngValue]="v.idVeterinario">
+          {{ v.nombre }} - {{ v.especialidad || 'Sin especialidad' }} - #{{ v.idVeterinario }}
+        </option>
+      </select>
+    </div>
+  </div>
+
   <div class="grid gap-5 xl:grid-cols-[minmax(320px,420px),1fr]">
     <form class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800"
           (ngSubmit)="guardar()">
-      <h2 class="text-lg font-semibold">{{ editandoId ? 'Editar tramo' : 'Nuevo tramo' }}</h2>
+      <div>
+        <p class="text-sm font-medium uppercase tracking-wide text-teal-700 dark:text-teal-300">Horario habitual semanal</p>
+        <h2 class="mt-1 text-xl font-semibold">{{ editandoId ? 'Editar bloque semanal' : 'Nuevo bloque semanal' }}</h2>
+      </div>
 
-      <div class="mt-4 space-y-4">
+      <div class="mt-5 space-y-4">
         <label class="block text-sm">
-          <span class="mb-1 block font-medium">Veterinario</span>
-          <select name="idVeterinario" required [(ngModel)]="form.idVeterinario"
-                  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900">
-            <option *ngFor="let v of veterinarios()" [ngValue]="v.idVeterinario">
-              {{ v.nombre }} - {{ v.especialidad }} - #{{ v.idVeterinario }}
-            </option>
-          </select>
-        </label>
-
-        <label class="block text-sm">
-          <span class="mb-1 block font-medium">Dia</span>
+          <span class="mb-1 block font-medium">Dia de la semana</span>
           <select name="diaSemana" required [(ngModel)]="form.diaSemana"
                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900">
             <option *ngFor="let dia of dias" [ngValue]="dia.value">{{ dia.label }}</option>
@@ -52,79 +62,84 @@
           </label>
         </div>
 
+        <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900/50">
+          <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Vista previa de huecos de 30 min</p>
+          <div class="mt-2 flex flex-wrap gap-1.5">
+            <span *ngFor="let hueco of previewHuecos(form.horaInicio, form.horaFin)"
+                  class="rounded-md bg-white px-2 py-1 font-mono text-xs text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700">
+              {{ hueco }}
+            </span>
+            <span *ngIf="previewHuecos(form.horaInicio, form.horaFin).length === 0" class="text-sm text-slate-500 dark:text-slate-400">
+              Elige un tramo valido.
+            </span>
+          </div>
+        </div>
+
         <label class="flex items-center gap-2 text-sm">
           <input type="checkbox" name="activo" [(ngModel)]="form.activo"
                  class="h-4 w-4 rounded border-slate-300 text-teal-600">
-          Activo
+          Bloque activo
         </label>
       </div>
 
       <div class="mt-5 flex justify-end gap-2">
-        <button *ngIf="editandoId"
-                type="button"
+        <button *ngIf="editandoId" type="button"
                 class="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
                 (click)="cancelarEdicion()">
           Cancelar
         </button>
         <button type="submit"
                 class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
-          {{ editandoId ? 'Guardar cambios' : 'Crear tramo' }}
+          {{ editandoId ? 'Guardar cambios' : 'Anadir bloque' }}
         </button>
       </div>
     </form>
 
     <div class="rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
       <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-700">
-        <h2 class="text-lg font-semibold">Horarios configurados</h2>
+        <h2 class="text-lg font-semibold">Semana habitual</h2>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Horarios activos e inactivos del veterinario seleccionado.
+        </p>
       </div>
 
       <div *ngIf="cargando()" class="p-5 text-sm text-slate-500 dark:text-slate-400">
         Cargando disponibilidad...
       </div>
 
-      <div *ngIf="!cargando() && disponibilidadesOrdenadas().length === 0" class="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-        Todavia no hay tramos configurados.
-      </div>
+      <div *ngIf="!cargando()" class="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-7">
+        <article *ngFor="let dia of dias"
+                 class="min-h-44 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900/40">
+          <div class="mb-3 flex items-center justify-between gap-2">
+            <div>
+              <p class="text-xs uppercase text-slate-500 dark:text-slate-400">{{ diaCorto(dia.value) }}</p>
+              <h3 class="font-semibold">{{ dia.label }}</h3>
+            </div>
+            <span class="rounded-full bg-white px-2 py-1 text-xs text-slate-600 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
+              {{ disponibilidadesDia(dia.value).length }}
+            </span>
+          </div>
 
-      <div *ngIf="!cargando() && disponibilidadesOrdenadas().length > 0" class="overflow-x-auto">
-        <table class="min-w-full text-left text-sm">
-          <thead class="bg-slate-50 text-xs uppercase text-slate-600 dark:bg-slate-900/40 dark:text-slate-300">
-            <tr>
-              <th class="px-5 py-3">Veterinario</th>
-              <th class="px-5 py-3">Dia</th>
-              <th class="px-5 py-3">Horario</th>
-              <th class="px-5 py-3">Estado</th>
-              <th class="px-5 py-3 text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-            <tr *ngFor="let item of disponibilidadesOrdenadas()" class="hover:bg-slate-50/60 dark:hover:bg-slate-700/30">
-              <td class="px-5 py-4 font-medium">{{ item.nombreVeterinario || nombreVeterinario(item.idVeterinario) }}</td>
-              <td class="px-5 py-4">{{ etiquetaDia(item.diaSemana) }}</td>
-              <td class="px-5 py-4 font-mono text-xs">{{ item.horaInicio }} - {{ item.horaFin }}</td>
-              <td class="px-5 py-4">
-                <span class="rounded-full px-2.5 py-1 text-xs font-medium"
+          <div *ngIf="disponibilidadesDia(dia.value).length === 0" class="rounded-md border border-dashed border-slate-300 p-3 text-center text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+            Sin horario
+          </div>
+
+          <div class="space-y-2">
+            <div *ngFor="let item of disponibilidadesDia(dia.value)"
+                 class="rounded-md bg-white p-2 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
+                 [ngClass]="!item.activo ? 'opacity-55' : ''">
+              <p class="font-mono text-sm font-semibold">{{ item.horaInicio }} - {{ item.horaFin }}</p>
+              <div class="mt-3 grid gap-1">
+                <span class="w-full rounded-md px-2 py-1 text-center text-xs"
                       [ngClass]="item.activo ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200'">
                   {{ item.activo ? 'Activo' : 'Inactivo' }}
                 </span>
-              </td>
-              <td class="px-5 py-4">
-                <div class="flex justify-end gap-2">
-                  <button type="button"
-                          class="rounded-md border border-slate-300 px-3 py-2 text-xs hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
-                          (click)="editar(item)">
-                    Editar
-                  </button>
-                  <button type="button"
-                          class="rounded-md bg-rose-600 px-3 py-2 text-xs text-white hover:bg-rose-700"
-                          (click)="eliminar(item)">
-                    Eliminar
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                <button type="button" class="w-full rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700" (click)="editar(item)">Editar</button>
+                <button type="button" class="w-full rounded bg-rose-600 px-2 py-1 text-xs text-white hover:bg-rose-700" (click)="eliminar(item)">Borrar</button>
+              </div>
+            </div>
+          </div>
+        </article>
       </div>
     </div>
   </div>
@@ -132,35 +147,25 @@
   <div class="mt-6 grid gap-5 xl:grid-cols-[minmax(320px,420px),1fr]">
     <form class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800"
           (ngSubmit)="guardarExcepcion()">
-      <h2 class="text-lg font-semibold">{{ editandoExcepcionId ? 'Editar excepcion' : 'Nueva excepcion por fecha' }}</h2>
-      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-        Tiene prioridad sobre el horario semanal para esa fecha concreta.
-      </p>
+      <div>
+        <p class="text-sm font-medium uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Cambios puntuales</p>
+        <h2 class="mt-1 text-xl font-semibold">{{ editandoExcepcionId ? 'Editar fecha concreta' : 'Nueva fecha concreta' }}</h2>
+      </div>
 
-      <div class="mt-4 space-y-4">
+      <div class="mt-5 space-y-4">
         <label class="block text-sm">
-          <span class="mb-1 block font-medium">Veterinario</span>
-          <select name="excepcionIdVeterinario" required [(ngModel)]="excepcionForm.idVeterinario"
-                  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900">
-            <option *ngFor="let v of veterinarios()" [ngValue]="v.idVeterinario">
-              {{ v.nombre }} - {{ v.especialidad }} - #{{ v.idVeterinario }}
-            </option>
-          </select>
-        </label>
-
-        <label class="block text-sm">
-          <span class="mb-1 block font-medium">Fecha concreta</span>
+          <span class="mb-1 block font-medium">Fecha</span>
           <input type="date" name="fechaExcepcion" required [min]="minFecha" [(ngModel)]="excepcionForm.fecha"
                  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900">
         </label>
 
         <label class="block text-sm">
-          <span class="mb-1 block font-medium">Tipo</span>
+          <span class="mb-1 block font-medium">Que ocurre ese dia</span>
           <select name="tipoExcepcion" required [ngModel]="excepcionForm.tipo"
                   (ngModelChange)="onTipoExcepcionChange($event)"
                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900">
-            <option value="no_disponible">No disponible</option>
-            <option value="disponible">Horario especial disponible</option>
+            <option value="no_disponible">No trabaja ese dia</option>
+            <option value="disponible">Tiene horario especial</option>
           </select>
         </label>
 
@@ -178,86 +183,82 @@
           </label>
         </div>
 
+        <div *ngIf="excepcionForm.tipo === 'disponible'" class="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900/50">
+          <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Huecos especiales de 30 min</p>
+          <div class="mt-2 flex flex-wrap gap-1.5">
+            <span *ngFor="let hueco of previewHuecos(excepcionForm.horaInicio, excepcionForm.horaFin)"
+                  class="rounded-md bg-white px-2 py-1 font-mono text-xs text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700">
+              {{ hueco }}
+            </span>
+          </div>
+        </div>
+
         <label class="block text-sm">
           <span class="mb-1 block font-medium">Motivo</span>
           <input type="text" name="motivoExcepcion" [(ngModel)]="excepcionForm.motivo"
-                 placeholder="Vacaciones, guardia, baja, reunion..."
+                 placeholder="Vacaciones, festivo, guardia, baja..."
                  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-900">
         </label>
 
         <label class="flex items-center gap-2 text-sm">
           <input type="checkbox" name="activoExcepcion" [(ngModel)]="excepcionForm.activo"
                  class="h-4 w-4 rounded border-slate-300 text-teal-600">
-          Activa
+          Cambio activo
         </label>
       </div>
 
       <div class="mt-5 flex justify-end gap-2">
-        <button *ngIf="editandoExcepcionId"
-                type="button"
+        <button *ngIf="editandoExcepcionId" type="button"
                 class="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
                 (click)="cancelarEdicionExcepcion()">
           Cancelar
         </button>
         <button type="submit"
                 class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">
-          {{ editandoExcepcionId ? 'Guardar cambios' : 'Crear excepcion' }}
+          {{ editandoExcepcionId ? 'Guardar cambios' : 'Anadir cambio' }}
         </button>
       </div>
     </form>
 
     <div class="rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
       <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-700">
-        <h2 class="text-lg font-semibold">Excepciones de calendario</h2>
+        <h2 class="text-lg font-semibold">Calendario de excepciones</h2>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Estos cambios tienen prioridad sobre la semana habitual.
+        </p>
       </div>
 
-      <div *ngIf="!cargando() && excepcionesOrdenadas().length === 0" class="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-        Todavia no hay excepciones configuradas.
+      <div *ngIf="!cargando() && excepcionesVeterinario().length === 0" class="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+        No hay cambios puntuales para este veterinario.
       </div>
 
-      <div *ngIf="!cargando() && excepcionesOrdenadas().length > 0" class="overflow-x-auto">
-        <table class="min-w-full text-left text-sm">
-          <thead class="bg-slate-50 text-xs uppercase text-slate-600 dark:bg-slate-900/40 dark:text-slate-300">
-            <tr>
-              <th class="px-5 py-3">Veterinario</th>
-              <th class="px-5 py-3">Fecha</th>
-              <th class="px-5 py-3">Tipo</th>
-              <th class="px-5 py-3">Horario</th>
-              <th class="px-5 py-3">Motivo</th>
-              <th class="px-5 py-3 text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-            <tr *ngFor="let item of excepcionesOrdenadas()" class="hover:bg-slate-50/60 dark:hover:bg-slate-700/30">
-              <td class="px-5 py-4 font-medium">{{ item.nombreVeterinario || nombreVeterinario(item.idVeterinario) }}</td>
-              <td class="px-5 py-4">{{ item.fecha }}</td>
-              <td class="px-5 py-4">
-                <span class="rounded-full px-2.5 py-1 text-xs font-medium"
-                      [ngClass]="item.tipo === 'disponible' ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-200' : 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-200'">
-                  {{ etiquetaTipoExcepcion(item.tipo) }}
-                </span>
-              </td>
-              <td class="px-5 py-4 font-mono text-xs">
-                {{ item.tipo === 'disponible' ? (item.horaInicio + ' - ' + item.horaFin) : 'Dia completo' }}
-              </td>
-              <td class="px-5 py-4 text-slate-600 dark:text-slate-300">{{ item.motivo || '-' }}</td>
-              <td class="px-5 py-4">
-                <div class="flex justify-end gap-2">
-                  <button type="button"
-                          class="rounded-md border border-slate-300 px-3 py-2 text-xs hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
-                          (click)="editarExcepcion(item)">
-                    Editar
-                  </button>
-                  <button type="button"
-                          class="rounded-md bg-rose-600 px-3 py-2 text-xs text-white hover:bg-rose-700"
-                          (click)="eliminarExcepcion(item)">
-                    Eliminar
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div *ngIf="!cargando() && excepcionesVeterinario().length > 0" class="grid gap-3 p-4 md:grid-cols-2 2xl:grid-cols-3">
+        <article *ngFor="let item of excepcionesVeterinario()"
+                 class="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="font-semibold">{{ item.fecha }}</p>
+              <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ item.motivo || 'Sin motivo' }}</p>
+            </div>
+            <span class="rounded-full px-2.5 py-1 text-xs font-medium"
+                  [ngClass]="item.tipo === 'disponible' ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-200' : 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-200'">
+              {{ etiquetaTipoExcepcion(item.tipo) }}
+            </span>
+          </div>
+
+          <p class="mt-4 font-mono text-sm">
+            {{ item.tipo === 'disponible' ? (item.horaInicio + ' - ' + item.horaFin) : 'Dia completo bloqueado' }}
+          </p>
+
+          <div class="mt-4 flex justify-end gap-2">
+            <button type="button" class="rounded-md border border-slate-300 px-3 py-2 text-xs hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700" (click)="editarExcepcion(item)">
+              Editar
+            </button>
+            <button type="button" class="rounded-md bg-rose-600 px-3 py-2 text-xs text-white hover:bg-rose-700" (click)="eliminarExcepcion(item)">
+              Eliminar
+            </button>
+          </div>
+        </article>
       </div>
     </div>
   </div>

@@ -108,6 +108,7 @@ export class CitasComponent {
           (c.motivo ?? '').toLowerCase().includes(t) ||
           (c.estado ?? '').toLowerCase().includes(t) ||
           (c.mascota?.nombre ?? '').toLowerCase().includes(t) ||
+          (c.mascota?.numeroChip ?? '').toLowerCase().includes(t) ||
           (c.veterinario?.nombre ?? '').toLowerCase().includes(t);
 
           return coincideEstado && coincideVeterinario && coincideTexto;
@@ -218,6 +219,13 @@ export class CitasComponent {
 
   duracionCita(cita: Cita): number {
     return cita.idCita ? (this.duracionesCitas.get(cita.idCita) || cita.duracionMinutos || 30) : (cita.duracionMinutos || 30);
+  }
+
+  etiquetaMascota(cita: Cita): string {
+    const mascota = cita.mascota;
+    if (!mascota) return 'Mascota';
+    const chip = mascota.numeroChip ? `Chip ${mascota.numeroChip}` : 'Sin chip';
+    return `${mascota.nombre} - ${chip}`;
   }
 
   clasesEstado(estado: string): string {

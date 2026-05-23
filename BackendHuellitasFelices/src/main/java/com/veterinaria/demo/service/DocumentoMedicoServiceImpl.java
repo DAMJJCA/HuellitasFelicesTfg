@@ -34,6 +34,7 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
     private final JdbcTemplate jdbcTemplate;
     private final MascotaRepository mascotaRepository;
     private final CurrentUserService currentUserService;
+    private final DocumentoMedicoArchivoStorageService archivoStorageService;
 
     private final RowMapper<DocumentoMedicoResponse> rowMapper = (rs, rowNum) -> {
         DocumentoMedicoResponse response = new DocumentoMedicoResponse();
@@ -59,10 +60,12 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
     public DocumentoMedicoServiceImpl(
             JdbcTemplate jdbcTemplate,
             MascotaRepository mascotaRepository,
-            CurrentUserService currentUserService) {
+            CurrentUserService currentUserService,
+            DocumentoMedicoArchivoStorageService archivoStorageService) {
         this.jdbcTemplate = jdbcTemplate;
         this.mascotaRepository = mascotaRepository;
         this.currentUserService = currentUserService;
+        this.archivoStorageService = archivoStorageService;
     }
 
     @Override
@@ -179,7 +182,11 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
         if (currentUserService.isCliente()) {
             throw new AccessDeniedException("Los clientes no pueden eliminar documentos medicos");
         }
+        DocumentoMedicoResponse documento = findById(id);
         jdbcTemplate.update("delete from documentos_medicos where id_documento = ?", id);
+        if (documento != null) {
+            archivoStorageService.eliminarSiExiste(documento.getRutaStorage());
+        }
     }
 
     private String baseSql() {
