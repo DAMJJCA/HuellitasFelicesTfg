@@ -78,6 +78,7 @@ public class MascotaServiceImpl implements MascotaService {
         Cliente cliente = clienteRepository.findById(idClienteDestino)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
+        normalizarYValidarChip(mascota);
         mascota.setCliente(cliente);
         return repository.save(mascota);
     }
@@ -93,5 +94,28 @@ public class MascotaServiceImpl implements MascotaService {
             throw new AccessDeniedException("No tienes acceso para eliminar esta mascota");
         }
         repository.deleteById(id);
+    }
+
+    private void normalizarYValidarChip(Mascota mascota) {
+        String chip = mascota.getNumeroChip();
+        if (chip == null || chip.isBlank()) {
+            mascota.setNumeroChip(null);
+            return;
+        }
+
+        String normalizado = chip.trim().replace(" ", "");
+        if (normalizado.length() > 50) {
+            throw new IllegalArgumentException("El numero de chip no puede superar 50 caracteres");
+        }
+
+        boolean duplicado = mascota.getIdMascota() == null
+                ? repository.existsByNumeroChipIgnoreCase(normalizado)
+                : repository.existsByNumeroChipIgnoreCaseAndIdMascotaNot(normalizado, mascota.getIdMascota());
+
+        if (duplicado) {
+            throw new IllegalArgumentException("Ya existe una mascota registrada con ese numero de chip");
+        }
+
+        mascota.setNumeroChip(normalizado);
     }
 }

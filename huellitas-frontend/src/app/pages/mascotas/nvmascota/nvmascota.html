@@ -19,6 +19,13 @@
         <input type="text" required name="nombre" [(ngModel)]="mascota.nombre" class="w-full rounded-md border px-3 py-2 text-sm">
       </div>
 
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Numero de chip</label>
+        <input type="text" maxlength="50" name="numeroChip" [(ngModel)]="mascota.numeroChip"
+               class="w-full rounded-md border px-3 py-2 text-sm"
+               placeholder="Ej. 941000024681357">
+      </div>
+
       <div *ngIf="!esCliente" class="mb-4">
         <label class="block text-sm mb-1">Dueno <span class="text-rose-600">*</span></label>
         <select name="idCliente" required [(ngModel)]="mascota.idCliente" class="w-full rounded-md border px-3 py-2 text-sm">

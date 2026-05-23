@@ -9,7 +9,7 @@
   </div>
 
   <ng-container *ngIf="!cargando() && mascota() as m">
-    <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div class="mb-5 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
       <div>
         <button type="button" class="mb-3 text-sm font-medium text-teal-700 dark:text-teal-300" (click)="volver()">
           Volver a mascotas
@@ -18,43 +18,62 @@
         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
           {{ m.especie || 'Sin especie' }} - {{ m.raza || 'Sin raza' }} - {{ edad(m.fechaNacimiento) }}
         </p>
+        <p class="mt-1 font-mono text-sm text-slate-600 dark:text-slate-300">
+          {{ m.numeroChip ? 'Chip ' + m.numeroChip : 'Sin chip registrado' }}
+        </p>
       </div>
 
       <div class="flex flex-wrap gap-2">
-        <button *ngIf="puedeGestionarMascota"
-                type="button"
+        <button *ngIf="puedeGestionarMascota" type="button"
                 class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                 (click)="editar()">
           Editar mascota
         </button>
-        <button *ngIf="puedeGestionarMascota"
-                type="button"
+        <button *ngIf="puedeGestionarMascota" type="button"
                 class="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
                 (click)="crearCita()">
           Nueva cita
         </button>
         <button type="button"
-                class="rounded-lg border border-teal-300 bg-teal-50 px-4 py-2.5 text-sm font-medium text-teal-800 hover:bg-teal-100 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-100"
+                class="rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2.5 text-sm font-medium text-indigo-800 hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-100 dark:hover:bg-indigo-900/60"
+                (click)="irConsultas()">
+          Nueva consulta
+        </button>
+        <button type="button"
+                class="rounded-lg border border-teal-300 bg-teal-50 px-4 py-2.5 text-sm font-medium text-teal-800 hover:bg-teal-100 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-100 dark:hover:bg-teal-900/60"
                 (click)="irPreventivos()">
-          Vacunas
+          Registrar preventivo
         </button>
         <button type="button"
-                class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                (click)="irDocumentos()">
-          Documentos
+                class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                (click)="subirDocumento()">
+          Subir documento
         </button>
         <button type="button"
-                class="rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2.5 text-sm font-medium text-indigo-800 hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-100"
+                class="rounded-lg border border-indigo-300 bg-white px-4 py-2.5 text-sm font-medium text-indigo-800 hover:bg-indigo-50 dark:border-indigo-700 dark:bg-slate-800 dark:text-indigo-100 dark:hover:bg-indigo-900/40"
                 (click)="exportarHistorial()">
           Exportar historial
         </button>
       </div>
     </div>
 
-    <div class="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+    <div *ngIf="!m.numeroChip || preventivosVencidos().length > 0" class="mb-5 grid gap-3 lg:grid-cols-2">
+      <div *ngIf="!m.numeroChip" class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-100">
+        Esta mascota no tiene chip registrado.
+      </div>
+      <div *ngIf="preventivosVencidos().length > 0" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-100">
+        Hay {{ preventivosVencidos().length }} preventivo{{ preventivosVencidos().length === 1 ? '' : 's' }} vencido{{ preventivosVencidos().length === 1 ? '' : 's' }}.
+      </div>
+    </div>
+
+    <div class="mb-5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
       <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <p class="text-sm text-slate-500 dark:text-slate-400">Dueno</p>
         <h2 class="mt-2 text-lg font-semibold">{{ m.cliente.nombre }} {{ m.cliente.apellidos }}</h2>
+      </div>
+      <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <p class="text-sm text-slate-500 dark:text-slate-400">Chip</p>
+        <h2 class="mt-2 font-mono text-lg font-semibold">{{ m.numeroChip || 'Sin chip' }}</h2>
       </div>
       <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <p class="text-sm text-slate-500 dark:text-slate-400">Peso</p>
@@ -70,145 +89,222 @@
       </div>
     </div>
 
-    <div class="mb-6 grid grid-cols-1 gap-3 md:grid-cols-5">
-      <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div class="mb-5 grid grid-cols-2 gap-3 md:grid-cols-5">
+      <button type="button" class="rounded-lg border border-slate-200 bg-white p-4 text-left shadow-sm dark:border-slate-700 dark:bg-slate-800" (click)="cambiarPestana('citas')">
         <p class="text-sm text-slate-500 dark:text-slate-400">Citas</p>
         <p class="mt-2 text-3xl font-semibold">{{ citas().length }}</p>
-      </div>
-      <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      </button>
+      <button type="button" class="rounded-lg border border-slate-200 bg-white p-4 text-left shadow-sm dark:border-slate-700 dark:bg-slate-800" (click)="cambiarPestana('consultas')">
         <p class="text-sm text-slate-500 dark:text-slate-400">Consultas</p>
         <p class="mt-2 text-3xl font-semibold">{{ consultas().length }}</p>
-      </div>
-      <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      </button>
+      <button type="button" class="rounded-lg border border-slate-200 bg-white p-4 text-left shadow-sm dark:border-slate-700 dark:bg-slate-800" (click)="cambiarPestana('historial')">
         <p class="text-sm text-slate-500 dark:text-slate-400">Tratamientos</p>
         <p class="mt-2 text-3xl font-semibold">{{ tratamientos().length }}</p>
-      </div>
-      <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      </button>
+      <button type="button" class="rounded-lg border border-slate-200 bg-white p-4 text-left shadow-sm dark:border-slate-700 dark:bg-slate-800" (click)="cambiarPestana('preventivos')">
         <p class="text-sm text-slate-500 dark:text-slate-400">Preventivos</p>
         <p class="mt-2 text-3xl font-semibold">{{ preventivos().length }}</p>
-      </div>
-      <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      </button>
+      <button type="button" class="rounded-lg border border-slate-200 bg-white p-4 text-left shadow-sm dark:border-slate-700 dark:bg-slate-800" (click)="cambiarPestana('documentos')">
         <p class="text-sm text-slate-500 dark:text-slate-400">Documentos</p>
         <p class="mt-2 text-3xl font-semibold">{{ documentos().length }}</p>
-      </div>
+      </button>
     </div>
 
-    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
-      <div class="space-y-6 xl:col-span-2">
-        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <h2 class="text-lg font-semibold">Proximas citas</h2>
-          <div *ngIf="proximasCitas().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            No hay proximas citas activas.
-          </div>
-          <div class="mt-4 space-y-3">
-            <div *ngFor="let cita of proximasCitas()" class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
-              <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p class="font-medium">{{ formatearFecha(cita.fecha) }} - {{ cita.hora }}</p>
-                  <p class="text-sm text-slate-500 dark:text-slate-400">{{ cita.motivo }} con {{ cita.veterinario.nombre }}</p>
-                </div>
-                <span class="w-fit rounded-full px-2 py-1 text-xs" [ngClass]="claseEstado(cita.estado)">
-                  {{ etiquetaEstado(cita.estado) }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <h2 class="text-lg font-semibold">Consultas recientes</h2>
-          <div *ngIf="consultas().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            No hay consultas registradas.
-          </div>
-          <div class="mt-4 space-y-3">
-            <div *ngFor="let consulta of consultas().slice(0, 5)" class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
-              <p class="font-medium">{{ formatearFecha(consulta.fecha) }} - {{ consulta.hora }}</p>
-              <p class="mt-1 text-sm"><span class="font-medium">Diagnostico:</span> {{ consulta.diagnostico || 'Sin diagnostico' }}</p>
-              <p class="text-sm text-slate-500 dark:text-slate-400">{{ consulta.observaciones || 'Sin observaciones' }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <h2 class="text-lg font-semibold">Tratamientos</h2>
-          <div *ngIf="tratamientos().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            No hay tratamientos registrados.
-          </div>
-          <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div *ngFor="let tratamiento of tratamientos().slice(0, 6)" class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
-              <p class="font-medium">{{ tratamiento.nombre }}</p>
-              <p class="text-sm text-slate-500 dark:text-slate-400">{{ tratamiento.medicamento || 'Sin medicamento' }}</p>
-              <p class="mt-1 text-sm">{{ tratamiento.dosis }} {{ tratamiento.duracion }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="space-y-6">
-        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <h2 class="text-lg font-semibold">Preventivos proximos</h2>
-          <div *ngIf="proximosPreventivos().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            No hay proximas dosis registradas.
-          </div>
-          <div class="mt-4 space-y-3">
-            <div *ngFor="let item of proximosPreventivos()" class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <p class="font-medium">{{ item.nombre }}</p>
-                  <p class="text-sm text-slate-500 dark:text-slate-400">{{ formatearFecha(item.proximaDosis) }}</p>
-                </div>
-                <span class="rounded-full px-2 py-1 text-xs"
-                      [ngClass]="item.tipo === 'vacuna' ? 'bg-teal-100 text-teal-800' : 'bg-amber-100 text-amber-800'">
-                  {{ item.tipo === 'vacuna' ? 'Vacuna' : 'Desparasitacion' }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <div class="mb-4 flex items-center justify-between gap-3">
-            <h2 class="text-lg font-semibold">Documentos</h2>
-            <button type="button" class="text-sm font-medium text-teal-700 dark:text-teal-300" (click)="irDocumentos()">Ver</button>
-          </div>
-          <div *ngIf="documentos().length === 0" class="text-sm text-slate-500 dark:text-slate-400">
-            No hay documentos registrados.
-          </div>
-          <div class="space-y-3">
-            <div *ngFor="let doc of documentos().slice(0, 5)" class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <p class="font-medium">{{ doc.nombre }}</p>
-                  <p class="text-sm text-slate-500 dark:text-slate-400">
-                    {{ etiquetaTipoDocumento(doc.tipo) }} - {{ formatearFecha(doc.fecha) }}
-                  </p>
-                </div>
-                <button type="button"
-                        class="rounded-md border border-teal-300 bg-teal-50 px-3 py-1.5 text-xs font-medium text-teal-800 hover:bg-teal-100"
-                        (click)="abrirDocumento(doc)">
-                  Abrir
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <h2 class="text-lg font-semibold">Todas las citas</h2>
-          <div *ngIf="citas().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            No hay citas registradas.
-          </div>
-          <div class="mt-4 max-h-[420px] space-y-3 overflow-y-auto pr-1">
-            <div *ngFor="let cita of citas()" class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
-              <p class="font-medium">{{ formatearFecha(cita.fecha) }} - {{ cita.hora }}</p>
-              <p class="text-sm text-slate-500 dark:text-slate-400">{{ cita.motivo || 'Sin motivo' }}</p>
-              <span class="mt-2 inline-flex rounded-full px-2 py-1 text-xs" [ngClass]="claseEstado(cita.estado)">
-                {{ etiquetaEstado(cita.estado) }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="mb-5 overflow-x-auto border-b border-slate-200 dark:border-slate-700">
+      <nav class="flex min-w-max gap-2">
+        <button *ngFor="let tab of pestanas" type="button"
+                class="border-b-2 px-3 py-3 text-sm font-medium"
+                [ngClass]="pestanaActiva() === tab.id ? 'border-teal-600 text-teal-700 dark:text-teal-300' : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100'"
+                (click)="cambiarPestana(tab.id)">
+          {{ tab.label }}
+        </button>
+      </nav>
     </div>
+
+    <ng-container [ngSwitch]="pestanaActiva()">
+      <div *ngSwitchCase="'resumen'" class="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        <div class="space-y-5 xl:col-span-2">
+          <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="text-lg font-semibold">Proximas citas</h2>
+            <p *ngIf="proximasCitas().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">No hay proximas citas activas.</p>
+            <div class="mt-4 grid gap-3">
+              <article *ngFor="let cita of proximasCitas()" class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p class="font-medium">{{ formatearFecha(cita.fecha) }} - {{ cita.hora }}</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ cita.motivo }} con {{ cita.veterinario.nombre }}</p>
+                  </div>
+                  <span class="w-fit rounded-full px-2 py-1 text-xs" [ngClass]="claseEstado(cita.estado)">{{ etiquetaEstado(cita.estado) }}</span>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="text-lg font-semibold">Ultimas consultas</h2>
+              <button type="button" class="text-sm font-medium text-teal-700 dark:text-teal-300" (click)="cambiarPestana('consultas')">Ver todas</button>
+            </div>
+            <p *ngIf="consultas().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">No hay consultas registradas.</p>
+            <div class="mt-4 grid gap-3">
+              <article *ngFor="let consulta of consultas().slice(0, 4)" class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="font-medium">{{ formatearFecha(consulta.fecha) }} - {{ consulta.hora }}</p>
+                    <p class="mt-1 text-sm"><span class="font-medium">Diagnostico:</span> {{ consulta.diagnostico || 'Sin diagnostico' }}</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ consulta.observaciones || 'Sin observaciones' }}</p>
+                  </div>
+                  <button type="button" class="text-sm font-medium text-teal-700 dark:text-teal-300" (click)="verConsulta(consulta)">Ver ficha</button>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <div class="space-y-5">
+          <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 class="text-lg font-semibold">Preventivos proximos</h2>
+            <p *ngIf="proximosPreventivos().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">No hay proximas dosis registradas.</p>
+            <div class="mt-4 grid gap-3">
+              <article *ngFor="let item of proximosPreventivos()" class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="font-medium">{{ item.nombre }}</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ formatearFecha(item.proximaDosis) }}</p>
+                  </div>
+                  <span class="rounded-full px-2 py-1 text-xs" [ngClass]="clasePreventivo(item)">{{ etiquetaPreventivo(item) }}</span>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="text-lg font-semibold">Ultimos documentos</h2>
+              <button type="button" class="text-sm font-medium text-teal-700 dark:text-teal-300" (click)="cambiarPestana('documentos')">Ver todos</button>
+            </div>
+            <p *ngIf="documentos().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">No hay documentos registrados.</p>
+            <div class="mt-4 grid gap-3">
+              <article *ngFor="let doc of documentos().slice(0, 5)" class="rounded-lg border border-slate-100 p-3 dark:border-slate-700">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="font-medium">{{ doc.nombre }}</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ etiquetaTipoDocumento(doc.tipo) }} - {{ formatearFecha(doc.fecha) }}</p>
+                  </div>
+                  <button type="button" class="text-sm font-medium text-teal-700 dark:text-teal-300" (click)="abrirDocumento(doc)">Abrir</button>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <section *ngSwitchCase="'historial'" class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h2 class="text-lg font-semibold">Historial clinico</h2>
+        <p *ngIf="eventosHistorial().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">No hay eventos registrados.</p>
+        <div class="mt-5 space-y-3">
+          <article *ngFor="let evento of eventosHistorial()" class="rounded-lg border border-slate-100 p-4 dark:border-slate-700">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="rounded-full px-2 py-1 text-xs" [ngClass]="claseEvento(evento.tipo)">{{ etiquetaEvento(evento.tipo) }}</span>
+                  <span *ngIf="evento.estado" class="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700 dark:bg-slate-700 dark:text-slate-100">{{ evento.estado }}</span>
+                </div>
+                <h3 class="mt-2 font-semibold">{{ evento.titulo }}</h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ evento.detalle }}</p>
+              </div>
+              <div class="text-sm text-slate-500 dark:text-slate-400 sm:text-right">
+                <p>{{ formatearFecha(evento.fecha) }}</p>
+                <p *ngIf="evento.hora">{{ evento.hora }}</p>
+                <button *ngIf="evento.accion" type="button" class="mt-2 font-medium text-teal-700 dark:text-teal-300" (click)="evento.accion()">Abrir</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section *ngSwitchCase="'consultas'" class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h2 class="text-lg font-semibold">Consultas</h2>
+        <p *ngIf="consultas().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">No hay consultas registradas.</p>
+        <div class="mt-4 grid gap-3">
+          <article *ngFor="let consulta of consultas()" class="rounded-lg border border-slate-100 p-4 dark:border-slate-700">
+            <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p class="font-medium">{{ formatearFecha(consulta.fecha) }} - {{ consulta.hora }}</p>
+                <p class="mt-1 text-sm"><span class="font-medium">Diagnostico:</span> {{ consulta.diagnostico || 'Sin diagnostico' }}</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400">{{ consulta.observaciones || 'Sin observaciones' }}</p>
+              </div>
+              <button type="button" class="rounded-md border border-teal-300 bg-teal-50 px-3 py-2 text-xs font-medium text-teal-800 hover:bg-teal-100 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-100 dark:hover:bg-teal-900/60" (click)="verConsulta(consulta)">Ver ficha</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section *ngSwitchCase="'documentos'" class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-lg font-semibold">Documentos</h2>
+          <button type="button" class="rounded-md bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700" (click)="subirDocumento()">Subir documento</button>
+        </div>
+        <p *ngIf="documentos().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">No hay documentos registrados.</p>
+        <div class="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <article *ngFor="let doc of documentos()" class="rounded-lg border border-slate-100 p-4 dark:border-slate-700">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-semibold">{{ doc.nombre }}</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">{{ etiquetaTipoDocumento(doc.tipo) }} - {{ formatearFecha(doc.fecha) }}</p>
+                <p *ngIf="doc.nombreArchivo" class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ doc.nombreArchivo }}</p>
+                <p *ngIf="doc.observaciones" class="mt-2 text-sm">{{ doc.observaciones }}</p>
+              </div>
+              <button type="button" class="rounded-md border border-teal-300 bg-teal-50 px-3 py-2 text-xs font-medium text-teal-800 hover:bg-teal-100 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-100 dark:hover:bg-teal-900/60" (click)="abrirDocumento(doc)">Abrir</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section *ngSwitchCase="'preventivos'" class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-lg font-semibold">Preventivos</h2>
+          <button type="button" class="rounded-md bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700" (click)="irPreventivos()">Registrar preventivo</button>
+        </div>
+        <p *ngIf="preventivos().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">No hay preventivos registrados.</p>
+        <div class="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <article *ngFor="let item of preventivos()" class="rounded-lg border border-slate-100 p-4 dark:border-slate-700">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-semibold">{{ item.nombre }}</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Aplicacion: {{ formatearFecha(item.fechaAplicacion) }}</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Proxima dosis: {{ formatearFecha(item.proximaDosis) }}</p>
+                <p *ngIf="item.observaciones" class="mt-2 text-sm">{{ item.observaciones }}</p>
+              </div>
+              <span class="rounded-full px-2 py-1 text-xs" [ngClass]="clasePreventivo(item)">{{ etiquetaPreventivo(item) }}</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section *ngSwitchCase="'citas'" class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-lg font-semibold">Citas</h2>
+          <button *ngIf="puedeGestionarMascota" type="button" class="rounded-md bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700" (click)="crearCita()">Nueva cita</button>
+        </div>
+        <p *ngIf="citas().length === 0" class="mt-3 text-sm text-slate-500 dark:text-slate-400">No hay citas registradas.</p>
+        <div class="mt-4 grid gap-3">
+          <article *ngFor="let cita of citas()" class="rounded-lg border border-slate-100 p-4 dark:border-slate-700">
+            <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p class="font-medium">{{ formatearFecha(cita.fecha) }} - {{ cita.hora }}</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400">{{ cita.motivo || 'Sin motivo' }} con {{ cita.veterinario.nombre }}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="rounded-full px-2 py-1 text-xs" [ngClass]="claseEstado(cita.estado)">{{ etiquetaEstado(cita.estado) }}</span>
+                <button *ngIf="puedeGestionarMascota" type="button" class="rounded-md border border-slate-300 px-3 py-2 text-xs hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700" (click)="editarCita(cita)">Editar</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </ng-container>
   </ng-container>
 </section>

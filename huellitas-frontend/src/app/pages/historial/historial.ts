@@ -115,8 +115,9 @@ export class HistorialComponent {
       ? `${mascota.cliente.nombre} ${mascota.cliente.apellidos}`.trim()
       : 'Sin duenio';
     const especie = mascota.especie || 'Sin especie';
+    const chip = mascota.numeroChip ? `Chip ${mascota.numeroChip}` : 'Sin chip';
     const id = mascota.idMascota ? `#${mascota.idMascota}` : 'Sin ID';
-    return `${mascota.nombre} - ${duenio} - ${especie} - ${id}`;
+    return `${mascota.nombre} - ${chip} - ${duenio} - ${especie} - ${id}`;
   }
 
   filtrarTipo(tipo: TipoEvento | 'todos') {
@@ -271,6 +272,7 @@ export class HistorialComponent {
     return this.normalizarTexto([
       mascota.idMascota,
       mascota.nombre,
+      mascota.numeroChip,
       mascota.especie,
       mascota.raza,
       duenio

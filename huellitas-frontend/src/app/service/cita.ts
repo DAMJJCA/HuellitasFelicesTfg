@@ -1,6 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { API_BASE_URL } from "../core/api.config";
 
 export type EstadoCita = 'programada' | 'confirmada' | 'en_consulta' | 'realizada' | 'cancelada';
 
@@ -22,6 +23,7 @@ export interface Cita {
   mascota: {
     idMascota: number;
     nombre?: string;
+    numeroChip?: string | null;
   };
 
   veterinario: {
@@ -38,7 +40,8 @@ export interface CitaDuracion {
 
 @Injectable({providedIn: 'root'})
 export class CitaService {
-  private api = 'http://localhost:8080/api/citas';
+  private api = `${API_BASE_URL}/citas`;
+  private duracionesApi = `${API_BASE_URL}/citas-duraciones`;
 
   constructor(private http: HttpClient) {}
 
@@ -64,9 +67,9 @@ export class CitaService {
     return this.http.get<Cita>(`${this.api}/${id}`);
   }
   getDuraciones(): Observable<CitaDuracion[]> {
-    return this.http.get<CitaDuracion[]>('http://localhost:8080/api/citas-duraciones');
+    return this.http.get<CitaDuracion[]>(this.duracionesApi);
   }
   guardarDuracion(idCita: number, duracionMinutos: number): Observable<CitaDuracion> {
-    return this.http.put<CitaDuracion>(`http://localhost:8080/api/citas-duraciones/${idCita}`, { duracionMinutos });
+    return this.http.put<CitaDuracion>(`${this.duracionesApi}/${idCita}`, { duracionMinutos });
   }
 }

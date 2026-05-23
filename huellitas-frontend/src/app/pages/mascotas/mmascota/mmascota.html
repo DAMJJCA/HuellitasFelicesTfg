@@ -23,6 +23,13 @@
         <input formControlName="nombre" class="w-full rounded-md border px-3 py-2 text-sm">
       </div>
 
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Numero de chip</label>
+        <input formControlName="numeroChip" maxlength="50"
+               class="w-full rounded-md border px-3 py-2 text-sm"
+               placeholder="Ej. 941000024681357">
+      </div>
+
       <div *ngIf="!esCliente" class="mb-4">
         <label class="block text-sm mb-1">Dueno *</label>
         <select formControlName="idCliente" class="w-full rounded-md border px-3 py-2 text-sm">

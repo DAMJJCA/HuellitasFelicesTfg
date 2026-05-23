@@ -1,6 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { API_BASE_URL } from "../core/api.config";
 
 export interface Consulta {
   idConsulta: number;
@@ -18,7 +19,7 @@ export interface Consulta {
 @Injectable({ providedIn: 'root' })
 export class ConsultaService {
 
-  private api = 'http://localhost:8080/api/consultas';
+  private api = `${API_BASE_URL}/consultas`;
 
   constructor(private http: HttpClient) { }
 

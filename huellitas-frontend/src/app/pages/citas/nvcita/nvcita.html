@@ -24,7 +24,7 @@
                        bg-white dark:bg-slate-900 px-4 py-3 text-base focus:ring-indigo-500">
           <option value="" disabled selected>Seleccione una mascota...</option>
           <option *ngFor="let m of mascotas()" [value]="m.idMascota">
-            {{ m.nombre }} - {{ m.cliente.nombre }} {{ m.cliente.apellidos }} - {{ m.especie }} - #{{ m.idMascota }}
+            {{ m.nombre }} - {{ m.numeroChip ? 'Chip ' + m.numeroChip : 'Sin chip' }} - {{ m.cliente.nombre }} {{ m.cliente.apellidos }} - {{ m.especie }} - #{{ m.idMascota }}
           </option>
         </select>
       </div>

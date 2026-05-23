@@ -81,7 +81,7 @@
           <option value="" disabled>Seleccione...</option>
 
           <option *ngFor="let m of mascotas" [value]="m.idMascota">
-            {{ m.nombre }} - {{ m.cliente.nombre }} {{ m.cliente.apellidos }} - {{ m.especie }} - #{{ m.idMascota }}
+            {{ m.nombre }} - {{ m.numeroChip ? 'Chip ' + m.numeroChip : 'Sin chip' }} - {{ m.cliente.nombre }} {{ m.cliente.apellidos }} - {{ m.especie }} - #{{ m.idMascota }}
           </option>
 
         </select>

@@ -56,8 +56,10 @@ export class MascotasComponent {
         if (!t) return lista;
         return lista.filter(c =>
           (c.nombre ?? '').toLowerCase().includes(t) ||
+          (c.numeroChip ?? '').toLowerCase().includes(t) ||
           (c.especie ?? '').toLowerCase().includes(t) ||
-          (c.raza ?? '').toLowerCase().includes(t)
+          (c.raza ?? '').toLowerCase().includes(t) ||
+          (`${c.cliente?.nombre ?? ''} ${c.cliente?.apellidos ?? ''}`).toLowerCase().includes(t)
         );
       }),
       shareReplay({ bufferSize: 1, refCount: true })
@@ -66,6 +68,10 @@ export class MascotasComponent {
 
   onBuscar(valor: string) { this.buscarTerm$.next(valor); }
   recargar() { this.refrescar$.next(); }
+
+  etiquetaChip(m: Mascotas): string {
+    return m.numeroChip?.trim() ? `Chip ${m.numeroChip}` : 'Sin chip';
+  }
 
   crear() { this.router.navigate(['/mascotas/nueva']); }
   verFicha(m: Mascotas) {

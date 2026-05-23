@@ -79,6 +79,22 @@ public class DocumentoMedicoArchivoStorageService {
         }
     }
 
+    public void eliminarSiExiste(String rutaStorage) {
+        if (rutaStorage == null || rutaStorage.isBlank()) {
+            return;
+        }
+
+        try {
+            Path archivo = uploadDir.resolve(rutaStorage).normalize();
+            if (!archivo.startsWith(uploadDir)) {
+                return;
+            }
+            Files.deleteIfExists(archivo);
+        } catch (IOException ignored) {
+            // El registro clinico ya puede eliminarse aunque el archivo fisico no exista o no sea accesible.
+        }
+    }
+
     private void validarArchivo(MultipartFile archivo) {
         if (archivo == null || archivo.isEmpty()) {
             throw new IllegalArgumentException("Debes seleccionar un archivo");

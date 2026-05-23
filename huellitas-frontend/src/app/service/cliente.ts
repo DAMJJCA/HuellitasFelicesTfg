@@ -1,6 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { API_BASE_URL } from "../core/api.config";
 
 export interface Cliente {
   idCliente?: number;
@@ -15,7 +16,7 @@ export type CrearClienteDto = Omit<Cliente, 'idCliente' | 'fechaRegistro'>;
 
 @Injectable({ providedIn: 'root' })
 export class ClienteService {
-  private api = 'http://localhost:8080/api/clientes';
+  private api = `${API_BASE_URL}/clientes`;
 
   constructor(private http: HttpClient) {}
 

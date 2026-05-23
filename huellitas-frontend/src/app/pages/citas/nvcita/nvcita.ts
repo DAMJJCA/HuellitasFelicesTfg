@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {ChangeDetectionStrategy,Component,signal} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { Cita, CitaService, CrearCitaDto } from '../../../service/cita';
 import {
@@ -56,10 +56,15 @@ export class NvcitaComponent {
     private readonly disponibilidadService: DisponibilidadVeterinarioService,
     private readonly mascotaService: MascotaService,
     private readonly veterinarioService: VeterinarioService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    const mascotaParam = this.route.snapshot.queryParamMap.get('mascota');
+    if (mascotaParam) {
+      this.cita.idMascota = mascotaParam;
+    }
 
     this.mascotaService.getMascotas().subscribe({
       next: m => this.mascotas.set(m),

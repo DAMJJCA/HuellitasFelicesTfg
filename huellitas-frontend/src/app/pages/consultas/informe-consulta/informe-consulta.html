@@ -1,0 +1,108 @@
+<section class="min-h-screen bg-slate-100 px-6 py-6 text-slate-900 dark:bg-slate-900 dark:text-slate-100 print:bg-white print:px-0 print:py-0 print:text-slate-900 md:px-10 md:py-8">
+  <div class="mb-5 flex flex-wrap justify-between gap-2 print:hidden">
+    <button type="button"
+            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+            (click)="volver()">
+      Volver a consulta
+    </button>
+    <button type="button"
+            class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            (click)="imprimir()">
+      Imprimir / guardar PDF
+    </button>
+  </div>
+
+  <div *ngIf="errorMsg()" class="mx-auto max-w-4xl rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 print:hidden">
+    {{ errorMsg() }}
+  </div>
+
+  <div *ngIf="cargando()" class="mx-auto max-w-4xl rounded-lg bg-white p-8 shadow-sm print:hidden">
+    Cargando informe...
+  </div>
+
+  <article *ngIf="!cargando() && consulta() as consulta"
+           class="mx-auto max-w-4xl bg-white p-8 text-slate-900 shadow-sm dark:bg-slate-800 dark:text-slate-100 print:max-w-none print:bg-white print:p-0 print:text-slate-900 print:shadow-none">
+    <header class="border-b border-slate-300 pb-5">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Huellitas Felices</p>
+          <h1 class="mt-2 text-3xl font-semibold tracking-tight">Informe de consulta</h1>
+          <p class="mt-2 text-sm text-slate-500">Generado el {{ formatearFechaHora(generadoEn) }}</p>
+        </div>
+        <div class="text-sm text-slate-600 sm:text-right">
+          <p class="font-semibold text-slate-900">Consulta #{{ consulta.idConsulta }}</p>
+          <p>{{ formatearFecha(consulta.fecha) }} {{ consulta.hora || '' }}</p>
+          <p *ngIf="consulta.idCita">Cita #{{ consulta.idCita }}</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="mt-6 grid gap-4 sm:grid-cols-2">
+      <div class="rounded-lg border border-slate-200 p-4 print:rounded-none">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Paciente</p>
+        <h2 class="mt-2 text-xl font-semibold">{{ mascotaNombre() }}</h2>
+        <p class="mt-1 text-sm text-slate-600">Chip: {{ chipMascota() }}</p>
+        <p class="mt-1 text-sm text-slate-600">Propietario: {{ duenioNombre() }}</p>
+      </div>
+
+      <div class="rounded-lg border border-slate-200 p-4 print:rounded-none">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Atencion</p>
+        <h2 class="mt-2 text-xl font-semibold">{{ veterinarioNombre() }}</h2>
+        <p class="mt-1 text-sm text-slate-600">Motivo: {{ cita()?.motivo || 'Sin motivo registrado' }}</p>
+        <p class="mt-1 text-sm text-slate-600">Estado cita: {{ cita()?.estado || 'Sin estado' }}</p>
+      </div>
+    </section>
+
+    <section class="mt-7">
+      <h2 class="border-b border-slate-200 pb-2 text-lg font-semibold">Datos clinicos</h2>
+      <div class="mt-4 grid gap-4">
+        <div>
+          <p class="text-sm font-semibold text-slate-700">Diagnostico</p>
+          <p class="mt-1 whitespace-pre-line text-sm leading-6 text-slate-800">{{ consulta.diagnostico || 'Sin diagnostico registrado.' }}</p>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-slate-700">Observaciones</p>
+          <p class="mt-1 whitespace-pre-line text-sm leading-6 text-slate-800">{{ consulta.observaciones || 'Sin observaciones registradas.' }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-7">
+      <h2 class="border-b border-slate-200 pb-2 text-lg font-semibold">Tratamiento pautado</h2>
+      <p *ngIf="tratamientos().length === 0" class="mt-3 text-sm text-slate-500">No hay tratamientos asociados a esta consulta.</p>
+      <div class="mt-3 grid gap-3">
+        <article *ngFor="let tratamiento of tratamientos()" class="rounded-lg border border-slate-200 p-4 print:rounded-none">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h3 class="font-semibold">{{ tratamiento.nombre }}</h3>
+              <p class="mt-1 text-sm text-slate-600">{{ resumenTratamiento(tratamiento) }}</p>
+            </div>
+          </div>
+          <p *ngIf="tratamiento.descripcion" class="mt-3 whitespace-pre-line text-sm leading-6 text-slate-800">
+            {{ tratamiento.descripcion }}
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="mt-7">
+      <h2 class="border-b border-slate-200 pb-2 text-lg font-semibold">Documentos asociados</h2>
+      <p *ngIf="documentos().length === 0" class="mt-3 text-sm text-slate-500">No hay documentos asociados a esta consulta.</p>
+      <div class="mt-3 grid gap-2">
+        <div *ngFor="let doc of documentos()" class="flex justify-between gap-3 border-b border-slate-100 py-2 text-sm">
+          <span>{{ doc.nombre }} <span class="text-slate-500">({{ doc.tipo }})</span></span>
+          <span class="text-slate-500">{{ formatearFecha(doc.fecha) }}</span>
+        </div>
+      </div>
+    </section>
+
+    <footer class="mt-10 grid gap-8 border-t border-slate-300 pt-8 text-sm sm:grid-cols-2">
+      <div>
+        <p class="border-t border-slate-400 pt-2 text-slate-600">Firma veterinario</p>
+      </div>
+      <div>
+        <p class="border-t border-slate-400 pt-2 text-slate-600">Firma propietario</p>
+      </div>
+    </footer>
+  </article>
+</section>

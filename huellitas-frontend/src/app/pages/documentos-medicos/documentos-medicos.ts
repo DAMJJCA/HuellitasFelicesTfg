@@ -1,22 +1,30 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Subject, catchError, combineLatest, map, of, shareReplay, startWith, switchMap } from 'rxjs';
 
 import { AuthService } from '../../auth/auth.service';
+import { Consulta, ConsultaService } from '../../service/consulta';
 import { DocumentoMedico, DocumentoMedicoDto, DocumentoMedicoService, TipoDocumentoMedico } from '../../service/documento-medico';
 import { MascotaService, Mascotas } from '../../service/mascota';
+import { EmptyStateComponent } from '../../shared/empty-state/empty-state';
+import { PageHeaderComponent } from '../../shared/page-header/page-header';
 
 @Component({
   selector: 'app-documentos-medicos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EmptyStateComponent, PageHeaderComponent],
   templateUrl: './documentos-medicos.html'
 })
 export class DocumentosMedicosComponent {
   private documentoService = inject(DocumentoMedicoService);
   private mascotaService = inject(MascotaService);
+  private consultaService = inject(ConsultaService);
   private authService = inject(AuthService);
+  private sanitizer = inject(DomSanitizer);
+  private route = inject(ActivatedRoute);
 
   private refrescar$ = new Subject<void>();
   private buscar$ = new BehaviorSubject<string>('');
@@ -46,6 +54,7 @@ export class DocumentosMedicosComponent {
           doc.nombre.toLowerCase().includes(texto) ||
           doc.tipo.toLowerCase().includes(texto) ||
           (doc.nombreMascota || '').toLowerCase().includes(texto) ||
+          this.etiquetaMascotaPorId(doc.idMascota).toLowerCase().includes(texto) ||
           (doc.observaciones || '').toLowerCase().includes(texto);
         return coincideTipo && coincideTexto;
       });
@@ -54,13 +63,20 @@ export class DocumentosMedicosComponent {
   );
 
   mascotas: Mascotas[] = [];
+  consultasMascota: Consulta[] = [];
   errorMsg = '';
   successMsg = '';
   tipoActivo: TipoDocumentoMedico | 'todos' = 'todos';
   mostrandoFormulario = false;
   editando: DocumentoMedico | null = null;
   guardando = false;
+  cargandoConsultas = false;
   archivoSeleccionado: File | null = null;
+  documentoPendienteEliminar: DocumentoMedico | null = null;
+  previewUrl: string | null = null;
+  previewResourceUrl: SafeResourceUrl | null = null;
+  previewTipo: string | null = null;
+  previewNombre = '';
   maxFecha = this.fechaHoy();
 
   tipos: { value: TipoDocumentoMedico; label: string }[] = [
@@ -80,8 +96,16 @@ export class DocumentosMedicosComponent {
   }
 
   ngOnInit(): void {
+    const mascotaParam = this.route.snapshot.queryParamMap.get('mascota');
+    const abrirNuevo = this.route.snapshot.queryParamMap.get('nuevo') === '1';
+
     this.mascotaService.getMascotas().subscribe({
-      next: mascotas => this.mascotas = mascotas,
+      next: mascotas => {
+        this.mascotas = mascotas;
+        if (mascotaParam && abrirNuevo && this.puedeGestionar) {
+          this.abrirNuevo(mascotaParam);
+        }
+      },
       error: () => this.errorMsg = 'No se pudieron cargar las mascotas.'
     });
   }
@@ -95,9 +119,14 @@ export class DocumentosMedicosComponent {
     this.tipoFiltro$.next(tipo);
   }
 
-  abrirNuevo() {
+  abrirNuevo(idMascota = '') {
     this.editando = null;
     this.form = this.crearFormVacio();
+    this.consultasMascota = [];
+    if (idMascota) {
+      this.form.idMascota = idMascota;
+      this.cargarConsultasMascota(idMascota);
+    }
     this.archivoSeleccionado = null;
     this.mostrandoFormulario = true;
   }
@@ -113,6 +142,7 @@ export class DocumentosMedicosComponent {
       fecha: doc.fecha || '',
       observaciones: doc.observaciones || ''
     };
+    this.cargarConsultasMascota(this.form.idMascota);
     this.archivoSeleccionado = null;
     this.mostrandoFormulario = true;
   }
@@ -122,6 +152,12 @@ export class DocumentosMedicosComponent {
     this.editando = null;
     this.guardando = false;
     this.archivoSeleccionado = null;
+  }
+
+  onMascotaDocumentoChange(idMascota: string) {
+    this.form.idMascota = idMascota;
+    this.form.idConsulta = '';
+    this.cargarConsultasMascota(idMascota);
   }
 
   guardar() {
@@ -181,12 +217,22 @@ export class DocumentosMedicosComponent {
     });
   }
 
-  eliminar(doc: DocumentoMedico) {
-    if (!doc.idDocumento || !confirm('Eliminar este documento medico?')) return;
+  abrirEliminar(doc: DocumentoMedico) {
+    this.documentoPendienteEliminar = doc;
+  }
+
+  cancelarEliminar() {
+    this.documentoPendienteEliminar = null;
+  }
+
+  confirmarEliminar() {
+    const doc = this.documentoPendienteEliminar;
+    if (!doc?.idDocumento) return;
 
     this.documentoService.eliminarDocumento(doc.idDocumento).subscribe({
       next: () => {
         this.successMsg = 'Documento eliminado correctamente.';
+        this.documentoPendienteEliminar = null;
         this.refrescar$.next();
       },
       error: err => {
@@ -206,12 +252,17 @@ export class DocumentosMedicosComponent {
   }
 
   abrirDocumento(doc: DocumentoMedico) {
+    this.errorMsg = '';
+    this.cerrarPreview();
+
     if (doc.idDocumento && doc.rutaStorage) {
       this.documentoService.descargarArchivo(doc.idDocumento).subscribe({
         next: blob => {
           const url = URL.createObjectURL(blob);
-          window.open(url, '_blank', 'noopener,noreferrer');
-          setTimeout(() => URL.revokeObjectURL(url), 60_000);
+          this.previewUrl = url;
+          this.previewResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+          this.previewTipo = doc.mimeType || blob.type;
+          this.previewNombre = doc.nombre;
         },
         error: err => {
           console.error('Error abriendo archivo', err);
@@ -220,7 +271,29 @@ export class DocumentosMedicosComponent {
       });
       return;
     }
-    window.open(doc.url, '_blank', 'noopener,noreferrer');
+
+    this.previewUrl = doc.url;
+    this.previewResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(doc.url);
+    this.previewTipo = this.tipoDesdeUrl(doc.url);
+    this.previewNombre = doc.nombre;
+  }
+
+  cerrarPreview() {
+    if (this.previewUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(this.previewUrl);
+    }
+    this.previewUrl = null;
+    this.previewResourceUrl = null;
+    this.previewTipo = null;
+    this.previewNombre = '';
+  }
+
+  esPreviewPdf(): boolean {
+    return this.previewTipo === 'application/pdf' || (this.previewUrl || '').toLowerCase().includes('.pdf');
+  }
+
+  esPreviewImagen(): boolean {
+    return !!this.previewTipo?.startsWith('image/') || /\.(jpg|jpeg|png|webp)(\?|$)/i.test(this.previewUrl || '');
   }
 
   formatearTamano(bytes: number | null | undefined): string {
@@ -232,6 +305,24 @@ export class DocumentosMedicosComponent {
 
   etiquetaTipo(tipo: TipoDocumentoMedico): string {
     return this.tipos.find(t => t.value === tipo)?.label || tipo;
+  }
+
+  etiquetaMascotaPorId(idMascota: number): string {
+    const mascota = this.mascotas.find(m => m.idMascota === idMascota);
+    if (!mascota) return '';
+    return this.etiquetaMascota(mascota);
+  }
+
+  etiquetaMascota(mascota: Mascotas): string {
+    const duenio = mascota.cliente ? `${mascota.cliente.nombre} ${mascota.cliente.apellidos}` : 'Sin duenio';
+    const chip = mascota.numeroChip ? `Chip ${mascota.numeroChip}` : 'Sin chip';
+    return `${mascota.nombre} - ${chip} - ${duenio} - ${mascota.especie || 'Sin especie'} - #${mascota.idMascota}`;
+  }
+
+  etiquetaConsulta(consulta: Consulta): string {
+    const fecha = consulta.fecha ? this.formatearFecha(consulta.fecha) : 'Sin fecha';
+    const diagnostico = consulta.diagnostico?.trim() || 'Sin diagnostico';
+    return `${fecha} ${consulta.hora || ''} - ${diagnostico} - #${consulta.idConsulta}`;
   }
 
   formatearFecha(fecha: string | null): string {
@@ -262,6 +353,24 @@ export class DocumentosMedicosComponent {
     return '';
   }
 
+  private cargarConsultasMascota(idMascota: string) {
+    this.consultasMascota = [];
+    if (!idMascota || !this.puedeGestionar) return;
+
+    this.cargandoConsultas = true;
+    this.consultaService.getConsultasPorMascota(Number(idMascota)).subscribe({
+      next: consultas => {
+        this.consultasMascota = consultas.sort((a, b) => `${b.fecha || ''}${b.hora || ''}`.localeCompare(`${a.fecha || ''}${a.hora || ''}`));
+        this.cargandoConsultas = false;
+      },
+      error: err => {
+        console.error('Error cargando consultas de mascota', err);
+        this.consultasMascota = [];
+        this.cargandoConsultas = false;
+      }
+    });
+  }
+
   private crearFormData(): FormData {
     const formData = new FormData();
     formData.append('idMascota', this.form.idMascota);
@@ -279,6 +388,15 @@ export class DocumentosMedicosComponent {
     const extensionesPermitidas = ['.pdf', '.jpg', '.jpeg', '.png', '.webp'];
     const nombre = archivo.name.toLowerCase();
     return tiposPermitidos.includes(archivo.type) || extensionesPermitidas.some(ext => nombre.endsWith(ext));
+  }
+
+  private tipoDesdeUrl(url: string): string {
+    const limpia = url.toLowerCase().split('?')[0];
+    if (limpia.endsWith('.pdf')) return 'application/pdf';
+    if (limpia.endsWith('.jpg') || limpia.endsWith('.jpeg')) return 'image/jpeg';
+    if (limpia.endsWith('.png')) return 'image/png';
+    if (limpia.endsWith('.webp')) return 'image/webp';
+    return 'external/url';
   }
 
   private crearFormVacio() {

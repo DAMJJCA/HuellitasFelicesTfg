@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../core/api.config';
 
 export type TipoDocumentoMedico = 'analitica' | 'radiografia' | 'informe' | 'receta' | 'consentimiento' | 'foto' | 'otro';
 
@@ -24,7 +25,7 @@ export type DocumentoMedicoDto = Omit<DocumentoMedico, 'idDocumento' | 'nombreMa
 
 @Injectable({ providedIn: 'root' })
 export class DocumentoMedicoService {
-  private api = 'http://localhost:8080/api/documentos-medicos';
+  private api = `${API_BASE_URL}/documentos-medicos`;
 
   constructor(private http: HttpClient) {}
 
