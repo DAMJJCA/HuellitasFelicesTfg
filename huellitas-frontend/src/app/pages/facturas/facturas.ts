@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Cliente, ClienteService } from '../../service/cliente';
 import { EstadoFactura, Factura, FacturaLinea, FacturaService } from '../../service/factura';
 
@@ -13,6 +14,7 @@ import { EstadoFactura, Factura, FacturaLinea, FacturaService } from '../../serv
 export class FacturasComponent implements OnInit {
   private facturaService = inject(FacturaService);
   private clienteService = inject(ClienteService);
+  private router = inject(Router);
 
   facturas = signal<Factura[]>([]);
   clientes: Cliente[] = [];
@@ -22,10 +24,16 @@ export class FacturasComponent implements OnInit {
 
   idCliente: number | null = null;
   idCita: number | null = null;
+  impuestoPorcentaje = 21;
+  descuentoPorcentaje = 0;
   notas = '';
   lineas: FacturaLinea[] = [{ concepto: 'Consulta veterinaria', cantidad: 1, precioUnitario: 30 }];
 
   totalBorrador = computed(() => this.lineas.reduce((sum, linea) => sum + this.totalLinea(linea), 0));
+  descuentoBorrador = computed(() => this.totalBorrador() * (Number(this.descuentoPorcentaje || 0) / 100));
+  baseBorrador = computed(() => this.totalBorrador() - this.descuentoBorrador());
+  impuestosBorrador = computed(() => this.baseBorrador() * (Number(this.impuestoPorcentaje || 0) / 100));
+  totalConImpuestos = computed(() => this.baseBorrador() + this.impuestosBorrador());
 
   ngOnInit(): void {
     this.cargar();
@@ -55,6 +63,8 @@ export class FacturasComponent implements OnInit {
     this.facturaService.crear({
       idCliente: Number(this.idCliente),
       idCita: this.idCita ? Number(this.idCita) : null,
+      impuestoPorcentaje: Number(this.impuestoPorcentaje || 0),
+      descuentoPorcentaje: Number(this.descuentoPorcentaje || 0),
       notas: this.notas || null,
       lineas: this.lineas
     }).subscribe({
@@ -78,6 +88,10 @@ export class FacturasComponent implements OnInit {
       },
       error: err => this.errorMsg = err?.error?.detail || err?.error?.message || 'No se pudo actualizar la factura.'
     });
+  }
+
+  imprimir(factura: Factura): void {
+    this.router.navigate(['/facturas', factura.idFactura, 'imprimir']);
   }
 
   agregarLinea(): void {
@@ -110,6 +124,8 @@ export class FacturasComponent implements OnInit {
   private resetForm(): void {
     this.idCliente = null;
     this.idCita = null;
+    this.impuestoPorcentaje = 21;
+    this.descuentoPorcentaje = 0;
     this.notas = '';
     this.lineas = [{ concepto: 'Consulta veterinaria', cantidad: 1, precioUnitario: 30 }];
   }

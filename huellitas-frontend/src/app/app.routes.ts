@@ -135,6 +135,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/facturas/facturas').then(m => m.FacturasComponent)
       },
+      {
+        path: 'facturas/:id/imprimir',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/facturas/factura-imprimir/factura-imprimir').then(m => m.FacturaImprimirComponent)
+      },
 
       // citas
       {

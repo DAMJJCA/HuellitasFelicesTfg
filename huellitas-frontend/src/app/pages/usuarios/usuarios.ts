@@ -15,6 +15,8 @@ export class UsuariosComponent implements OnInit {
   private authService = inject(AuthService);
 
   usuarios: UsuarioInterno[] = [];
+  filtro: 'todos' | 'internos' | 'clientes' | 'veterinarios' = 'todos';
+  busqueda = '';
   errorMsg = '';
   successMsg = '';
   guardando = false;
@@ -36,6 +38,43 @@ export class UsuariosComponent implements OnInit {
       next: usuarios => this.usuarios = usuarios,
       error: err => this.errorMsg = err?.error?.detail || err?.error?.message || 'No se pudieron cargar los usuarios.'
     });
+  }
+
+  usuariosFiltrados(): UsuarioInterno[] {
+    const term = this.busqueda.trim().toLowerCase();
+    const porTipo = this.usuariosPorTipo();
+    if (!term) return porTipo;
+
+    return porTipo.filter(usuario =>
+      (usuario.nombreUsuario || '').toLowerCase().includes(term) ||
+      (usuario.email || '').toLowerCase().includes(term) ||
+      this.etiquetaRol(usuario.rol).toLowerCase().includes(term) ||
+      this.vinculo(usuario).toLowerCase().includes(term)
+    );
+  }
+
+  usuariosPorTipo(): UsuarioInterno[] {
+    if (this.filtro === 'internos') {
+      return this.usuarios.filter(usuario => !usuario.idCliente && !usuario.idVeterinario);
+    }
+    if (this.filtro === 'clientes') {
+      return this.usuarios.filter(usuario => !!usuario.idCliente);
+    }
+    if (this.filtro === 'veterinarios') {
+      return this.usuarios.filter(usuario => !!usuario.idVeterinario);
+    }
+    return this.usuarios;
+  }
+
+  cambiarFiltro(filtro: 'todos' | 'internos' | 'clientes' | 'veterinarios'): void {
+    this.filtro = filtro;
+  }
+
+  totalFiltro(filtro: 'todos' | 'internos' | 'clientes' | 'veterinarios'): number {
+    if (filtro === 'internos') return this.usuarios.filter(usuario => !usuario.idCliente && !usuario.idVeterinario).length;
+    if (filtro === 'clientes') return this.usuarios.filter(usuario => !!usuario.idCliente).length;
+    if (filtro === 'veterinarios') return this.usuarios.filter(usuario => !!usuario.idVeterinario).length;
+    return this.usuarios.length;
   }
 
   guardar(): void {
@@ -68,7 +107,7 @@ export class UsuariosComponent implements OnInit {
   }
 
   editar(usuario: UsuarioInterno): void {
-    if (!this.puedeEditar || !this.esRolInterno(usuario.rol)) return;
+    if (!this.puedeEditar || !this.esEditable(usuario)) return;
     this.editando = usuario;
     this.form = {
       nombreUsuario: usuario.nombreUsuario,
@@ -103,6 +142,16 @@ export class UsuariosComponent implements OnInit {
       cliente: 'Cliente'
     };
     return etiquetas[rol] || rol;
+  }
+
+  vinculo(usuario: UsuarioInterno): string {
+    if (usuario.idVeterinario) return `Veterinario #${usuario.idVeterinario}`;
+    if (usuario.idCliente) return `Cliente #${usuario.idCliente}`;
+    return 'Usuario interno';
+  }
+
+  esEditable(usuario: UsuarioInterno): boolean {
+    return this.esRolInterno(usuario.rol) && !usuario.idCliente && !usuario.idVeterinario;
   }
 
   private formVacio(): UsuarioInternoRequest {

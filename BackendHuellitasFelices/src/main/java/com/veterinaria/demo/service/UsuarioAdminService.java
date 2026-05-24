@@ -2,6 +2,7 @@ package com.veterinaria.demo.service;
 
 import java.util.List;
 
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,18 +18,33 @@ public class UsuarioAdminService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JdbcTemplate jdbcTemplate;
 
-    public UsuarioAdminService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioAdminService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JdbcTemplate jdbcTemplate) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Transactional(readOnly = true)
     public List<UsuarioResponse> listar() {
-        return usuarioRepository.findAllByOrderByCreadoEnDesc()
-                .stream()
-                .map(UsuarioResponse::from)
-                .toList();
+        return jdbcTemplate.query("""
+                select id_usuario, nombre_usuario, email, rol, activo, id_cliente, id_veterinario,
+                       creado_en, actualizado_en, foto_perfil_url
+                from usuarios
+                order by creado_en desc nulls last, id_usuario desc
+                """,
+                (rs, rowNum) -> new UsuarioResponse(
+                        rs.getLong("id_usuario"),
+                        rs.getString("nombre_usuario"),
+                        rs.getString("email"),
+                        RolUsuario.valueOf(rs.getString("rol")),
+                        rs.getBoolean("activo"),
+                        rs.getObject("id_cliente") == null ? null : rs.getLong("id_cliente"),
+                        rs.getObject("id_veterinario") == null ? null : rs.getLong("id_veterinario"),
+                        rs.getTimestamp("creado_en") == null ? null : rs.getTimestamp("creado_en").toLocalDateTime(),
+                        rs.getTimestamp("actualizado_en") == null ? null : rs.getTimestamp("actualizado_en").toLocalDateTime(),
+                        rs.getString("foto_perfil_url")));
     }
 
     @Transactional

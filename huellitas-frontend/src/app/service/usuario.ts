@@ -11,6 +11,8 @@ export interface UsuarioInterno {
   email: string;
   rol: string;
   activo: boolean;
+  idCliente?: number | null;
+  idVeterinario?: number | null;
   creadoEn?: string;
   actualizadoEn?: string;
   profileImageUrl?: string | null;

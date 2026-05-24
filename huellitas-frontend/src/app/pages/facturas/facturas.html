@@ -39,6 +39,19 @@
              class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
              placeholder="Opcional" />
 
+      <div class="mt-4 grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium">IVA %</label>
+          <input name="impuestoPorcentaje" type="number" min="0" max="100" step="0.01" [(ngModel)]="impuestoPorcentaje"
+                 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium">Descuento %</label>
+          <input name="descuentoPorcentaje" type="number" min="0" max="100" step="0.01" [(ngModel)]="descuentoPorcentaje"
+                 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" />
+        </div>
+      </div>
+
       <div class="mt-5 space-y-3">
         <div class="flex items-center justify-between">
           <h3 class="font-semibold">Lineas</h3>
@@ -81,9 +94,13 @@
                 class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"></textarea>
 
       <div class="mt-5 rounded-lg bg-slate-100 p-3 text-sm dark:bg-slate-900">
-        Base: <strong>{{ formatoImporte(totalBorrador()) }}</strong>
-        <span class="mx-2 text-slate-400">|</span>
-        IVA estimado: <strong>{{ formatoImporte(totalBorrador() * 0.21) }}</strong>
+        <div class="flex justify-between"><span>Subtotal</span><strong>{{ formatoImporte(totalBorrador()) }}</strong></div>
+        <div class="flex justify-between"><span>Descuento</span><strong>{{ formatoImporte(descuentoBorrador()) }}</strong></div>
+        <div class="flex justify-between"><span>Base</span><strong>{{ formatoImporte(baseBorrador()) }}</strong></div>
+        <div class="flex justify-between"><span>IVA</span><strong>{{ formatoImporte(impuestosBorrador()) }}</strong></div>
+        <div class="mt-2 flex justify-between border-t border-slate-300 pt-2 text-base dark:border-slate-700">
+          <span>Total</span><strong>{{ formatoImporte(totalConImpuestos()) }}</strong>
+        </div>
       </div>
 
       <button type="submit"
@@ -102,6 +119,7 @@
               <th class="px-5 py-3">Fecha</th>
               <th class="px-5 py-3">Cliente</th>
               <th class="px-5 py-3">Estado</th>
+              <th class="px-5 py-3">Pago</th>
               <th class="px-5 py-3 text-right">Total</th>
               <th class="px-5 py-3 text-right">Acciones</th>
             </tr>
@@ -116,9 +134,15 @@
                   {{ factura.estado }}
                 </span>
               </td>
+              <td class="px-5 py-4">{{ factura.pagoEstado || 'pendiente' }}</td>
               <td class="px-5 py-4 text-right font-semibold">{{ formatoImporte(factura.total) }}</td>
               <td class="px-5 py-4">
                 <div class="flex flex-wrap justify-end gap-2">
+                  <button type="button"
+                          class="rounded-md border border-slate-300 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-700"
+                          (click)="imprimir(factura)">
+                    Imprimir
+                  </button>
                   <button type="button"
                           class="rounded-md border border-blue-300 px-3 py-1.5 text-xs text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-100 dark:hover:bg-blue-900/30"
                           (click)="cambiarEstado(factura, 'emitida')">

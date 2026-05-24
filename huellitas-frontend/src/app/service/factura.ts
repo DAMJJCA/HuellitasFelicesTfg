@@ -21,9 +21,15 @@ export interface Factura {
   numero?: string | null;
   fecha: string;
   estado: EstadoFactura;
+  impuestoPorcentaje: number;
+  descuentoPorcentaje: number;
+  descuento: number;
   baseImponible: number;
   impuestos: number;
   total: number;
+  pagoEstado?: string | null;
+  pagoProveedor?: string | null;
+  pagoReferencia?: string | null;
   notas?: string | null;
   creadoEn?: string;
   lineas?: FacturaLinea[] | null;
@@ -32,6 +38,8 @@ export interface Factura {
 export interface FacturaRequest {
   idCliente: number;
   idCita?: number | null;
+  impuestoPorcentaje?: number | null;
+  descuentoPorcentaje?: number | null;
   notas?: string | null;
   lineas: FacturaLinea[];
 }

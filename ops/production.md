@@ -34,6 +34,8 @@ Para pagos reales no conviene guardar tarjetas ni datos sensibles en la base de 
 - recibir webhook firmado
 - marcar la factura como `pagada`
 
+La tabla de facturas deja preparados `pago_estado`, `pago_proveedor` y `pago_referencia`, pero no se integra ninguna pasarela todavia.
+
 ## Notificaciones
 
 Email ya es el canal base. Para WhatsApp/SMS, la integracion deberia centralizarse en un proveedor como Twilio, WhatsApp Cloud API o similar:
