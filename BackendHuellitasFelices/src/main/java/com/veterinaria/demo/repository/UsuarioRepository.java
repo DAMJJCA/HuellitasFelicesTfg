@@ -1,6 +1,7 @@
 package com.veterinaria.demo.repository;
 
 import java.util.Optional;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -13,4 +14,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     boolean existsByEmailIgnoreCase(String email);
 
     Optional<Usuario> findByIdVeterinario(Long idVeterinario);
+
+    List<Usuario> findAllByOrderByCreadoEnDesc();
 }

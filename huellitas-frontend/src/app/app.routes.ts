@@ -123,6 +123,18 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/auditoria-clinica/auditoria-clinica').then(m => m.AuditoriaClinicaComponent)
       },
+      {
+        path: 'admin/usuarios',
+        canActivate: [adminOnlyGuard],
+        loadComponent: () =>
+          import('./pages/usuarios/usuarios').then(m => m.UsuariosComponent)
+      },
+      {
+        path: 'facturas',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/facturas/facturas').then(m => m.FacturasComponent)
+      },
 
       // citas
       {
