@@ -2,6 +2,78 @@
 
 @import 'tailwindcss';
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #e2e8f0;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e2e8f0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border: 2px solid #e2e8f0;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+::-webkit-scrollbar-corner {
+  background: #e2e8f0;
+}
+
+.dark * {
+  scrollbar-color: #475569 #0f172a;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-color: #0f172a;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+.dark ::-webkit-scrollbar-corner {
+  background: #0f172a;
+}
+
+@media (prefers-color-scheme: dark) {
+  * {
+    scrollbar-color: #475569 #0f172a;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0f172a;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-color: #0f172a;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: #0f172a;
+  }
+}
+
 .app-table-head {
   background-color: #2563eb !important;
   color: #eff6ff !important;

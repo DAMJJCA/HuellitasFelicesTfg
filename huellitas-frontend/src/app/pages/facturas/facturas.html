@@ -1,0 +1,149 @@
+<section class="min-h-screen bg-slate-50 px-6 py-6 text-slate-800 dark:bg-slate-900 dark:text-slate-100 md:px-10 md:py-8">
+  <div class="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+    <div>
+      <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Facturacion</h1>
+      <p class="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+        Facturas basicas para consultas, tratamientos y servicios de la clinica.
+      </p>
+    </div>
+    <button type="button"
+            class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            (click)="cargar()">
+      Recargar
+    </button>
+  </div>
+
+  <div *ngIf="errorMsg" class="mb-4 rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-100">
+    {{ errorMsg }}
+  </div>
+  <div *ngIf="successMsg" class="mb-4 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-100">
+    {{ successMsg }}
+  </div>
+
+  <div class="grid gap-6 xl:grid-cols-[460px_minmax(0,1fr)]">
+    <form class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+          (ngSubmit)="crear()">
+      <h2 class="text-lg font-semibold">Nueva factura</h2>
+
+      <label class="mt-4 block text-sm font-medium">Cliente</label>
+      <select name="idCliente" required [(ngModel)]="idCliente"
+              class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+        <option [ngValue]="null">Selecciona un cliente</option>
+        <option *ngFor="let cliente of clientes" [ngValue]="cliente.idCliente">
+          {{ cliente.nombre }} {{ cliente.apellidos }}
+        </option>
+      </select>
+
+      <label class="mt-4 block text-sm font-medium">ID cita vinculada</label>
+      <input name="idCita" type="number" min="1" [(ngModel)]="idCita"
+             class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+             placeholder="Opcional" />
+
+      <div class="mt-5 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold">Lineas</h3>
+          <button type="button"
+                  class="rounded-md border border-slate-300 px-3 py-1.5 text-xs hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
+                  (click)="agregarLinea()">
+            Anadir linea
+          </button>
+        </div>
+
+        <div *ngFor="let linea of lineas; let i = index" class="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+          <label class="block text-xs font-medium text-slate-500 dark:text-slate-400">Concepto</label>
+          <input name="concepto-{{ i }}" required [(ngModel)]="linea.concepto"
+                 class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" />
+
+          <div class="mt-3 grid grid-cols-[1fr_1fr_auto] gap-2">
+            <div>
+              <label class="block text-xs font-medium text-slate-500 dark:text-slate-400">Cantidad</label>
+              <input name="cantidad-{{ i }}" type="number" min="0.01" step="0.01" required [(ngModel)]="linea.cantidad"
+                     class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 dark:text-slate-400">Precio</label>
+              <input name="precio-{{ i }}" type="number" min="0" step="0.01" required [(ngModel)]="linea.precioUnitario"
+                     class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" />
+            </div>
+            <button type="button"
+                    class="self-end rounded-md bg-rose-600 px-3 py-2 text-xs text-white hover:bg-rose-700 disabled:opacity-40"
+                    [disabled]="lineas.length === 1"
+                    (click)="quitarLinea(i)">
+              Quitar
+            </button>
+          </div>
+          <p class="mt-2 text-right text-sm font-medium">{{ formatoImporte(totalLinea(linea)) }}</p>
+        </div>
+      </div>
+
+      <label class="mt-4 block text-sm font-medium">Notas</label>
+      <textarea name="notas" rows="3" [(ngModel)]="notas"
+                class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"></textarea>
+
+      <div class="mt-5 rounded-lg bg-slate-100 p-3 text-sm dark:bg-slate-900">
+        Base: <strong>{{ formatoImporte(totalBorrador()) }}</strong>
+        <span class="mx-2 text-slate-400">|</span>
+        IVA estimado: <strong>{{ formatoImporte(totalBorrador() * 0.21) }}</strong>
+      </div>
+
+      <button type="submit"
+              class="mt-5 w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+              [disabled]="guardando">
+        {{ guardando ? 'Creando...' : 'Crear factura' }}
+      </button>
+    </form>
+
+    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left text-sm">
+          <thead class="app-table-head">
+            <tr>
+              <th class="px-5 py-3">Numero</th>
+              <th class="px-5 py-3">Fecha</th>
+              <th class="px-5 py-3">Cliente</th>
+              <th class="px-5 py-3">Estado</th>
+              <th class="px-5 py-3 text-right">Total</th>
+              <th class="px-5 py-3 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+            <tr *ngFor="let factura of facturas()" class="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+              <td class="px-5 py-4 font-mono text-xs">{{ factura.numero || ('#' + factura.idFactura) }}</td>
+              <td class="px-5 py-4">{{ factura.fecha }}</td>
+              <td class="px-5 py-4">{{ factura.cliente }}</td>
+              <td class="px-5 py-4">
+                <span class="rounded-full px-2.5 py-1 text-xs" [ngClass]="claseEstado(factura.estado)">
+                  {{ factura.estado }}
+                </span>
+              </td>
+              <td class="px-5 py-4 text-right font-semibold">{{ formatoImporte(factura.total) }}</td>
+              <td class="px-5 py-4">
+                <div class="flex flex-wrap justify-end gap-2">
+                  <button type="button"
+                          class="rounded-md border border-blue-300 px-3 py-1.5 text-xs text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-100 dark:hover:bg-blue-900/30"
+                          (click)="cambiarEstado(factura, 'emitida')">
+                    Emitir
+                  </button>
+                  <button type="button"
+                          class="rounded-md border border-emerald-300 px-3 py-1.5 text-xs text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-100 dark:hover:bg-emerald-900/30"
+                          (click)="cambiarEstado(factura, 'pagada')">
+                    Pagada
+                  </button>
+                  <button type="button"
+                          class="rounded-md border border-rose-300 px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:text-rose-100 dark:hover:bg-rose-900/30"
+                          (click)="cambiarEstado(factura, 'cancelada')">
+                    Cancelar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="facturas().length === 0" class="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+        Todavia no hay facturas.
+      </div>
+    </div>
+  </div>
+</section>

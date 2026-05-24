@@ -1,0 +1,116 @@
+<section class="min-h-screen bg-slate-50 px-6 py-6 text-slate-800 dark:bg-slate-900 dark:text-slate-100 md:px-10 md:py-8">
+  <div class="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+    <div>
+      <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Usuarios internos</h1>
+      <p class="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+        Gestion de perfiles de administracion, recepcion y auxiliar.
+      </p>
+    </div>
+    <button type="button"
+            class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            (click)="cargar()">
+      Recargar
+    </button>
+  </div>
+
+  <div *ngIf="errorMsg" class="mb-4 rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-100">
+    {{ errorMsg }}
+  </div>
+  <div *ngIf="successMsg" class="mb-4 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-100">
+    {{ successMsg }}
+  </div>
+
+  <div class="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
+    <form *ngIf="puedeEditar"
+          class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+          (ngSubmit)="guardar()">
+      <h2 class="text-lg font-semibold">{{ editando ? 'Editar usuario' : 'Nuevo usuario interno' }}</h2>
+
+      <label class="mt-4 block text-sm font-medium">Nombre</label>
+      <input name="nombreUsuario" required [(ngModel)]="form.nombreUsuario"
+             class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" />
+
+      <label class="mt-4 block text-sm font-medium">Email</label>
+      <input name="email" type="email" required [(ngModel)]="form.email"
+             class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" />
+
+      <label class="mt-4 block text-sm font-medium">Rol</label>
+      <select name="rol" required [(ngModel)]="form.rol"
+              class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+        <option value="admin">Administrador</option>
+        <option value="recepcion">Recepcion/Gerencia</option>
+        <option value="auxiliar">Auxiliar</option>
+      </select>
+
+      <label class="mt-4 block text-sm font-medium">
+        {{ editando ? 'Nueva contrasena (opcional)' : 'Contrasena' }}
+      </label>
+      <input name="password" type="password" [required]="!editando" [(ngModel)]="form.password"
+             class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" />
+
+      <label class="mt-4 inline-flex items-center gap-2 text-sm">
+        <input type="checkbox" name="activo" [(ngModel)]="form.activo" />
+        Usuario activo
+      </label>
+
+      <div class="mt-6 flex gap-2">
+        <button type="submit"
+                class="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+                [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : (editando ? 'Guardar cambios' : 'Crear usuario') }}
+        </button>
+        <button type="button"
+                class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
+                (click)="cancelarEdicion()">
+          Limpiar
+        </button>
+      </div>
+    </form>
+
+    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left text-sm">
+          <thead class="app-table-head">
+            <tr>
+              <th class="px-5 py-3">Usuario</th>
+              <th class="px-5 py-3">Email</th>
+              <th class="px-5 py-3">Rol</th>
+              <th class="px-5 py-3">Estado</th>
+              <th class="px-5 py-3 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+            <tr *ngFor="let usuario of usuarios" class="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+              <td class="px-5 py-4 font-medium">{{ usuario.nombreUsuario }}</td>
+              <td class="px-5 py-4">{{ usuario.email }}</td>
+              <td class="px-5 py-4">{{ etiquetaRol(usuario.rol) }}</td>
+              <td class="px-5 py-4">
+                <span class="rounded-full px-2.5 py-1 text-xs"
+                      [ngClass]="usuario.activo ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-100' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'">
+                  {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="px-5 py-4">
+                <div class="flex justify-end gap-2">
+                  <button *ngIf="puedeEditar"
+                          type="button"
+                          class="rounded-md border border-slate-300 px-3 py-1.5 text-xs hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700"
+                          (click)="editar(usuario)">
+                    Editar
+                  </button>
+                  <button *ngIf="puedeEditar"
+                          type="button"
+                          class="rounded-md px-3 py-1.5 text-xs text-white"
+                          [ngClass]="usuario.activo ? 'bg-rose-600 hover:bg-rose-700' : 'bg-emerald-600 hover:bg-emerald-700'"
+                          (click)="cambiarActivo(usuario)">
+                    {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

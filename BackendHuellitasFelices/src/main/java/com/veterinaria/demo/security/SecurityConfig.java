@@ -56,6 +56,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/clientes/**").hasAnyRole("ADMIN", "RECEPCION")
                         .requestMatchers("/api/veterinarios/**").hasAnyRole("ADMIN", "CLIENTE", "RECEPCION", "AUXILIAR")
+                        .requestMatchers("/api/usuarios/**").hasAnyRole("ADMIN", "RECEPCION")
+                        .requestMatchers("/api/facturas/**").hasAnyRole("ADMIN", "RECEPCION")
                         .anyRequest().authenticated());
 
         return http.build();
