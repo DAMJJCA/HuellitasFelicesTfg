@@ -41,19 +41,19 @@ public class DisponibilidadVeterinarioController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     public DisponibilidadVeterinarioResponse crear(@RequestBody DisponibilidadVeterinarioRequest request) {
         return service.save(request);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     public DisponibilidadVeterinarioResponse editar(@PathVariable Long id, @RequestBody DisponibilidadVeterinarioRequest request) {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     public void eliminar(@PathVariable Long id) {
         service.delete(id);
     }
@@ -71,19 +71,19 @@ public class DisponibilidadVeterinarioController {
     }
 
     @PostMapping("/excepciones")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     public ExcepcionDisponibilidadResponse crearExcepcion(@RequestBody ExcepcionDisponibilidadRequest request) {
         return service.saveExcepcion(request);
     }
 
     @PutMapping("/excepciones/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     public ExcepcionDisponibilidadResponse editarExcepcion(@PathVariable Long id, @RequestBody ExcepcionDisponibilidadRequest request) {
         return service.updateExcepcion(id, request);
     }
 
     @DeleteMapping("/excepciones/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     public void eliminarExcepcion(@PathVariable Long id) {
         service.deleteExcepcion(id);
     }

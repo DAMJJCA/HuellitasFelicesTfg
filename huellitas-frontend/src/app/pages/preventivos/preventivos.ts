@@ -73,11 +73,11 @@ export class PreventivosComponent {
   form = this.crearFormVacio();
 
   get puedeGestionar(): boolean {
-    return this.authService.isAdmin() || this.authService.isVeterinario();
+    return this.authService.isAdmin() || this.authService.isVeterinario() || this.authService.isAuxiliar();
   }
 
   get puedeEnviarRecordatorios(): boolean {
-    return this.authService.isAdmin();
+    return this.authService.isAdmin() || this.authService.isRecepcion();
   }
 
   ngOnInit(): void {

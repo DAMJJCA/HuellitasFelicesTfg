@@ -19,7 +19,6 @@ export interface Tratamiento {
   };
 }
 
-@Injectable({ providedIn: 'root' })
 @Injectable({
   providedIn: 'root'
 })

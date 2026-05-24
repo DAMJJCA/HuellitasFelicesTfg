@@ -31,7 +31,7 @@
           <p><span class="font-semibold">Nacimiento:</span> {{ formatearFecha(m.fechaNacimiento) }}</p>
         </div>
         <div>
-          <p><span class="font-semibold">Dueno:</span> {{ m.cliente.nombre }} {{ m.cliente.apellidos }}</p>
+          <p><span class="font-semibold">Dueño:</span> {{ m.cliente.nombre }} {{ m.cliente.apellidos }}</p>
           <p><span class="font-semibold">Peso:</span> {{ m.peso || 'Sin peso' }} <span *ngIf="m.peso">kg</span></p>
           <p><span class="font-semibold">Sexo:</span> {{ m.sexo || 'Sin dato' }}</p>
           <p><span class="font-semibold">Generado:</span> {{ formatearFechaHora(generadoEn) }}</p>
@@ -67,7 +67,7 @@
       <div class="mt-3 space-y-3">
         <article *ngFor="let c of consultas()" class="break-inside-avoid rounded border border-slate-200 p-4">
           <p class="font-semibold">{{ formatearFecha(c.fecha) }} - {{ c.hora }}</p>
-          <p class="mt-1 text-sm"><span class="font-semibold">Diagnostico:</span> {{ c.diagnostico || 'Sin diagnostico' }}</p>
+          <p class="mt-1 text-sm"><span class="font-semibold">Diagnóstico:</span> {{ c.diagnostico || 'Sin diagnóstico' }}</p>
           <p class="mt-1 whitespace-pre-line text-sm">{{ c.observaciones || 'Sin observaciones' }}</p>
         </article>
         <p *ngIf="consultas().length === 0" class="text-sm text-slate-500">No hay consultas registradas.</p>
@@ -91,7 +91,7 @@
       <div class="mt-3 space-y-3">
         <article *ngFor="let p of preventivos()" class="break-inside-avoid rounded border border-slate-200 p-4">
           <p class="font-semibold">{{ p.nombre }} · {{ p.tipo }}</p>
-          <p class="text-sm">Aplicacion: {{ formatearFecha(p.fechaAplicacion) }} · Proxima dosis: {{ formatearFecha(p.proximaDosis) }}</p>
+          <p class="text-sm">Aplicación: {{ formatearFecha(p.fechaAplicacion) }} · Próxima dosis: {{ formatearFecha(p.proximaDosis) }}</p>
           <p *ngIf="p.observaciones" class="mt-1 text-sm">{{ p.observaciones }}</p>
         </article>
         <p *ngIf="preventivos().length === 0" class="text-sm text-slate-500">No hay preventivos registrados.</p>

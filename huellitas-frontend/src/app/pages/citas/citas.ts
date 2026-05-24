@@ -2,12 +2,16 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { BehaviorSubject, catchError, combineLatest, map, Observable, of, shareReplay, startWith, Subject, switchMap } from 'rxjs';
 import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Cita, CitaService, EstadoCita } from '../../service/cita';
 import { HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../../auth/auth.service';
 import { VeterinarioService, veterinario } from '../../service/veterinario';
+import { extraerMensajeError } from '../../core/http-error';
+import { coincideFiltroFecha, fechaHoraCita, FiltroFechaAgenda, isoLocal, normalizarEstadoCita } from '../../core/agenda-utils';
+import { PermissionService } from '../../core/permission.service';
 
-type VistaCitas = 'agenda' | 'calendario' | 'tabla';
+type VistaCitas = 'agenda' | 'semana' | 'calendario' | 'tabla';
 
 interface OpcionEstado {
   value: EstadoCita;
@@ -35,7 +39,9 @@ export class CitasComponent {
   private buscarTerm$ = new Subject<string>();
   private estadoFiltro$ = new BehaviorSubject<EstadoCita | 'todas'>('todas');
   private veterinarioFiltro$ = new BehaviorSubject<number | 'todos'>('todos');
+  private fechaFiltro$ = new BehaviorSubject<FiltroFechaAgenda>('todas');
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   citas$!: Observable<Cita[]>;
   citasFiltrados$!: Observable<Cita[]>
@@ -46,9 +52,11 @@ export class CitasComponent {
   vista: VistaCitas = 'agenda';
   estadoActivo: EstadoCita | 'todas' = 'todas';
   veterinarioActivo: number | 'todos' = 'todos';
+  fechaActiva: FiltroFechaAgenda = 'todas';
   veterinarios: veterinario[] = [];
   duracionesCitas = new Map<number, number>();
   fechaCalendario = new Date();
+  fechaSemana = new Date();
   diasSemana = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
 
   mostrandoConfirmacion = false;
@@ -65,15 +73,16 @@ export class CitasComponent {
   constructor(
     private citaService: CitaService,
     private veterinarioService: VeterinarioService,
-    private authService: AuthService
+    private authService: AuthService,
+    private permissions: PermissionService
   ) { }
 
   get puedeGestionarCitas(): boolean {
-    return !this.authService.isVeterinario();
+    return this.permissions.canManageCitas;
   }
 
   get puedeEnviarRecordatorios(): boolean {
-    return this.authService.isAdmin();
+    return this.authService.isAdmin() || this.authService.isRecepcion();
   }
 
   get esCliente(): boolean {
@@ -81,6 +90,8 @@ export class CitasComponent {
   }
 
   ngOnInit(): void {
+    this.aplicarFiltrosDesdeRuta();
+
     this.citas$ = this.refrescar$.pipe(
       startWith(void 0),
       switchMap(() => this.citaService.getCitas()),
@@ -97,13 +108,15 @@ export class CitasComponent {
       this.citas$,
       this.buscarTerm$.pipe(startWith('')),
       this.estadoFiltro$,
-      this.veterinarioFiltro$
+      this.veterinarioFiltro$,
+      this.fechaFiltro$
     ]).pipe(
-      map(([lista, term, estado, veterinario]) => {
+      map(([lista, term, estado, veterinario, fecha]) => {
         const t = term.trim().toLowerCase();
         return lista.filter(c => {
           const coincideEstado = estado === 'todas' || this.normalizarEstado(c.estado) === estado;
           const coincideVeterinario = veterinario === 'todos' || c.veterinario?.idVeterinario === veterinario;
+          const coincideFecha = this.coincideFiltroFecha(c.fecha, fecha);
           const coincideTexto = !t ||
           (c.motivo ?? '').toLowerCase().includes(t) ||
           (c.estado ?? '').toLowerCase().includes(t) ||
@@ -111,7 +124,7 @@ export class CitasComponent {
           (c.mascota?.numeroChip ?? '').toLowerCase().includes(t) ||
           (c.veterinario?.nombre ?? '').toLowerCase().includes(t);
 
-          return coincideEstado && coincideVeterinario && coincideTexto;
+          return coincideEstado && coincideVeterinario && coincideFecha && coincideTexto;
         });
       }),
       shareReplay({ bufferSize: 1, refCount: true })
@@ -145,6 +158,14 @@ export class CitasComponent {
   recargar() { this.refrescar$.next(); }
   cambiarVista(vista: VistaCitas) { this.vista = vista; }
 
+  get tituloSemana(): string {
+    const dias = this.diasSemanaVista([]);
+    if (dias.length === 0) return '';
+    const inicio = dias[0].fecha;
+    const fin = dias[6].fecha;
+    return `${inicio.getDate()} ${inicio.toLocaleDateString('es-ES', { month: 'short' })} - ${fin.getDate()} ${fin.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' })}`;
+  }
+
   get tituloCalendario(): string {
     return this.fechaCalendario.toLocaleDateString('es-ES', {
       month: 'long',
@@ -160,6 +181,35 @@ export class CitasComponent {
 
   irHoy() {
     this.fechaCalendario = new Date();
+    this.fechaSemana = new Date();
+  }
+
+  cambiarSemana(delta: number) {
+    const nuevaFecha = new Date(this.fechaSemana);
+    nuevaFecha.setDate(nuevaFecha.getDate() + (delta * 7));
+    this.fechaSemana = nuevaFecha;
+  }
+
+  diasSemanaVista(citas: Cita[]): DiaCalendario[] {
+    const base = new Date(this.fechaSemana);
+    const diaSemana = base.getDay() === 0 ? 7 : base.getDay();
+    const inicio = new Date(base);
+    inicio.setDate(base.getDate() - (diaSemana - 1));
+
+    return Array.from({ length: 7 }, (_, index) => {
+      const fecha = new Date(inicio);
+      fecha.setDate(inicio.getDate() + index);
+      const iso = this.isoLocal(fecha);
+
+      return {
+        fecha,
+        iso,
+        numero: fecha.getDate(),
+        esMesActual: true,
+        esHoy: iso === this.isoLocal(new Date()),
+        citas: citas.filter(cita => cita.fecha === iso).sort((a, b) => (a.hora || '').localeCompare(b.hora || ''))
+      };
+    });
   }
 
   diasCalendario(citas: Cita[]): DiaCalendario[] {
@@ -194,8 +244,33 @@ export class CitasComponent {
     this.veterinarioFiltro$.next(this.veterinarioActivo);
   }
 
+  filtrarFecha(filtro: FiltroFechaAgenda) {
+    this.fechaActiva = filtro;
+    this.fechaFiltro$.next(filtro);
+  }
+
   crear() { this.router.navigate(['/citas/crear']); }
   editar(c: Cita) { this.router.navigate(['/citas', c.idCita, 'editar']); }
+  verMascota(c: Cita) {
+    if (c.mascota?.idMascota) this.router.navigate(['/mascotas', c.mascota.idMascota]);
+  }
+  iniciarConsulta(c: Cita) {
+    if (!c.idCita) return;
+    this.errorMsg = '';
+    this.successMsg = '';
+    this.citaService.actualizarEstado(c.idCita, 'en_consulta').subscribe({
+      next: cita => {
+        const idConsulta = cita.consulta?.idConsulta;
+        if (idConsulta) {
+          this.router.navigate(['/consultas', idConsulta, 'editar'], { queryParams: { iniciar: 1 } });
+          return;
+        }
+        this.successMsg = 'Consulta iniciada. Abre la consulta desde el listado.';
+        this.refrescar$.next();
+      },
+      error: err => this.errorMsg = extraerMensajeError(err, 'No se pudo iniciar la consulta.')
+    });
+  }
 
   abrirEliminar(c: Cita) {
     this.mostrandoConfirmacion = true;
@@ -244,9 +319,10 @@ export class CitasComponent {
   puedeCambiarEstado(cita: Cita, estado: EstadoCita): boolean {
     if (!cita.idCita || this.normalizarEstado(cita.estado) === estado) return false;
     if (this.authService.isCliente()) {
-      return estado === 'programada' || estado === 'confirmada' || estado === 'cancelada';
+      return this.normalizarEstado(cita.estado) === 'programada' && (estado === 'confirmada' || estado === 'cancelada')
+        || this.normalizarEstado(cita.estado) === 'confirmada' && estado === 'cancelada';
     }
-    return true;
+    return this.transicionesPermitidas(this.normalizarEstado(cita.estado)).includes(estado);
   }
 
   puedeConfirmarRapido(cita: Cita): boolean {
@@ -278,7 +354,7 @@ export class CitasComponent {
       },
       error: err => {
         console.error('ERROR actualizando estado', err);
-        this.errorMsg = this.extraerMensajeError(err, 'No se pudo actualizar el estado de la cita.');
+        this.errorMsg = extraerMensajeError(err, 'No se pudo actualizar el estado de la cita.');
       }
     });
   }
@@ -298,7 +374,7 @@ export class CitasComponent {
       error: err => {
         console.error('ERROR enviando recordatorios', err);
         this.enviandoRecordatorios = false;
-        this.errorMsg = 'No se pudieron enviar los recordatorios.';
+        this.errorMsg = extraerMensajeError(err, 'No se pudieron enviar los recordatorios.');
       }
     });
   }
@@ -317,25 +393,69 @@ export class CitasComponent {
       },
       error: err => {
         console.error('ERROR eliminando cita', err);
-        this.errorMsg = 'No se pudo eliminar la cita.';
+        this.errorMsg = extraerMensajeError(err, 'No se pudo eliminar la cita.');
       }
     });
   }
 
-  private normalizarEstado(estado: string): EstadoCita {
-    const estadoNormalizado = (estado || 'programada').trim().toLowerCase().replace(/[- ]/g, '_') as EstadoCita;
-    return this.estados.some(e => e.value === estadoNormalizado) ? estadoNormalizado : 'programada';
+  normalizarEstado(estado: string): EstadoCita {
+    return normalizarEstadoCita(estado);
   }
 
   private compararCitas(a: Cita, b: Cita): number {
-    return `${a.fecha}T${a.hora || '00:00'}`.localeCompare(`${b.fecha}T${b.hora || '00:00'}`);
+    return fechaHoraCita(a).localeCompare(fechaHoraCita(b));
+  }
+
+  private coincideFiltroFecha(fecha: string, filtro: FiltroFechaAgenda): boolean {
+    return coincideFiltroFecha(fecha, filtro);
   }
 
   private isoLocal(date: Date): string {
-    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+    return isoLocal(date);
   }
 
-  private extraerMensajeError(err: any, fallback: string): string {
-    return err?.error?.detail || err?.error?.message || err?.error?.error || fallback;
+  private aplicarFiltrosDesdeRuta(): void {
+    const params = this.route.snapshot.queryParamMap;
+    const estado = params.get('estado');
+    const fecha = params.get('fecha');
+    const vista = params.get('vista');
+
+    if (this.esEstadoFiltro(estado)) {
+      this.estadoActivo = estado;
+      this.estadoFiltro$.next(estado);
+    }
+
+    if (this.esFiltroFecha(fecha)) {
+      this.fechaActiva = fecha;
+      this.fechaFiltro$.next(fecha);
+    }
+
+    if (this.esVista(vista)) {
+      this.vista = vista;
+    }
   }
+
+  private esEstadoFiltro(valor: string | null): valor is EstadoCita | 'todas' {
+    return valor === 'todas' || this.estados.some(estado => estado.value === valor);
+  }
+
+  private esFiltroFecha(valor: string | null): valor is FiltroFechaAgenda {
+    return valor === 'todas' || valor === 'hoy' || valor === 'manana' || valor === 'semana';
+  }
+
+  private esVista(valor: string | null): valor is VistaCitas {
+    return valor === 'agenda' || valor === 'semana' || valor === 'calendario' || valor === 'tabla';
+  }
+
+  private transicionesPermitidas(estado: EstadoCita): EstadoCita[] {
+    const transiciones: Record<EstadoCita, EstadoCita[]> = {
+      programada: ['confirmada', 'en_consulta', 'cancelada'],
+      confirmada: ['en_consulta', 'cancelada'],
+      en_consulta: ['realizada', 'cancelada'],
+      realizada: [],
+      cancelada: []
+    };
+    return transiciones[estado] ?? [];
+  }
+
 }

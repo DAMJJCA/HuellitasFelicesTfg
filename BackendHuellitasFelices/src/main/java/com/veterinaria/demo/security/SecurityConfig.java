@@ -29,12 +29,15 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
+    private final ApiSecurityErrorHandler apiSecurityErrorHandler;
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter,
-            UserDetailsService userDetailsService) {
+            UserDetailsService userDetailsService,
+            ApiSecurityErrorHandler apiSecurityErrorHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.userDetailsService = userDetailsService;
+        this.apiSecurityErrorHandler = apiSecurityErrorHandler;
     }
 
     @Bean
@@ -42,14 +45,17 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(apiSecurityErrorHandler)
+                        .accessDeniedHandler(apiSecurityErrorHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/clientes/**").hasRole("ADMIN")
-                        .requestMatchers("/api/veterinarios/**").hasAnyRole("ADMIN", "CLIENTE")
+                        .requestMatchers("/api/clientes/**").hasAnyRole("ADMIN", "RECEPCION")
+                        .requestMatchers("/api/veterinarios/**").hasAnyRole("ADMIN", "CLIENTE", "RECEPCION", "AUXILIAR")
                         .anyRequest().authenticated());
 
         return http.build();

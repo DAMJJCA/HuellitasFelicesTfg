@@ -5,8 +5,9 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { Cita, CitaService, EstadoCita } from '../../service/cita';
 import { ConsultaService } from '../../service/consulta';
-import { MascotaService } from '../../service/mascota';
+import { MascotaService, Mascotas } from '../../service/mascota';
 import { Preventivo, PreventivoService } from '../../service/preventivo';
+import { extraerMensajeError } from '../../core/http-error';
 
 type DiaCalendario = {
   fecha: Date;
@@ -23,6 +24,14 @@ type EstadoResumen = {
   estado: EstadoCita;
   label: string;
   total: number;
+};
+
+type AvisoOperativo = {
+  titulo: string;
+  descripcion: string;
+  tipo: 'critico' | 'aviso' | 'info';
+  accion: string;
+  destino: () => void;
 };
 
 @Component({
@@ -44,29 +53,37 @@ export class DashboardComponent {
   proximasCitas = signal<Cita[]>([]);
   consultasHoy = signal(0);
   totalMascotas = signal(0);
+  mascotasSinChip = signal<Mascotas[]>([]);
+  citasPendientesConfirmar = signal<Cita[]>([]);
   preventivosProximos = signal<Preventivo[]>([]);
   estadosResumen = signal<EstadoResumen[]>([]);
+  avisosOperativos = signal<AvisoOperativo[]>([]);
 
   diasSemana = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
   rangoSemanas = signal<string>('');
   calendario = signal<DiaCalendario[]>([]);
   errorMsg = signal('');
   successMsg = signal('');
+  recordatorioEnviando = signal<number | null>(null);
 
   get tituloRol(): string {
     if (this.authService.isCliente()) return 'Panel del cliente';
     if (this.authService.isVeterinario()) return 'Panel veterinario';
+    if (this.authService.isRecepcion()) return 'Panel de recepcion';
+    if (this.authService.isAuxiliar()) return 'Panel auxiliar';
     return 'Panel de administracion';
   }
 
   get descripcionRol(): string {
     if (this.authService.isCliente()) return 'Tus mascotas, citas y cuidados preventivos en un vistazo.';
     if (this.authService.isVeterinario()) return 'Citas asignadas, consultas del dia y seguimiento preventivo.';
+    if (this.authService.isRecepcion()) return 'Gestion operativa de agenda, clientes, recordatorios y disponibilidad.';
+    if (this.authService.isAuxiliar()) return 'Apoyo clinico para documentos, preventivos e historial.';
     return 'Resumen operativo de la clinica Huellitas Felices.';
   }
 
   get puedeCrearCitas(): boolean {
-    return !this.authService.isVeterinario();
+    return this.authService.isAdmin() || this.authService.isRecepcion() || this.authService.isCliente();
   }
 
   get esAdmin(): boolean {
@@ -74,7 +91,7 @@ export class DashboardComponent {
   }
 
   get esStaff(): boolean {
-    return this.authService.isAdmin() || this.authService.isVeterinario();
+    return this.authService.isAdmin() || this.authService.isVeterinario() || this.authService.isAuxiliar();
   }
 
   get esCliente(): boolean {
@@ -93,12 +110,14 @@ export class DashboardComponent {
         const ordenadas = [...citas].sort((a, b) => this.fechaHora(a).localeCompare(this.fechaHora(b)));
         this.citasHoy.set(ordenadas.filter(c => this.esHoy(c.fecha)));
         this.proximasCitas.set(ordenadas.filter(c => this.esProximaActiva(c)).slice(0, 6));
+        this.citasPendientesConfirmar.set(ordenadas.filter(c => this.normalizarEstado(c.estado) === 'programada' && this.fechaHora(c) >= this.isoLocal(new Date())).slice(0, 5));
         this.estadosResumen.set(this.calcularEstados(ordenadas));
         this.generarCalendarioDosSemanas(hoy, ordenadas);
+        this.actualizarAvisos();
       },
       error: err => {
         console.error('Error cargando citas del dashboard', err);
-        this.errorMsg.set('No se pudieron cargar las citas del dashboard.');
+        this.errorMsg.set(extraerMensajeError(err, 'No se pudieron cargar las citas del dashboard.'));
       }
     });
 
@@ -108,12 +127,19 @@ export class DashboardComponent {
     });
 
     this.mascotaService.getMascotas().subscribe({
-      next: mascotas => this.totalMascotas.set(mascotas.length),
+      next: mascotas => {
+        this.totalMascotas.set(mascotas.length);
+        this.mascotasSinChip.set(mascotas.filter(m => !m.numeroChip).slice(0, 5));
+        this.actualizarAvisos();
+      },
       error: () => this.totalMascotas.set(0)
     });
 
     this.preventivoService.getProximos().subscribe({
-      next: preventivos => this.preventivosProximos.set(preventivos.slice(0, 6)),
+      next: preventivos => {
+        this.preventivosProximos.set(preventivos.slice(0, 6));
+        this.actualizarAvisos();
+      },
       error: () => this.preventivosProximos.set([])
     });
   }
@@ -147,7 +173,7 @@ export class DashboardComponent {
       },
       error: err => {
         console.error('Error actualizando cita desde dashboard', err);
-        this.errorMsg.set(this.extraerMensajeError(err, 'No se pudo actualizar la cita.'));
+        this.errorMsg.set(extraerMensajeError(err, 'No se pudo actualizar la cita.'));
       }
     });
   }
@@ -158,6 +184,64 @@ export class DashboardComponent {
 
   irACitas() {
     this.router.navigate(['/citas']);
+  }
+
+  irACitaPendiente(cita: Cita) {
+    if (cita.idCita && (this.authService.isAdmin() || this.authService.isRecepcion() || this.authService.isCliente())) {
+      this.router.navigate(['/citas', cita.idCita, 'editar']);
+      return;
+    }
+
+    this.router.navigate(['/citas'], {
+      queryParams: {
+        estado: 'programada',
+        fecha: 'semana',
+        vista: 'agenda'
+      }
+    });
+  }
+
+  puedeEnviarRecordatorioCita(): boolean {
+    return this.authService.isAdmin() || this.authService.isRecepcion();
+  }
+
+  contactoDueno(cita: Cita): string {
+    const cliente = cita.mascota?.cliente;
+    if (!cliente) return 'Dueño sin datos de contacto';
+    const nombre = [cliente.nombre, cliente.apellidos].filter(Boolean).join(' ') || 'Dueño';
+    const telefono = cliente.telefono || 'sin telefono';
+    return `${nombre} - ${telefono}`;
+  }
+
+  telefonoDueno(cita: Cita): string {
+    return cita.mascota?.cliente?.telefono || '';
+  }
+
+  emailDueno(cita: Cita): string {
+    return cita.mascota?.cliente?.email || '';
+  }
+
+  llamarDueno(cita: Cita) {
+    const telefono = this.telefonoDueno(cita);
+    if (telefono) window.location.href = `tel:${telefono}`;
+  }
+
+  enviarRecordatorioCita(cita: Cita) {
+    if (!cita.idCita || this.recordatorioEnviando() === cita.idCita) return;
+
+    this.errorMsg.set('');
+    this.successMsg.set('');
+    this.recordatorioEnviando.set(cita.idCita);
+    this.citaService.enviarRecordatorioCita(cita.idCita).subscribe({
+      next: response => {
+        this.recordatorioEnviando.set(null);
+        this.successMsg.set(`${response.mensaje} Enviadas: ${response.enviadas}. Omitidas: ${response.omitidas}.`);
+      },
+      error: err => {
+        this.recordatorioEnviando.set(null);
+        this.errorMsg.set(extraerMensajeError(err, 'No se pudo enviar el recordatorio de la cita.'));
+      }
+    });
   }
 
   irAClientes() {
@@ -176,8 +260,16 @@ export class DashboardComponent {
     this.router.navigate(['/tratamientos']);
   }
 
+  irAMascotas() {
+    this.router.navigate(['/mascotas']);
+  }
+
   irAPreventivos() {
     this.router.navigate(['/preventivos']);
+  }
+
+  irAMascota(idMascota?: number) {
+    if (idMascota) this.router.navigate(['/mascotas', idMascota]);
   }
 
   formatearFecha(fecha: string | null | undefined): string {
@@ -208,6 +300,15 @@ export class DashboardComponent {
       cancelada: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-200'
     };
     return clases[this.normalizarEstado(estado)] || 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-100';
+  }
+
+  claseAviso(tipo: AvisoOperativo['tipo']): string {
+    const clases = {
+      critico: 'border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-100',
+      aviso: 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-100',
+      info: 'border-sky-200 bg-sky-50 text-sky-900 dark:border-sky-800 dark:bg-sky-900/20 dark:text-sky-100'
+    };
+    return clases[tipo];
   }
 
   private generarCalendarioDosSemanas(hoy: Date, citas: Cita[]) {
@@ -261,6 +362,52 @@ export class DashboardComponent {
     }));
   }
 
+  private actualizarAvisos(): void {
+    const avisos: AvisoOperativo[] = [];
+
+    if (this.citasPendientesConfirmar().length > 0) {
+      avisos.push({
+        titulo: 'Citas pendientes de confirmar',
+        descripcion: `${this.citasPendientesConfirmar().length} cita(s) proximas siguen sin confirmar.`,
+        tipo: 'aviso',
+        accion: 'Abrir agenda',
+        destino: () => this.irACitas()
+      });
+    }
+
+    if (this.mascotasSinChip().length > 0) {
+      avisos.push({
+        titulo: 'Mascotas sin chip',
+        descripcion: `${this.mascotasSinChip().length} ficha(s) necesitan identificacion por chip.`,
+        tipo: 'critico',
+        accion: 'Revisar mascotas',
+        destino: () => this.irAMascotas()
+      });
+    }
+
+    if (this.preventivosProximos().length > 0) {
+      avisos.push({
+        titulo: 'Preventivos proximos',
+        descripcion: `${this.preventivosProximos().length} vacuna(s) o desparasitacion(es) requieren seguimiento.`,
+        tipo: 'info',
+        accion: 'Ver preventivos',
+        destino: () => this.irAPreventivos()
+      });
+    }
+
+    if (this.citasHoy().some(cita => this.normalizarEstado(cita.estado) === 'en_consulta')) {
+      avisos.push({
+        titulo: 'Consultas en curso',
+        descripcion: 'Hay citas marcadas como en consulta pendientes de finalizar.',
+        tipo: 'aviso',
+        accion: 'Ver citas de hoy',
+        destino: () => this.irACitas()
+      });
+    }
+
+    this.avisosOperativos.set(avisos.slice(0, 4));
+  }
+
   private esHoy(fecha: string): boolean {
     return this.esMismoDia(fecha, new Date());
   }
@@ -289,7 +436,4 @@ export class DashboardComponent {
     return (estado || 'programada').trim().toLowerCase().replace(/[- ]/g, '_');
   }
 
-  private extraerMensajeError(err: any, fallback: string): string {
-    return err?.error?.detail || err?.error?.message || err?.error?.error || fallback;
-  }
 }

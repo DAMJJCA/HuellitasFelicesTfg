@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { ShellComponent } from './layout/shell/shell';
 import { authGuard } from './auth/auth.guard';  //Proteccion de rutas
 import { adminGuard } from './auth/admin.guard';
+import { adminOnlyGuard } from './auth/admin-only.guard';
 import { staffGuard } from './auth/staff.guard';
 import { nonVeterinarioGuard } from './auth/non-veterinario.guard';
 
@@ -94,13 +95,13 @@ export const routes: Routes = [
       },
       {
         path: 'admin/veterinarios/nuevo',
-        canActivate: [adminGuard],
+        canActivate: [adminOnlyGuard],
         loadComponent: () =>
           import('./pages/veterinarios/nvveterinario/nvveterinario').then(m => m.NvVeterinarioComponent)
       },
       {
         path: 'admin/veterinarios/:id/editar',
-        canActivate: [adminGuard],
+        canActivate: [adminOnlyGuard],
         loadComponent: () =>
           import('./pages/veterinarios/mveterinario/mveterinario').then(m => m.MveterinarioComponent)
       },
@@ -115,6 +116,12 @@ export const routes: Routes = [
         canActivate: [adminGuard],
         loadComponent: () =>
           import('./pages/disponibilidad-veterinarios/disponibilidad-veterinarios').then(m => m.DisponibilidadVeterinariosComponent)
+      },
+      {
+        path: 'admin/auditoria-clinica',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/auditoria-clinica/auditoria-clinica').then(m => m.AuditoriaClinicaComponent)
       },
 
       // citas
@@ -196,6 +203,11 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () =>
           import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'perfil',
+        loadComponent: () =>
+          import('./pages/perfil/perfil').then(m => m.Perfil)
       }
     ]
   },

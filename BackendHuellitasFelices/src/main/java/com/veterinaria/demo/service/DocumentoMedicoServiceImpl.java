@@ -35,6 +35,7 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
     private final MascotaRepository mascotaRepository;
     private final CurrentUserService currentUserService;
     private final DocumentoMedicoArchivoStorageService archivoStorageService;
+    private final AuditoriaClinicaService auditoriaClinicaService;
 
     private final RowMapper<DocumentoMedicoResponse> rowMapper = (rs, rowNum) -> {
         DocumentoMedicoResponse response = new DocumentoMedicoResponse();
@@ -61,11 +62,13 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
             JdbcTemplate jdbcTemplate,
             MascotaRepository mascotaRepository,
             CurrentUserService currentUserService,
-            DocumentoMedicoArchivoStorageService archivoStorageService) {
+            DocumentoMedicoArchivoStorageService archivoStorageService,
+            AuditoriaClinicaService auditoriaClinicaService) {
         this.jdbcTemplate = jdbcTemplate;
         this.mascotaRepository = mascotaRepository;
         this.currentUserService = currentUserService;
         this.archivoStorageService = archivoStorageService;
+        this.auditoriaClinicaService = auditoriaClinicaService;
     }
 
     @Override
@@ -117,7 +120,9 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
         }, keyHolder);
 
         Number key = keyHolder.getKey();
-        return findById(key != null ? key.longValue() : null);
+        Long id = key != null ? key.longValue() : null;
+        auditoriaClinicaService.registrar("documento_medico", id, "crear", "Documento " + request.getNombre());
+        return findById(id);
     }
 
     @Override
@@ -148,6 +153,7 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
                 request.getObservaciones(),
                 id);
 
+        auditoriaClinicaService.registrar("documento_medico", id, "editar", "Documento " + request.getNombre());
         return findById(id);
     }
 
@@ -158,8 +164,8 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
         if (actual == null) {
             throw new IllegalArgumentException("El documento medico no existe");
         }
-        if (currentUserService.isCliente()) {
-            throw new AccessDeniedException("Los clientes no pueden modificar documentos medicos");
+        if (currentUserService.isCliente() || currentUserService.isRecepcion()) {
+            throw new AccessDeniedException("Tu rol no puede modificar documentos medicos");
         }
 
         jdbcTemplate.update("""
@@ -179,14 +185,15 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
 
     @Override
     public void deleteById(Long id) {
-        if (currentUserService.isCliente()) {
-            throw new AccessDeniedException("Los clientes no pueden eliminar documentos medicos");
+        if (currentUserService.isCliente() || currentUserService.isRecepcion()) {
+            throw new AccessDeniedException("Tu rol no puede eliminar documentos medicos");
         }
         DocumentoMedicoResponse documento = findById(id);
         jdbcTemplate.update("delete from documentos_medicos where id_documento = ?", id);
         if (documento != null) {
             archivoStorageService.eliminarSiExiste(documento.getRutaStorage());
         }
+        auditoriaClinicaService.registrar("documento_medico", id, "eliminar", "Documento eliminado");
     }
 
     private String baseSql() {
@@ -200,8 +207,8 @@ public class DocumentoMedicoServiceImpl implements DocumentoMedicoService {
     }
 
     private void validarPuedeModificar(DocumentoMedicoRequest request) {
-        if (currentUserService.isCliente()) {
-            throw new AccessDeniedException("Los clientes no pueden modificar documentos medicos");
+        if (currentUserService.isCliente() || currentUserService.isRecepcion()) {
+            throw new AccessDeniedException("Tu rol no puede modificar documentos medicos");
         }
         if (request.getIdMascota() == null) {
             throw new IllegalArgumentException("Debes indicar la mascota");

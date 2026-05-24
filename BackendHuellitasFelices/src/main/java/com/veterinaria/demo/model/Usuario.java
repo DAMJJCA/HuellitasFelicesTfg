@@ -51,6 +51,9 @@ public class Usuario {
     @Column(name = "actualizado_en", insertable = false, updatable = false)
     private LocalDateTime actualizadoEn;
 
+    @Column(name = "foto_perfil_url", columnDefinition = "text")
+    private String fotoPerfilUrl;
+
     public Long getIdUsuario() {
         return idUsuario;
     }
@@ -121,5 +124,13 @@ public class Usuario {
 
     public LocalDateTime getActualizadoEn() {
         return actualizadoEn;
+    }
+
+    public String getFotoPerfilUrl() {
+        return fotoPerfilUrl;
+    }
+
+    public void setFotoPerfilUrl(String fotoPerfilUrl) {
+        this.fotoPerfilUrl = fotoPerfilUrl;
     }
 }

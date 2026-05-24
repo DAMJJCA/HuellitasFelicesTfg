@@ -35,10 +35,30 @@ public class CurrentUserService {
         return hasRole(RolUsuario.veterinario);
     }
 
+    public boolean isAdmin() {
+        return hasRole(RolUsuario.admin);
+    }
+
+    public boolean isRecepcion() {
+        return hasRole(RolUsuario.recepcion);
+    }
+
+    public boolean isAuxiliar() {
+        return hasRole(RolUsuario.auxiliar);
+    }
+
+    public boolean isRecepcionOAdmin() {
+        return isAdmin() || isRecepcion();
+    }
+
+    public boolean isClinicalStaff() {
+        return isAdmin() || isVeterinario() || isAuxiliar();
+    }
+
     public Long getAuthenticatedClienteIdOrThrow() {
         Usuario usuario = getAuthenticatedUsuario();
         if (usuario.getRol() != RolUsuario.cliente || usuario.getIdCliente() == null) {
-            throw new AccessDeniedException("Usuario cliente sin idCliente asignado");
+            throw new AccessDeniedException("Tu usuario cliente no esta enlazado con una ficha de cliente. Revisa usuarios.id_cliente en Supabase.");
         }
         return usuario.getIdCliente();
     }
@@ -46,7 +66,7 @@ public class CurrentUserService {
     public Long getAuthenticatedVeterinarioIdOrThrow() {
         Usuario usuario = getAuthenticatedUsuario();
         if (usuario.getRol() != RolUsuario.veterinario || usuario.getIdVeterinario() == null) {
-            throw new AccessDeniedException("Usuario veterinario sin idVeterinario asignado");
+            throw new AccessDeniedException("Tu usuario veterinario no esta enlazado con una ficha de veterinario. Revisa usuarios.id_veterinario en Supabase.");
         }
         return usuario.getIdVeterinario();
     }

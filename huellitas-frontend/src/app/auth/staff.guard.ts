@@ -10,7 +10,7 @@ export const staffGuard: CanActivateFn = () => {
     return router.createUrlTree(['/login']);
   }
 
-  if (authService.isAdmin() || authService.isVeterinario()) {
+  if (authService.isClinicalStaff()) {
     return true;
   }
 

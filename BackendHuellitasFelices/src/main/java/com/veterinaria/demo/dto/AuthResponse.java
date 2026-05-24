@@ -7,13 +7,15 @@ public class AuthResponse {
     private final String email;
     private final String nombreUsuario;
     private final String rol;
+    private final String profileImageUrl;
 
-    public AuthResponse(String token, String type, String email, String nombreUsuario, String rol) {
+    public AuthResponse(String token, String type, String email, String nombreUsuario, String rol, String profileImageUrl) {
         this.token = token;
         this.type = type;
         this.email = email;
         this.nombreUsuario = nombreUsuario;
         this.rol = rol;
+        this.profileImageUrl = profileImageUrl;
     }
 
     public String getToken() {
@@ -34,5 +36,9 @@ public class AuthResponse {
 
     public String getRol() {
         return rol;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
     }
 }

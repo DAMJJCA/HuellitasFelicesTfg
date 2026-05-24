@@ -55,13 +55,13 @@ public class DocumentoMedicoController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO', 'AUXILIAR')")
     public DocumentoMedicoResponse crear(@RequestBody DocumentoMedicoRequest request) {
         return service.save(request);
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO', 'AUXILIAR')")
     public DocumentoMedicoResponse subir(
             @RequestParam Long idMascota,
             @RequestParam(required = false) Long idConsulta,
@@ -111,13 +111,13 @@ public class DocumentoMedicoController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO', 'AUXILIAR')")
     public DocumentoMedicoResponse editar(@PathVariable Long id, @RequestBody DocumentoMedicoRequest request) {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO', 'AUXILIAR')")
     public void eliminar(@PathVariable Long id) {
         service.deleteById(id);
     }

@@ -10,7 +10,7 @@ export const nonVeterinarioGuard: CanActivateFn = () => {
     return router.createUrlTree(['/login']);
   }
 
-  if (authService.isVeterinario()) {
+  if (authService.isVeterinario() || authService.isAuxiliar()) {
     return router.createUrlTree(['/dashboard']);
   }
 

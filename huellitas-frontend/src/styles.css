@@ -2,6 +2,47 @@
 
 @import 'tailwindcss';
 
+.app-table-head {
+  background-color: #2563eb !important;
+  color: #eff6ff !important;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.app-table-head tr,
+.app-table-head th {
+  background-color: #2563eb !important;
+  color: #eff6ff !important;
+}
+
+.dark .app-table-head {
+  background-color: #2563eb !important;
+  color: #eff6ff !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-table-head {
+    background-color: #2563eb !important;
+    color: #eff6ff !important;
+  }
+
+  .app-table-head tr,
+  .app-table-head th {
+    background-color: #2563eb !important;
+    color: #eff6ff !important;
+  }
+}
+
+.app-table-head th {
+  border-bottom: 1px solid #60a5fa !important;
+}
+
+.dark .app-table-head th {
+  border-bottom-color: #334155;
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     background: #0f172a;

@@ -3,6 +3,7 @@ import {ChangeDetectionStrategy,Component,signal} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { extraerMensajeError } from '../../../core/http-error';
 import { Cita, CitaService, CrearCitaDto } from '../../../service/cita';
 import {
   DisponibilidadVeterinario,
@@ -68,12 +69,12 @@ export class NvcitaComponent {
 
     this.mascotaService.getMascotas().subscribe({
       next: m => this.mascotas.set(m),
-      error: () => this.error.set('Error cargando mascotas.')
+      error: err => this.error.set(extraerMensajeError(err, 'Error cargando mascotas.'))
     });
 
     this.veterinarioService.getVeterinarios().subscribe({
       next: v => this.veterinarios.set(v),
-      error: () => this.error.set('Error cargando veterinarios.')
+      error: err => this.error.set(extraerMensajeError(err, 'Error cargando veterinarios.'))
     });
 
     this.citaService.getCitas().subscribe({
@@ -171,7 +172,7 @@ export class NvcitaComponent {
     this.success.set('');
 
     if (form.invalid || !this.cita.idMascota || !this.cita.idVeterinario) {
-      this.error.set('Por favor selecciona una mascota y un veterinario.');
+      this.error.set('Selecciona mascota, veterinario, fecha, hora y motivo antes de guardar.');
       return;
     }
 
@@ -208,21 +209,17 @@ export class NvcitaComponent {
             this.success.set('Cita creada exitosamente.');
             setTimeout(() => this.router.navigate(['/citas']), 600);
           },
-          error: err => this.error.set(this.extraerMensajeError(err, 'La cita se creo, pero no se pudo guardar la duracion.'))
+          error: err => this.error.set(extraerMensajeError(err, 'La cita se creó, pero no se pudo guardar la duración.'))
         });
       },
       error: (err) => {
-        this.error.set(this.extraerMensajeError(err, 'Error creando la cita.'));
+        this.error.set(extraerMensajeError(err, 'Error creando la cita.'));
       }
     });
   }
 
   cancelar() {
     this.router.navigate(['/citas']);
-  }
-
-  private extraerMensajeError(err: any, fallback: string): string {
-    return err?.error?.detail || err?.error?.message || err?.error?.error || fallback;
   }
 
   private validarFechaHora(): string {

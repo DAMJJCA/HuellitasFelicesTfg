@@ -92,7 +92,7 @@ export class DocumentosMedicosComponent {
   form = this.crearFormVacio();
 
   get puedeGestionar(): boolean {
-    return this.authService.isAdmin() || this.authService.isVeterinario();
+    return this.authService.isAdmin() || this.authService.isVeterinario() || this.authService.isAuxiliar();
   }
 
   ngOnInit(): void {

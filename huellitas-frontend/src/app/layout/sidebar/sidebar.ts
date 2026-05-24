@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 
@@ -23,7 +23,23 @@ export class SidebarComponent {
         { label: 'Citas', route: '/citas' },
         { label: 'Vacunas', route: '/preventivos' },
         { label: 'Documentos', route: '/documentos-medicos' },
-        { label: 'Historial medico', route: '/historial' }
+        { label: 'Historial medico', route: '/historial' },
+        { label: 'Perfil', route: '/perfil' }
+      ];
+    }
+
+    if (this.authService.isRecepcion()) {
+      return [
+        { label: 'Dashboard', route: '/dashboard' },
+        { label: 'Clientes', route: '/clientes' },
+        { label: 'Mascotas', route: '/mascotas' },
+        { label: 'Veterinarios', route: '/admin/veterinarios' },
+        { label: 'Disponibilidad', route: '/admin/disponibilidad-veterinarios' },
+        { label: 'Auditoria', route: '/admin/auditoria-clinica' },
+        { label: 'Citas', route: '/citas' },
+        { label: 'Vacunas', route: '/preventivos' },
+        { label: 'Historial medico', route: '/historial' },
+        { label: 'Perfil', route: '/perfil' }
       ];
     }
 
@@ -36,25 +52,38 @@ export class SidebarComponent {
         { label: 'Tratamientos', route: '/tratamientos' },
         { label: 'Vacunas', route: '/preventivos' },
         { label: 'Documentos', route: '/documentos-medicos' },
-        { label: 'Historial medico', route: '/historial' }
+        { label: 'Historial medico', route: '/historial' },
+        { label: 'Perfil', route: '/perfil' }
       ];
     }
 
-    const adminItems = [
+    if (this.authService.isAuxiliar()) {
+      return [
+        { label: 'Dashboard', route: '/dashboard' },
+        { label: 'Mascotas', route: '/mascotas' },
+        { label: 'Citas', route: '/citas' },
+        { label: 'Vacunas', route: '/preventivos' },
+        { label: 'Documentos', route: '/documentos-medicos' },
+        { label: 'Historial medico', route: '/historial' },
+        { label: 'Perfil', route: '/perfil' }
+      ];
+    }
+
+    return [
       { label: 'Dashboard', route: '/dashboard' },
       { label: 'Clientes', route: '/clientes' },
       { label: 'Mascotas', route: '/mascotas' },
       { label: 'Veterinarios', route: '/admin/veterinarios' },
       { label: 'Disponibilidad', route: '/admin/disponibilidad-veterinarios' },
+      { label: 'Auditoria', route: '/admin/auditoria-clinica' },
       { label: 'Citas', route: '/citas' },
       { label: 'Consultas', route: '/consultas' },
       { label: 'Tratamientos', route: '/tratamientos' },
       { label: 'Vacunas', route: '/preventivos' },
       { label: 'Documentos', route: '/documentos-medicos' },
-      { label: 'Historial medico', route: '/historial' }
+      { label: 'Historial medico', route: '/historial' },
+      { label: 'Perfil', route: '/perfil' }
     ];
-
-    return adminItems;
   }
 
   get nombreUsuario(): string {
@@ -63,6 +92,10 @@ export class SidebarComponent {
 
   get rolUsuario(): string {
     return this.authService.userRoleLabel();
+  }
+
+  get imagenPerfil(): string {
+    return this.authService.profileImage();
   }
 
   logout() {

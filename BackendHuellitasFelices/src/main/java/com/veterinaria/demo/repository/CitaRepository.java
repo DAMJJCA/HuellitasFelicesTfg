@@ -10,13 +10,15 @@ import com.veterinaria.demo.model.Cita;
 
 public interface CitaRepository extends JpaRepository<Cita, Long> {
 
-    List<Cita> findByMascota_Cliente_IdCliente(Long idCliente);
+    List<Cita> findByEliminadoFalse();
 
-    Optional<Cita> findByIdCitaAndMascota_Cliente_IdCliente(Long idCita, Long idCliente);
+    List<Cita> findByMascota_Cliente_IdClienteAndEliminadoFalse(Long idCliente);
 
-    List<Cita> findByVeterinario_IdVeterinario(Long idVeterinario);
+    Optional<Cita> findByIdCitaAndMascota_Cliente_IdClienteAndEliminadoFalse(Long idCita, Long idCliente);
 
-    Optional<Cita> findByIdCitaAndVeterinario_IdVeterinario(Long idCita, Long idVeterinario);
+    List<Cita> findByVeterinario_IdVeterinarioAndEliminadoFalse(Long idVeterinario);
+
+    Optional<Cita> findByIdCitaAndVeterinario_IdVeterinarioAndEliminadoFalse(Long idCita, Long idVeterinario);
 
     List<Cita> findByFechaAndEstadoNotIn(LocalDate fecha, List<String> estados);
 
@@ -26,7 +28,7 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
             String hora,
             List<String> estados);
 
-    List<Cita> findByVeterinario_IdVeterinarioAndFechaAndEstadoIn(
+    List<Cita> findByVeterinario_IdVeterinarioAndFechaAndEstadoInAndEliminadoFalse(
             Long idVeterinario,
             LocalDate fecha,
             List<String> estados);

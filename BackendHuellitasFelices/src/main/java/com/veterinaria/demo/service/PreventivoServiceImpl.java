@@ -27,6 +27,7 @@ public class PreventivoServiceImpl implements PreventivoService {
     private final JdbcTemplate jdbcTemplate;
     private final MascotaRepository mascotaRepository;
     private final CurrentUserService currentUserService;
+    private final AuditoriaClinicaService auditoriaClinicaService;
 
     private final RowMapper<PreventivoResponse> rowMapper = (rs, rowNum) -> {
         PreventivoResponse response = new PreventivoResponse();
@@ -49,10 +50,12 @@ public class PreventivoServiceImpl implements PreventivoService {
     public PreventivoServiceImpl(
             JdbcTemplate jdbcTemplate,
             MascotaRepository mascotaRepository,
-            CurrentUserService currentUserService) {
+            CurrentUserService currentUserService,
+            AuditoriaClinicaService auditoriaClinicaService) {
         this.jdbcTemplate = jdbcTemplate;
         this.mascotaRepository = mascotaRepository;
         this.currentUserService = currentUserService;
+        this.auditoriaClinicaService = auditoriaClinicaService;
     }
 
     @Override
@@ -113,7 +116,9 @@ public class PreventivoServiceImpl implements PreventivoService {
         }, keyHolder);
 
         Number key = keyHolder.getKey();
-        return findById(key != null ? key.longValue() : null);
+        Long id = key != null ? key.longValue() : null;
+        auditoriaClinicaService.registrar("preventivo", id, "crear", "Preventivo " + request.getNombre());
+        return findById(id);
     }
 
     @Override
@@ -139,6 +144,7 @@ public class PreventivoServiceImpl implements PreventivoService {
                 request.getObservaciones(),
                 id);
 
+        auditoriaClinicaService.registrar("preventivo", id, "editar", "Preventivo " + request.getNombre());
         return findById(id);
     }
 
@@ -148,6 +154,7 @@ public class PreventivoServiceImpl implements PreventivoService {
             throw new AccessDeniedException("Los clientes no pueden eliminar vacunas o desparasitaciones");
         }
         jdbcTemplate.update("delete from vacunas_desparasitaciones where id_registro = ?", id);
+        auditoriaClinicaService.registrar("preventivo", id, "eliminar", "Preventivo eliminado");
     }
 
     private String baseSql() {

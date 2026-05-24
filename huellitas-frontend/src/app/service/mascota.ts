@@ -9,6 +9,11 @@ export interface Mascotas {
   especie: string;
   raza: string;
   numeroChip?: string | null;
+  fotoUrl?: string | null;
+  alergias?: string | null;
+  enfermedadesCronicas?: string | null;
+  medicacionHabitual?: string | null;
+  observacionesInternas?: string | null;
   fechaNacimiento: string | null;
   peso: number | null;
   sexo: string;
@@ -24,6 +29,11 @@ export type CrearMascotaDto = {
   especie: string;
   raza: string;
   numeroChip?: string | null;
+  fotoUrl?: string | null;
+  alergias?: string | null;
+  enfermedadesCronicas?: string | null;
+  medicacionHabitual?: string | null;
+  observacionesInternas?: string | null;
   fechaNacimiento: string | null;
   peso: number | null;
   sexo: string;
