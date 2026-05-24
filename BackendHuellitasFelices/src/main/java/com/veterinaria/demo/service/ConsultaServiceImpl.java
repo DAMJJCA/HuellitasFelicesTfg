@@ -16,20 +16,26 @@ public class ConsultaServiceImpl implements ConsultaService {
     private final ConsultaRepository repo;
     private final MascotaRepository mascotaRepository;
     private final CurrentUserService currentUserService;
+    private final AuditoriaClinicaService auditoriaClinicaService;
 
     public ConsultaServiceImpl(
             ConsultaRepository repo,
             MascotaRepository mascotaRepository,
-            CurrentUserService currentUserService) {
+            CurrentUserService currentUserService,
+            AuditoriaClinicaService auditoriaClinicaService) {
         this.repo = repo;
         this.mascotaRepository = mascotaRepository;
         this.currentUserService = currentUserService;
+        this.auditoriaClinicaService = auditoriaClinicaService;
     }
 
     @Override
     public List<Consulta> findAll() {
         if (currentUserService.isCliente()) {
             return repo.findByCita_Mascota_Cliente_IdCliente(currentUserService.getAuthenticatedClienteIdOrThrow());
+        }
+        if (currentUserService.isVeterinario()) {
+            return repo.findByCita_Veterinario_IdVeterinario(currentUserService.getAuthenticatedVeterinarioIdOrThrow());
         }
         return repo.findAll();
     }
@@ -38,6 +44,10 @@ public class ConsultaServiceImpl implements ConsultaService {
     public Consulta findById(Long id) {
         if (currentUserService.isCliente()) {
             return repo.findByIdConsultaAndCita_Mascota_Cliente_IdCliente(id, currentUserService.getAuthenticatedClienteIdOrThrow())
+                    .orElseThrow(() -> new AccessDeniedException("No tienes acceso a esta consulta"));
+        }
+        if (currentUserService.isVeterinario()) {
+            return repo.findByIdConsultaAndCita_Veterinario_IdVeterinario(id, currentUserService.getAuthenticatedVeterinarioIdOrThrow())
                     .orElseThrow(() -> new AccessDeniedException("No tienes acceso a esta consulta"));
         }
         return repo.findById(id).orElse(null);
@@ -52,22 +62,40 @@ public class ConsultaServiceImpl implements ConsultaService {
             }
             return repo.findByCita_Mascota_IdMascotaAndCita_Mascota_Cliente_IdCliente(idMascota, idCliente);
         }
+        if (currentUserService.isVeterinario()) {
+            return repo.findByCita_Mascota_IdMascotaAndCita_Veterinario_IdVeterinario(
+                    idMascota,
+                    currentUserService.getAuthenticatedVeterinarioIdOrThrow());
+        }
         return repo.findByCita_Mascota_IdMascota(idMascota);
     }
 
     @Override
     public Consulta save(Consulta consulta) {
-        if (currentUserService.isCliente()) {
-            throw new AccessDeniedException("Los clientes no pueden modificar consultas");
+        if (currentUserService.isCliente() || currentUserService.isRecepcion() || currentUserService.isAuxiliar()) {
+            throw new AccessDeniedException("Tu rol no puede modificar consultas clinicas");
         }
-        return repo.save(consulta);
+        validarConsulta(consulta);
+        Consulta saved = repo.save(consulta);
+        auditoriaClinicaService.registrar("consulta", saved.getIdConsulta(), "editar", "Consulta actualizada");
+        return saved;
     }
 
     @Override
     public void deleteById(Long id) {
-        if (currentUserService.isCliente()) {
-            throw new AccessDeniedException("Los clientes no pueden eliminar consultas");
+        if (currentUserService.isCliente() || currentUserService.isRecepcion() || currentUserService.isAuxiliar()) {
+            throw new AccessDeniedException("Tu rol no puede eliminar consultas clinicas");
         }
         repo.deleteById(id);
+        auditoriaClinicaService.registrar("consulta", id, "eliminar", "Consulta eliminada");
+    }
+
+    private void validarConsulta(Consulta consulta) {
+        if (consulta.getDiagnostico() != null && consulta.getDiagnostico().length() > 1000) {
+            throw new IllegalArgumentException("El diagnostico no puede superar 1000 caracteres");
+        }
+        if (consulta.getObservaciones() != null && consulta.getObservaciones().length() > 1500) {
+            throw new IllegalArgumentException("Las observaciones no pueden superar 1500 caracteres");
+        }
     }
 }

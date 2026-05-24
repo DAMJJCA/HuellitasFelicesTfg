@@ -43,20 +43,20 @@ public class MascotaController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE', 'RECEPCION')")
     public Mascota crear(@RequestBody Mascota mascota) {
         return service.save(mascota);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE', 'RECEPCION')")
     public Mascota editar(@PathVariable Long id, @RequestBody Mascota mascota) {
         mascota.setIdMascota(id);
         return service.save(mascota);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE', 'RECEPCION')")
     public void eliminar(@PathVariable Long id) {
         service.deleteById(id);
     }

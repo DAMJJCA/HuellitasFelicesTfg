@@ -48,25 +48,25 @@ public class PreventivoController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO', 'AUXILIAR')")
     public PreventivoResponse crear(@RequestBody PreventivoRequest request) {
         return service.save(request);
     }
 
     @PostMapping("/recordatorios/proximas-dosis")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     public ReminderResponse enviarRecordatoriosProximasDosis() {
         return reminderService.enviarRecordatoriosProximasDosis();
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO', 'AUXILIAR')")
     public PreventivoResponse editar(@PathVariable Long id, @RequestBody PreventivoRequest request) {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VETERINARIO', 'AUXILIAR')")
     public void eliminar(@PathVariable Long id) {
         service.deleteById(id);
     }

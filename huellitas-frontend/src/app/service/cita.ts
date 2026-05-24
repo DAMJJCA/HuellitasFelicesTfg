@@ -24,12 +24,23 @@ export interface Cita {
     idMascota: number;
     nombre?: string;
     numeroChip?: string | null;
+    cliente?: {
+      idCliente?: number;
+      nombre?: string;
+      apellidos?: string;
+      telefono?: string | null;
+      email?: string | null;
+    };
   };
 
   veterinario: {
     idVeterinario: number;
     nombre?: string;
   };
+
+  consulta?: {
+    idConsulta: number;
+  } | null;
 }
 export type CrearCitaDto = Omit<Cita, 'idCita'>;
 
@@ -62,6 +73,9 @@ export class CitaService {
   }
   enviarRecordatoriosProximas(): Observable<ReminderResponse> {
     return this.http.post<ReminderResponse>(`${this.api}/recordatorios/proximas`, {});
+  }
+  enviarRecordatorioCita(id: number): Observable<ReminderResponse> {
+    return this.http.post<ReminderResponse>(`${this.api}/${id}/recordatorio`, {});
   }
   getCita(id: number): Observable<Cita> {
     return this.http.get<Cita>(`${this.api}/${id}`);

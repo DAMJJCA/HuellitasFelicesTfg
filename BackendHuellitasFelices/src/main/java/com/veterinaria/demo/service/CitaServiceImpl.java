@@ -35,12 +35,18 @@ public class CitaServiceImpl implements CitaService {
             "confirmada",
             "en_consulta");
 
+    private static final Set<String> ESTADOS_FINALES = Set.of(
+            "realizada",
+            "completada",
+            "cancelada");
+
     private final CitaRepository citaRepo;
     private final ConsultaRepository consultaRepo;
     private final MascotaRepository mascotaRepository;
     private final CurrentUserService currentUserService;
     private final DisponibilidadVeterinarioService disponibilidadVeterinarioService;
     private final CitaDuracionService citaDuracionService;
+    private final AuditoriaClinicaService auditoriaClinicaService;
 
     public CitaServiceImpl(
             CitaRepository citaRepo,
@@ -48,34 +54,36 @@ public class CitaServiceImpl implements CitaService {
             MascotaRepository mascotaRepository,
             CurrentUserService currentUserService,
             DisponibilidadVeterinarioService disponibilidadVeterinarioService,
-            CitaDuracionService citaDuracionService) {
+            CitaDuracionService citaDuracionService,
+            AuditoriaClinicaService auditoriaClinicaService) {
         this.citaRepo = citaRepo;
         this.consultaRepo = consultaRepo;
         this.mascotaRepository = mascotaRepository;
         this.currentUserService = currentUserService;
         this.disponibilidadVeterinarioService = disponibilidadVeterinarioService;
         this.citaDuracionService = citaDuracionService;
+        this.auditoriaClinicaService = auditoriaClinicaService;
     }
 
     @Override
     public List<Cita> findAll() {
         if (currentUserService.isCliente()) {
-            return citaRepo.findByMascota_Cliente_IdCliente(currentUserService.getAuthenticatedClienteIdOrThrow());
+            return citaRepo.findByMascota_Cliente_IdClienteAndEliminadoFalse(currentUserService.getAuthenticatedClienteIdOrThrow());
         }
         if (currentUserService.isVeterinario()) {
-            return citaRepo.findByVeterinario_IdVeterinario(currentUserService.getAuthenticatedVeterinarioIdOrThrow());
+            return citaRepo.findByVeterinario_IdVeterinarioAndEliminadoFalse(currentUserService.getAuthenticatedVeterinarioIdOrThrow());
         }
-        return citaRepo.findAll();
+        return citaRepo.findByEliminadoFalse();
     }
 
     @Override
     public Cita findById(Long id) {
         if (currentUserService.isCliente()) {
-            return citaRepo.findByIdCitaAndMascota_Cliente_IdCliente(id, currentUserService.getAuthenticatedClienteIdOrThrow())
+            return citaRepo.findByIdCitaAndMascota_Cliente_IdClienteAndEliminadoFalse(id, currentUserService.getAuthenticatedClienteIdOrThrow())
                     .orElseThrow(() -> new AccessDeniedException("No tienes acceso a esta cita"));
         }
         if (currentUserService.isVeterinario()) {
-            return citaRepo.findByIdCitaAndVeterinario_IdVeterinario(id, currentUserService.getAuthenticatedVeterinarioIdOrThrow())
+            return citaRepo.findByIdCitaAndVeterinario_IdVeterinarioAndEliminadoFalse(id, currentUserService.getAuthenticatedVeterinarioIdOrThrow())
                     .orElseThrow(() -> new AccessDeniedException("No tienes acceso a esta cita"));
         }
         return citaRepo.findById(id).orElse(null);
@@ -84,8 +92,8 @@ public class CitaServiceImpl implements CitaService {
     @Override
     @Transactional
     public Cita save(Cita cita) {
-        if (currentUserService.isVeterinario()) {
-            throw new AccessDeniedException("Los veterinarios no pueden crear ni editar citas");
+        if (currentUserService.isVeterinario() || currentUserService.isAuxiliar()) {
+            throw new AccessDeniedException("Tu rol no puede crear ni editar citas");
         }
 
         if (cita.getMascota() == null || cita.getMascota().getIdMascota() == null) {
@@ -101,15 +109,22 @@ public class CitaServiceImpl implements CitaService {
             }
 
             if (cita.getIdCita() != null
-                    && citaRepo.findByIdCitaAndMascota_Cliente_IdCliente(cita.getIdCita(), idCliente).isEmpty()) {
+                    && citaRepo.findByIdCitaAndMascota_Cliente_IdClienteAndEliminadoFalse(cita.getIdCita(), idCliente).isEmpty()) {
                 throw new AccessDeniedException("No tienes acceso para editar esta cita");
             }
         }
 
         cita.setEstado(normalizarEstado(cita.getEstado()));
+        validarDatosBasicos(cita);
         validarFechaCita(cita);
         validarDisponibilidadHorario(cita);
+        boolean nueva = cita.getIdCita() == null;
         Cita saved = citaRepo.save(cita);
+        auditoriaClinicaService.registrar(
+                "cita",
+                saved.getIdCita(),
+                nueva ? "crear" : "editar",
+                "Cita " + saved.getFecha() + " " + saved.getHora() + " estado " + saved.getEstado());
 
         if (saved.getConsulta() == null) {
             Consulta consulta = new Consulta();
@@ -138,25 +153,45 @@ public class CitaServiceImpl implements CitaService {
                 && ("en_consulta".equals(normalizarEstado(estado)) || "realizada".equals(normalizarEstado(estado)))) {
             throw new AccessDeniedException("Los clientes no pueden marcar citas como en consulta o realizadas");
         }
+        if (currentUserService.isRecepcion()
+                && ("en_consulta".equals(normalizarEstado(estado)) || "realizada".equals(normalizarEstado(estado)))) {
+            throw new AccessDeniedException("Recepcion no puede iniciar o finalizar consultas clinicas");
+        }
+        if (currentUserService.isAuxiliar()) {
+            throw new AccessDeniedException("Auxiliar no puede cambiar el estado de las citas");
+        }
 
-        cita.setEstado(normalizarEstado(estado));
+        String estadoActual = normalizarEstado(cita.getEstado());
+        String estadoNuevo = normalizarEstado(estado);
+        validarTransicionEstado(estadoActual, estadoNuevo);
+        validarFinalizacionClinica(cita, estadoNuevo);
+        cita.setEstado(estadoNuevo);
         validarFechaCita(cita);
         validarDisponibilidadHorario(cita);
-        return citaRepo.save(cita);
+        Cita saved = citaRepo.save(cita);
+        auditoriaClinicaService.registrar("cita", saved.getIdCita(), "cambiar_estado", "Nuevo estado: " + saved.getEstado());
+        return saved;
     }
 
     @Override
     public void deleteById(Long id) {
-        if (currentUserService.isVeterinario()) {
-            throw new AccessDeniedException("Los veterinarios no pueden eliminar citas");
+        if (currentUserService.isVeterinario() || currentUserService.isAuxiliar()) {
+            throw new AccessDeniedException("Tu rol no puede eliminar citas");
         }
 
         if (currentUserService.isCliente()
-                && citaRepo.findByIdCitaAndMascota_Cliente_IdCliente(id, currentUserService.getAuthenticatedClienteIdOrThrow())
+                && citaRepo.findByIdCitaAndMascota_Cliente_IdClienteAndEliminadoFalse(id, currentUserService.getAuthenticatedClienteIdOrThrow())
                         .isEmpty()) {
             throw new AccessDeniedException("No tienes acceso para eliminar esta cita");
         }
-        citaRepo.deleteById(id);
+        Cita cita = findById(id);
+        if (cita == null) {
+            throw new IllegalArgumentException("La cita no existe");
+        }
+        cita.setEliminado(true);
+        cita.setEstado("cancelada");
+        citaRepo.save(cita);
+        auditoriaClinicaService.registrar("cita", id, "anular", "Cita anulada");
     }
 
     private String normalizarEstado(String estado) {
@@ -172,6 +207,54 @@ public class CitaServiceImpl implements CitaService {
         return estadoNormalizado;
     }
 
+    private void validarDatosBasicos(Cita cita) {
+        if (cita.getMotivo() == null || cita.getMotivo().isBlank()) {
+            throw new IllegalArgumentException("Debes indicar el motivo de la cita");
+        }
+        if (cita.getMotivo().trim().length() < 5) {
+            throw new IllegalArgumentException("El motivo debe tener al menos 5 caracteres");
+        }
+        if (cita.getMotivo().length() > 200) {
+            throw new IllegalArgumentException("El motivo no puede superar 200 caracteres");
+        }
+        if (cita.getDuracionMinutos() != null
+                && (cita.getDuracionMinutos() < 15 || cita.getDuracionMinutos() > 120 || cita.getDuracionMinutos() % 15 != 0)) {
+            throw new IllegalArgumentException("La duracion debe estar entre 15 y 120 minutos en tramos de 15");
+        }
+    }
+
+    private void validarTransicionEstado(String estadoActual, String estadoNuevo) {
+        if (estadoActual.equals(estadoNuevo)) {
+            return;
+        }
+        if (ESTADOS_FINALES.contains(estadoActual)) {
+            throw new IllegalArgumentException("No se puede cambiar una cita que ya esta finalizada o cancelada");
+        }
+        if ("programada".equals(estadoActual)
+                && !Set.of("confirmada", "cancelada", "en_consulta").contains(estadoNuevo)) {
+            throw new IllegalArgumentException("Una cita programada solo puede confirmarse, cancelarse o iniciar consulta");
+        }
+        if ("confirmada".equals(estadoActual)
+                && !Set.of("en_consulta", "cancelada").contains(estadoNuevo)) {
+            throw new IllegalArgumentException("Una cita confirmada solo puede iniciar consulta o cancelarse");
+        }
+        if ("en_consulta".equals(estadoActual)
+                && !Set.of("realizada", "cancelada").contains(estadoNuevo)) {
+            throw new IllegalArgumentException("Una cita en consulta solo puede finalizarse o cancelarse");
+        }
+    }
+
+    private void validarFinalizacionClinica(Cita cita, String estadoNuevo) {
+        if (!"realizada".equals(estadoNuevo) && !"completada".equals(estadoNuevo)) {
+            return;
+        }
+
+        Consulta consulta = cita.getConsulta();
+        if (consulta == null || consulta.getDiagnostico() == null || consulta.getDiagnostico().isBlank()) {
+            throw new IllegalArgumentException("Para finalizar la cita debes completar el diagnostico de la consulta");
+        }
+    }
+
     private void validarDisponibilidadHorario(Cita cita) {
         if (!ESTADOS_QUE_OCUPAN_HORARIO.contains(cita.getEstado())) {
             return;
@@ -185,7 +268,7 @@ public class CitaServiceImpl implements CitaService {
             throw new IllegalArgumentException("Debes indicar fecha y hora de la cita");
         }
 
-        boolean horarioOcupado = citaRepo.findByVeterinario_IdVeterinarioAndFechaAndEstadoIn(
+        boolean horarioOcupado = citaRepo.findByVeterinario_IdVeterinarioAndFechaAndEstadoInAndEliminadoFalse(
                 cita.getVeterinario().getIdVeterinario(),
                 cita.getFecha(),
                 ESTADOS_QUE_OCUPAN_HORARIO).stream()
@@ -210,7 +293,7 @@ public class CitaServiceImpl implements CitaService {
     }
 
     private void validarFechaCita(Cita cita) {
-        if (!ESTADOS_QUE_OCUPAN_HORARIO.contains(cita.getEstado())) {
+        if (!List.of("programada", "confirmada").contains(cita.getEstado())) {
             return;
         }
 

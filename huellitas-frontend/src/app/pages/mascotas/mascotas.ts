@@ -32,7 +32,7 @@ export class MascotasComponent {
   ) {}
 
   get puedeGestionarMascotas(): boolean {
-    return !this.authService.isVeterinario();
+    return this.authService.isAdmin() || this.authService.isRecepcion() || this.authService.isCliente();
   }
 
   ngOnInit(): void {

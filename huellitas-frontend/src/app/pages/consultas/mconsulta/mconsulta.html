@@ -1,44 +1,21 @@
-<section
-  class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100
-         px-6 py-6 md:px-10 md:py-8">
-
-
+<section class="min-h-screen bg-slate-50 px-6 py-6 text-slate-800 dark:bg-slate-900 dark:text-slate-100 md:px-10 md:py-8">
   <header class="mb-8">
-    <h1 class="text-4xl font-semibold tracking-tight">
-      Modificar Consulta
-    </h1>
+    <h1 class="text-4xl font-semibold tracking-tight">Modificar consulta</h1>
     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-      Registro clínico del veterinario. Los datos de agenda no pueden modificarse.
+      Registro clinico del veterinario. Los datos de agenda no pueden modificarse.
     </p>
   </header>
 
-  <!-- Card principal -->
-  <div
-    class="max-w-4xl rounded-2xl border border-slate-200 dark:border-slate-700
-           bg-white dark:bg-slate-800 shadow-lg p-6 md:p-8 space-y-8">
+  <div class="max-w-4xl rounded-lg border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-700 dark:bg-slate-800 md:p-8">
+    <app-status-message type="error" [message]="errorMsg"></app-status-message>
+    <app-status-message type="success" [message]="successMsg"></app-status-message>
 
-    <!-- Mensajes -->
-    <div *ngIf="errorMsg"
-         class="rounded-lg border border-rose-300 bg-rose-50 text-rose-800 px-4 py-2 text-sm">
-      <strong>Error:</strong> {{ errorMsg }}
-    </div>
-
-    <div *ngIf="successMsg"
-         class="rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm">
-      <strong>Éxito:</strong> {{ successMsg }}
-    </div>
-
-    <!-- Datos de la consulta -->
-    <section
-      class="rounded-xl border border-slate-200 dark:border-slate-700
-             bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
-
-      <h2 class="text-xs font-semibold uppercase tracking-wide mb-4
-                 text-slate-600 dark:text-slate-400">
+    <section class="mb-8 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900 md:p-5">
+      <h2 class="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
         Datos de la consulta
       </h2>
 
-      <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-5">
         <input [value]="idConsulta" readonly class="input-readonly" />
         <input [value]="idCita" readonly class="input-readonly" />
         <input [value]="nombreMascota" readonly class="input-readonly" />
@@ -47,110 +24,51 @@
       </div>
     </section>
 
-    <!-- FORMULARIO -->
     <form [formGroup]="form" (ngSubmit)="guardar()" class="space-y-8">
-
-      <!-- Diagnóstico -->
       <section>
-        <h2 class="text-lg font-semibold mb-2">Diagnóstico</h2>
-        <textarea
-          rows="8"
-          formControlName="diagnostico"
-          class="input-textarea w-full"
-          placeholder="Describe aquí el diagnóstico clínico...">
-        </textarea>
+        <h2 class="mb-2 text-lg font-semibold">Diagnostico</h2>
+        <textarea rows="8" formControlName="diagnostico" class="input-textarea w-full" placeholder="Describe aqui el diagnostico clinico..."></textarea>
+        <app-form-field-error [control]="form.controls.diagnostico" label="El diagnostico"></app-form-field-error>
       </section>
 
-      <!-- Observaciones -->
       <section>
-        <h2 class="text-base font-semibold mb-2">Observaciones</h2>
-        <textarea
-          rows="5"
-          formControlName="observaciones"
-          class="input-textarea w-full"
-          placeholder="Observaciones adicionales...">
-        </textarea>
+        <h2 class="mb-2 text-base font-semibold">Observaciones</h2>
+        <textarea rows="5" formControlName="observaciones" class="input-textarea w-full" placeholder="Observaciones adicionales..."></textarea>
+        <app-form-field-error [control]="form.controls.observaciones" label="Las observaciones"></app-form-field-error>
       </section>
 
-      <!-- Checkbox tratamiento -->
-      <section
-        class="rounded-xl border border-slate-200 dark:border-slate-700
-               bg-slate-50 dark:bg-slate-900 p-4 flex gap-3 items-start">
-
-        <input
-          type="checkbox"
-          formControlName="tratamiento"
-          class="mt-1 h-4 w-4 rounded text-indigo-600" />
-
+      <section class="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
+        <input type="checkbox" formControlName="tratamiento" class="mt-1 h-4 w-4 rounded text-indigo-600" />
         <div>
-          <label class="font-semibold text-sm">
-            Requiere tratamiento
-          </label>
+          <label class="text-sm font-semibold">Requiere tratamiento</label>
           <p class="text-xs text-slate-500 dark:text-slate-400">
-            Marca esta opción si se debe crear un tratamiento para esta consulta.
+            Marca esta opcion si se debe crear un tratamiento para esta consulta.
           </p>
         </div>
       </section>
 
-      <!-- FORMULARIO TRATAMIENTO -->
-      <section
-        *ngIf="form.value.tratamiento"
-        [formGroup]="tratamientoForm"
-        class="rounded-xl border border-indigo-200
-               bg-indigo-50 dark:bg-slate-800 p-5 space-y-4">
+      <section *ngIf="form.value.tratamiento" [formGroup]="tratamientoForm" class="space-y-4 rounded-lg border border-indigo-200 bg-indigo-50 p-5 dark:border-indigo-800 dark:bg-indigo-900/20">
+        <h3 class="text-lg font-semibold">Nuevo tratamiento</h3>
 
-        <h3 class="text-lg font-semibold">
-          Nuevo Tratamiento
-        </h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            formControlName="nombre"
-            class="input-textarea"
-            placeholder="Nombre del tratamiento" />
-
-          <input
-            formControlName="medicamento"
-            class="input-textarea"
-            placeholder="Medicamento" />
-
-          <input
-            formControlName="dosis"
-            class="input-textarea"
-            placeholder="Dosis" />
-
-          <input
-            formControlName="duracion"
-            class="input-textarea"
-            placeholder="Duración" />
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <input formControlName="nombre" class="input-textarea" placeholder="Nombre del tratamiento" />
+          <input formControlName="medicamento" class="input-textarea" placeholder="Medicamento" />
+          <input formControlName="dosis" class="input-textarea" placeholder="Dosis" />
+          <input formControlName="duracion" class="input-textarea" placeholder="Duracion" />
         </div>
 
-        <textarea
-          formControlName="descripcion"
-          rows="3"
-          class="input-textarea w-full"
-          placeholder="Descripción del tratamiento">
-        </textarea>
+        <textarea formControlName="descripcion" rows="3" class="input-textarea w-full" placeholder="Descripcion del tratamiento"></textarea>
       </section>
 
-      <!-- Acciones -->
-      <div class="flex justify-end gap-3 pt-4">
-        <button
-          type="button"
-          class="btn-secondary"
-          (click)="cancelar()">
-          Cancelar
-        </button>
-
-        <button
-          type="submit"
-          [disabled]="cargando"
-          class="rounded-md bg-emerald-600 hover:bg-emerald-700
-                 text-white px-4 py-2">
+      <div class="flex flex-wrap justify-end gap-3 pt-4">
+        <button type="button" class="btn-secondary" (click)="cancelar()">Cancelar</button>
+        <button type="submit" [disabled]="cargando" class="rounded-md bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700">
           Guardar
         </button>
+        <button type="button" [disabled]="cargando" class="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700" (click)="guardar(true)">
+          Guardar y finalizar
+        </button>
       </div>
-
     </form>
   </div>
 </section>

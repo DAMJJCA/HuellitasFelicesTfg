@@ -27,7 +27,7 @@
       </div>
 
       <div *ngIf="!esCliente" class="mb-4">
-        <label class="block text-sm mb-1">Dueno <span class="text-rose-600">*</span></label>
+        <label class="block text-sm mb-1">Dueño <span class="text-rose-600">*</span></label>
         <select name="idCliente" required [(ngModel)]="mascota.idCliente" class="w-full rounded-md border px-3 py-2 text-sm">
           <option value="" disabled selected>Seleccione...</option>
           <option *ngFor="let c of clientes()" [value]="c.idCliente">

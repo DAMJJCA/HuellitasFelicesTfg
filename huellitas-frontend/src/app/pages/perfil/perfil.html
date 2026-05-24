@@ -1,1 +1,46 @@
-<p>perfil works!</p>
+<section class="min-h-screen bg-slate-50 px-6 py-6 text-slate-800 dark:bg-slate-900 dark:text-slate-100 md:px-10 md:py-8">
+  <div class="mb-6 max-w-3xl">
+    <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Perfil</h1>
+    <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+      Personaliza tu imagen y revisa los datos de la sesión actual.
+    </p>
+  </div>
+
+  <app-status-message type="error" [message]="errorMsg()"></app-status-message>
+  <app-status-message type="success" [message]="successMsg()"></app-status-message>
+
+  <div class="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+    <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <img [src]="imagen()" alt="Imagen de perfil" class="mx-auto h-48 w-48 rounded-full border-4 border-teal-100 object-cover dark:border-teal-900/60">
+
+      <div class="mt-5 grid gap-2">
+        <label class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700">
+          {{ guardando() ? 'Guardando...' : 'Cambiar imagen' }}
+          <input type="file" accept="image/*" class="sr-only" (change)="seleccionarImagen($event)">
+        </label>
+        <button type="button"
+                class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                [disabled]="guardando()"
+                (click)="quitarImagen()">
+          Restablecer imagen
+        </button>
+      </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <h2 class="text-xl font-semibold">{{ nombre }}</h2>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ rol }}</p>
+
+      <dl class="mt-6 grid gap-4 sm:grid-cols-2">
+        <div class="rounded-lg border border-slate-100 p-4 dark:border-slate-700">
+          <dt class="text-sm text-slate-500 dark:text-slate-400">Email</dt>
+          <dd class="mt-1 font-medium">{{ email }}</dd>
+        </div>
+        <div class="rounded-lg border border-slate-100 p-4 dark:border-slate-700">
+          <dt class="text-sm text-slate-500 dark:text-slate-400">Imagen</dt>
+          <dd class="mt-1 font-medium">Guardada en tu perfil</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</section>

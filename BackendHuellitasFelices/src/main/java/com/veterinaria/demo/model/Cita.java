@@ -26,6 +26,9 @@ public class Cita {
     private String estado;
     private String motivo;
 
+    @Column(nullable = false)
+    private boolean eliminado = false;
+
     @Transient
     private Integer duracionMinutos;
 
@@ -55,6 +58,9 @@ public class Cita {
 
     public String getMotivo() { return motivo; }
     public void setMotivo(String motivo) { this.motivo = motivo; }
+
+    public boolean isEliminado() { return eliminado; }
+    public void setEliminado(boolean eliminado) { this.eliminado = eliminado; }
 
     public Integer getDuracionMinutos() { return duracionMinutos; }
     public void setDuracionMinutos(Integer duracionMinutos) { this.duracionMinutos = duracionMinutos; }

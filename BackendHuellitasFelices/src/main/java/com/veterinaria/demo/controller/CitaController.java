@@ -44,32 +44,38 @@ public class CitaController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE', 'RECEPCION')")
     public Cita crear(@RequestBody Cita cita) {
         return service.save(cita);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE', 'RECEPCION')")
     public Cita editar(@PathVariable Long id, @RequestBody Cita cita) {
         cita.setIdCita(id);
         return service.save(cita);
     }
 
     @PatchMapping("/{id}/estado")
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE', 'VETERINARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE', 'VETERINARIO', 'RECEPCION')")
     public Cita cambiarEstado(@PathVariable Long id, @RequestBody Map<String, String> body) {
         return service.updateEstado(id, body.get("estado"));
     }
 
     @PostMapping("/recordatorios/proximas")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     public ReminderResponse enviarRecordatoriosProximas() {
         return reminderService.enviarRecordatoriosProximasCitas();
     }
 
+    @PostMapping("/{id}/recordatorio")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
+    public ReminderResponse enviarRecordatorioCita(@PathVariable Long id) {
+        return reminderService.enviarRecordatorioCita(id);
+    }
+
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE', 'RECEPCION')")
     public void eliminar(@PathVariable Long id) {
         service.deleteById(id);
     }

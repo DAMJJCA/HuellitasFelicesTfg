@@ -5,13 +5,14 @@ import { forkJoin, of, switchMap, catchError } from 'rxjs';
 
 import { AuthService } from '../../../auth/auth.service';
 import { Cita, CitaService } from '../../../service/cita';
+import { Cliente, ClienteService } from '../../../service/cliente';
 import { Consulta, ConsultaService } from '../../../service/consulta';
 import { DocumentoMedico, DocumentoMedicoService } from '../../../service/documento-medico';
 import { MascotaService, Mascotas } from '../../../service/mascota';
 import { Preventivo, PreventivoService } from '../../../service/preventivo';
 import { Tratamiento, TratamientoService } from '../../../service/tratamiento';
 
-type PestanaFicha = 'resumen' | 'historial' | 'consultas' | 'documentos' | 'preventivos' | 'citas';
+type PestanaFicha = 'resumen' | 'historial' | 'consultas' | 'tratamientos' | 'documentos' | 'preventivos' | 'citas';
 
 type EventoFicha = {
   tipo: 'cita' | 'consulta' | 'tratamiento' | 'preventivo' | 'documento';
@@ -33,6 +34,7 @@ export class DetalleMascotaComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private mascotaService = inject(MascotaService);
+  private clienteService = inject(ClienteService);
   private citaService = inject(CitaService);
   private consultaService = inject(ConsultaService);
   private documentoService = inject(DocumentoMedicoService);
@@ -41,6 +43,7 @@ export class DetalleMascotaComponent {
   private authService = inject(AuthService);
 
   mascota = signal<Mascotas | null>(null);
+  cliente = signal<Cliente | null>(null);
   citas = signal<Cita[]>([]);
   consultas = signal<Consulta[]>([]);
   tratamientos = signal<Tratamiento[]>([]);
@@ -54,13 +57,14 @@ export class DetalleMascotaComponent {
     { id: 'resumen', label: 'Resumen' },
     { id: 'historial', label: 'Historial' },
     { id: 'consultas', label: 'Consultas' },
+    { id: 'tratamientos', label: 'Tratamientos' },
     { id: 'documentos', label: 'Documentos' },
     { id: 'preventivos', label: 'Preventivos' },
     { id: 'citas', label: 'Citas' }
   ];
 
   get puedeGestionarMascota(): boolean {
-    return !this.authService.isVeterinario();
+    return this.authService.isAdmin() || this.authService.isRecepcion() || this.authService.isCliente();
   }
 
   ngOnInit(): void {
@@ -73,26 +77,36 @@ export class DetalleMascotaComponent {
           return of(null);
         }
 
-        return forkJoin({
-          mascota: this.mascotaService.getMascota(id),
-          citas: this.citaService.getCitas().pipe(catchError(() => of([] as Cita[]))),
-          consultas: this.consultaService.getConsultasPorMascota(id).pipe(catchError(() => of([] as Consulta[]))),
-          documentos: this.documentoService.getDocumentosPorMascota(id).pipe(catchError(() => of([] as DocumentoMedico[]))),
-          tratamientos: this.tratamientoService.getTratamientosPorMascota(id).pipe(catchError(() => of([] as Tratamiento[]))),
-          preventivos: this.preventivoService.getPreventivos().pipe(catchError(() => of([] as Preventivo[])))
-        });
+        return this.mascotaService.getMascota(id).pipe(
+          switchMap(mascota => forkJoin({
+            mascota: of(mascota),
+            cliente: mascota.cliente?.idCliente
+              ? this.clienteService.getCliente(mascota.cliente.idCliente).pipe(catchError(() => of(null)))
+              : of(null),
+            citas: this.citaService.getCitas().pipe(catchError(() => of([] as Cita[]))),
+            consultas: this.consultaService.getConsultasPorMascota(id).pipe(catchError(() => of([] as Consulta[]))),
+            documentos: this.documentoService.getDocumentosPorMascota(id).pipe(catchError(() => of([] as DocumentoMedico[]))),
+            tratamientos: this.tratamientoService.getTratamientosPorMascota(id).pipe(catchError(() => of([] as Tratamiento[]))),
+            preventivos: this.preventivoService.getPreventivos().pipe(catchError(() => of([] as Preventivo[])))
+          }))
+        );
       })
     ).subscribe({
       next: data => {
         if (!data) return;
         const idMascota = data.mascota.idMascota;
         this.mascota.set(data.mascota);
+        this.cliente.set(data.cliente);
         this.citas.set(data.citas
           .filter(c => c.mascota?.idMascota === idMascota)
           .sort((a, b) => this.fechaHora(a).localeCompare(this.fechaHora(b))));
         this.consultas.set([...data.consultas].sort((a, b) => `${b.fecha}T${b.hora || '00:00'}`.localeCompare(`${a.fecha}T${a.hora || '00:00'}`)));
         this.documentos.set([...data.documentos].sort((a, b) => (b.fecha || '').localeCompare(a.fecha || '')));
-        this.tratamientos.set(data.tratamientos);
+        this.tratamientos.set([...data.tratamientos].sort((a, b) => {
+          const consultaA = data.consultas.find(c => c.idConsulta === a.consulta?.idConsulta);
+          const consultaB = data.consultas.find(c => c.idConsulta === b.consulta?.idConsulta);
+          return `${consultaB?.fecha || ''}T${consultaB?.hora || ''}`.localeCompare(`${consultaA?.fecha || ''}T${consultaA?.hora || ''}`);
+        }));
         this.preventivos.set(data.preventivos
           .filter(p => p.idMascota === idMascota)
           .sort((a, b) => (a.proximaDosis || '9999-12-31').localeCompare(b.proximaDosis || '9999-12-31')));
@@ -147,6 +161,13 @@ export class DetalleMascotaComponent {
 
   irConsultas() {
     this.router.navigate(['/consultas']);
+  }
+
+  irCliente() {
+    const idCliente = this.mascota()?.cliente?.idCliente;
+    if (idCliente && (this.authService.isAdmin() || this.authService.isRecepcion())) {
+      this.router.navigate(['/clientes', idCliente]);
+    }
   }
 
   verConsulta(consulta: Consulta) {
@@ -204,8 +225,8 @@ export class DetalleMascotaComponent {
 
   etiquetaTipoDocumento(tipo: string): string {
     const etiquetas: Record<string, string> = {
-      analitica: 'Analitica',
-      radiografia: 'Radiografia',
+      analitica: 'Analítica',
+      radiografia: 'Radiografía',
       informe: 'Informe',
       receta: 'Receta',
       consentimiento: 'Consentimiento',
@@ -230,7 +251,7 @@ export class DetalleMascotaComponent {
         tipo: 'consulta' as const,
         fecha: consulta.fecha,
         hora: consulta.hora,
-        titulo: consulta.diagnostico || 'Consulta medica',
+        titulo: consulta.diagnostico || 'Consulta médica',
         detalle: consulta.observaciones || 'Sin observaciones',
         accion: () => this.verConsulta(consulta)
       })),
@@ -251,7 +272,7 @@ export class DetalleMascotaComponent {
             tipo: 'preventivo',
             fecha: item.fechaAplicacion,
             titulo: item.nombre,
-            detalle: item.tipo === 'vacuna' ? 'Vacuna aplicada' : 'Desparasitacion aplicada'
+            detalle: item.tipo === 'vacuna' ? 'Vacuna aplicada' : 'Desparasitación aplicada'
           });
         }
         if (item.proximaDosis) {
@@ -259,7 +280,7 @@ export class DetalleMascotaComponent {
             tipo: 'preventivo',
             fecha: item.proximaDosis,
             titulo: item.nombre,
-            detalle: item.tipo === 'vacuna' ? 'Proxima vacuna' : 'Proxima desparasitacion',
+            detalle: item.tipo === 'vacuna' ? 'Próxima vacuna' : 'Próxima desparasitación',
             estado: this.estaVencido(item) ? 'Vencido' : 'Pendiente'
           });
         }
@@ -317,7 +338,7 @@ export class DetalleMascotaComponent {
     let years = hoy.getFullYear() - nacimiento.getFullYear();
     const monthDiff = hoy.getMonth() - nacimiento.getMonth();
     if (monthDiff < 0 || (monthDiff === 0 && hoy.getDate() < nacimiento.getDate())) years--;
-    return years <= 0 ? 'Menos de 1 ano' : `${years} ano${years === 1 ? '' : 's'}`;
+    return years <= 0 ? 'Menos de 1 año' : `${years} año${years === 1 ? '' : 's'}`;
   }
 
   etiquetaEstado(estado: string): string {
@@ -356,7 +377,7 @@ export class DetalleMascotaComponent {
 
   etiquetaPreventivo(item: Preventivo): string {
     if (this.estaVencido(item)) return 'Vencido';
-    return item.tipo === 'vacuna' ? 'Vacuna' : 'Desparasitacion';
+    return item.tipo === 'vacuna' ? 'Vacuna' : 'Desparasitación';
   }
 
   private fechaHora(cita: Cita): string {

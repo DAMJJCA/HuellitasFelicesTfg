@@ -18,14 +18,17 @@ public class MascotaServiceImpl implements MascotaService {
     private final MascotaRepository repository;
     private final ClienteRepository clienteRepository;
     private final CurrentUserService currentUserService;
+    private final AuditoriaClinicaService auditoriaClinicaService;
 
     public MascotaServiceImpl(
             MascotaRepository repository,
             ClienteRepository clienteRepository,
-            CurrentUserService currentUserService) {
+            CurrentUserService currentUserService,
+            AuditoriaClinicaService auditoriaClinicaService) {
         this.repository = repository;
         this.clienteRepository = clienteRepository;
         this.currentUserService = currentUserService;
+        this.auditoriaClinicaService = auditoriaClinicaService;
     }
 
     @Override
@@ -56,8 +59,8 @@ public class MascotaServiceImpl implements MascotaService {
     @Override
     @Transactional
     public Mascota save(Mascota mascota) {
-        if (currentUserService.isVeterinario()) {
-            throw new AccessDeniedException("Los veterinarios no pueden crear ni editar mascotas");
+        if (currentUserService.isVeterinario() || currentUserService.isAuxiliar()) {
+            throw new AccessDeniedException("Tu rol no puede crear ni editar mascotas");
         }
 
         Long idClienteDestino;
@@ -80,13 +83,20 @@ public class MascotaServiceImpl implements MascotaService {
 
         normalizarYValidarChip(mascota);
         mascota.setCliente(cliente);
-        return repository.save(mascota);
+        boolean nueva = mascota.getIdMascota() == null;
+        Mascota saved = repository.save(mascota);
+        auditoriaClinicaService.registrar(
+                "mascota",
+                saved.getIdMascota(),
+                nueva ? "crear" : "editar",
+                "Mascota " + saved.getNombre() + " chip " + (saved.getNumeroChip() == null ? "sin chip" : saved.getNumeroChip()));
+        return saved;
     }
 
     @Override
     public void deleteById(Long id) {
-        if (currentUserService.isVeterinario()) {
-            throw new AccessDeniedException("Los veterinarios no pueden eliminar mascotas");
+        if (currentUserService.isVeterinario() || currentUserService.isAuxiliar()) {
+            throw new AccessDeniedException("Tu rol no puede eliminar mascotas");
         }
 
         if (currentUserService.isCliente()
@@ -94,6 +104,7 @@ public class MascotaServiceImpl implements MascotaService {
             throw new AccessDeniedException("No tienes acceso para eliminar esta mascota");
         }
         repository.deleteById(id);
+        auditoriaClinicaService.registrar("mascota", id, "eliminar", "Mascota eliminada");
     }
 
     private void normalizarYValidarChip(Mascota mascota) {

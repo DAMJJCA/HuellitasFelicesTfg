@@ -35,7 +35,7 @@ public class CitaDuracionController {
     }
 
     @PutMapping("/{idCita}")
-    @PreAuthorize("hasAnyRole('ADMIN','CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN','CLIENTE','RECEPCION')")
     public CitaDuracionResponse guardar(@PathVariable Long idCita, @RequestBody CitaDuracionRequest request) {
         return service.save(idCita, request);
     }

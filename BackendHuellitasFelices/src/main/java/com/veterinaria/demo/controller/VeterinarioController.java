@@ -32,13 +32,13 @@ public class VeterinarioController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE', 'RECEPCION', 'AUXILIAR')")
     public List<Veterinario> listar() {
         return service.findAll();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE', 'RECEPCION', 'AUXILIAR')")
     public Veterinario obtener(@PathVariable Long id) {
         return service.findById(id);
     }

@@ -121,16 +121,16 @@ export class GlobalSearchComponent {
       citas: this.citaService.getCitas().pipe(catchError(() => of([] as Cita[]))),
       preventivos: this.preventivoService.getPreventivos().pipe(catchError(() => of([] as Preventivo[]))),
       documentos: this.documentoService.getDocumentos().pipe(catchError(() => of([] as DocumentoMedico[]))),
-      clientes: this.authService.isAdmin()
+      clientes: this.authService.isAdminOrRecepcion()
         ? this.clienteService.getClientes().pipe(catchError(() => of([] as Cliente[])))
         : of([] as Cliente[]),
-      veterinarios: this.authService.isAdmin()
+      veterinarios: this.authService.isAdminOrRecepcion() || this.authService.isAuxiliar()
         ? this.veterinarioService.getVeterinarios().pipe(catchError(() => of([] as veterinario[])))
         : of([] as veterinario[]),
-      consultas: this.esStaff()
+      consultas: this.authService.isAdmin() || this.authService.isVeterinario()
         ? this.consultaService.getConsultas().pipe(catchError(() => of([] as Consulta[])))
         : of([] as Consulta[]),
-      tratamientos: this.esStaff()
+      tratamientos: this.authService.isAdmin() || this.authService.isVeterinario()
         ? this.tratamientoService.getTratamientos().pipe(catchError(() => of([] as Tratamiento[])))
         : of([] as Tratamiento[])
     }).subscribe({
@@ -189,7 +189,7 @@ export class GlobalSearchComponent {
       tipo: 'Cita',
       titulo: `${cita.mascota?.nombre || 'Mascota'} - ${cita.fecha} ${cita.hora}`,
       detalle: `${cita.motivo || 'Sin motivo'} - ${cita.estado} - ${cita.veterinario?.nombre || 'Sin veterinario'} - #${cita.idCita}`,
-      ruta: this.authService.isVeterinario() ? '/citas' : `/citas/${cita.idCita}/editar`,
+      ruta: (this.authService.isVeterinario() || this.authService.isAuxiliar()) ? '/citas' : `/citas/${cita.idCita}/editar`,
       texto: this.normalizar(`${cita.idCita} ${cita.fecha} ${cita.hora} ${cita.estado} ${cita.motivo} ${cita.mascota?.nombre} ${cita.mascota?.numeroChip} ${cita.mascota?.idMascota} ${cita.veterinario?.nombre} ${cita.veterinario?.idVeterinario}`)
     }));
   }
@@ -245,7 +245,7 @@ export class GlobalSearchComponent {
   }
 
   private esStaff(): boolean {
-    return this.authService.isAdmin() || this.authService.isVeterinario();
+    return this.authService.isStaff();
   }
 
   private normalizar(valor: unknown): string {

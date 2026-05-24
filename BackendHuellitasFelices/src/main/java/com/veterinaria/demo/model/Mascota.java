@@ -23,6 +23,21 @@ public class Mascota {
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
 
+    @Column(name = "foto_url", columnDefinition = "text")
+    private String fotoUrl;
+
+    @Column(name = "alergias", columnDefinition = "text")
+    private String alergias;
+
+    @Column(name = "enfermedades_cronicas", columnDefinition = "text")
+    private String enfermedadesCronicas;
+
+    @Column(name = "medicacion_habitual", columnDefinition = "text")
+    private String medicacionHabitual;
+
+    @Column(name = "observaciones_internas", columnDefinition = "text")
+    private String observacionesInternas;
+
     @ManyToOne
     @JoinColumn(name = "id_cliente")
     private Cliente cliente;
@@ -103,6 +118,46 @@ public class Mascota {
 
     public void setCliente(Cliente cliente) {
         this.cliente = cliente;
+    }
+
+    public String getFotoUrl() {
+        return fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
+    }
+
+    public String getAlergias() {
+        return alergias;
+    }
+
+    public void setAlergias(String alergias) {
+        this.alergias = alergias;
+    }
+
+    public String getEnfermedadesCronicas() {
+        return enfermedadesCronicas;
+    }
+
+    public void setEnfermedadesCronicas(String enfermedadesCronicas) {
+        this.enfermedadesCronicas = enfermedadesCronicas;
+    }
+
+    public String getMedicacionHabitual() {
+        return medicacionHabitual;
+    }
+
+    public void setMedicacionHabitual(String medicacionHabitual) {
+        this.medicacionHabitual = medicacionHabitual;
+    }
+
+    public String getObservacionesInternas() {
+        return observacionesInternas;
+    }
+
+    public void setObservacionesInternas(String observacionesInternas) {
+        this.observacionesInternas = observacionesInternas;
     }
 
 }

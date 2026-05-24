@@ -16,20 +16,26 @@ public class TratamientoServiceImpl implements TratamientoService {
     private final TratamientoRepository repo;
     private final MascotaRepository mascotaRepository;
     private final CurrentUserService currentUserService;
+    private final AuditoriaClinicaService auditoriaClinicaService;
 
     public TratamientoServiceImpl(
             TratamientoRepository repo,
             MascotaRepository mascotaRepository,
-            CurrentUserService currentUserService) {
+            CurrentUserService currentUserService,
+            AuditoriaClinicaService auditoriaClinicaService) {
         this.repo = repo;
         this.mascotaRepository = mascotaRepository;
         this.currentUserService = currentUserService;
+        this.auditoriaClinicaService = auditoriaClinicaService;
     }
 
     @Override
     public List<Tratamiento> findAll() {
         if (currentUserService.isCliente()) {
             return repo.findByConsulta_Cita_Mascota_Cliente_IdCliente(currentUserService.getAuthenticatedClienteIdOrThrow());
+        }
+        if (currentUserService.isVeterinario()) {
+            return repo.findByConsulta_Cita_Veterinario_IdVeterinario(currentUserService.getAuthenticatedVeterinarioIdOrThrow());
         }
         return repo.findAll();
     }
@@ -40,6 +46,11 @@ public class TratamientoServiceImpl implements TratamientoService {
             return repo.findByConsulta_IdConsultaAndConsulta_Cita_Mascota_Cliente_IdCliente(
                     idConsulta,
                     currentUserService.getAuthenticatedClienteIdOrThrow());
+        }
+        if (currentUserService.isVeterinario()) {
+            return repo.findByConsulta_IdConsultaAndConsulta_Cita_Veterinario_IdVeterinario(
+                    idConsulta,
+                    currentUserService.getAuthenticatedVeterinarioIdOrThrow());
         }
         return repo.findByConsulta_IdConsulta(idConsulta);
     }
@@ -52,6 +63,11 @@ public class TratamientoServiceImpl implements TratamientoService {
                 throw new AccessDeniedException("No tienes acceso al historial medico de esta mascota");
             }
             return repo.findByConsulta_Cita_Mascota_IdMascotaAndConsulta_Cita_Mascota_Cliente_IdCliente(idMascota, idCliente);
+        }
+        if (currentUserService.isVeterinario()) {
+            return repo.findByConsulta_Cita_Mascota_IdMascotaAndConsulta_Cita_Veterinario_IdVeterinario(
+                    idMascota,
+                    currentUserService.getAuthenticatedVeterinarioIdOrThrow());
         }
         return repo.findByConsulta_Cita_Mascota_IdMascota(idMascota);
     }
@@ -74,23 +90,52 @@ public class TratamientoServiceImpl implements TratamientoService {
                 throw new AccessDeniedException("No tienes acceso a este tratamiento");
             }
         }
+        if (currentUserService.isVeterinario()) {
+            Long idVeterinario = currentUserService.getAuthenticatedVeterinarioIdOrThrow();
+            Long idVeterinarioTratamiento = tratamiento.getConsulta()
+                    .getCita()
+                    .getVeterinario()
+                    .getIdVeterinario();
+            if (!idVeterinario.equals(idVeterinarioTratamiento)) {
+                throw new AccessDeniedException("No tienes acceso a este tratamiento");
+            }
+        }
 
         return tratamiento;
     }
 
     @Override
     public Tratamiento save(Tratamiento tratamiento) {
-        if (currentUserService.isCliente()) {
-            throw new AccessDeniedException("Los clientes no pueden modificar tratamientos");
+        if (currentUserService.isCliente() || currentUserService.isRecepcion() || currentUserService.isAuxiliar()) {
+            throw new AccessDeniedException("Tu rol no puede modificar tratamientos");
         }
-        return repo.save(tratamiento);
+        validarTratamiento(tratamiento);
+        Tratamiento saved = repo.save(tratamiento);
+        auditoriaClinicaService.registrar("tratamiento", saved.getIdTratamiento(), tratamiento.getIdTratamiento() == null ? "crear" : "editar", "Tratamiento " + saved.getNombre());
+        return saved;
     }
 
     @Override
     public void deleteById(Long id) {
-        if (currentUserService.isCliente()) {
-            throw new AccessDeniedException("Los clientes no pueden eliminar tratamientos");
+        if (currentUserService.isCliente() || currentUserService.isRecepcion() || currentUserService.isAuxiliar()) {
+            throw new AccessDeniedException("Tu rol no puede eliminar tratamientos");
         }
         repo.deleteById(id);
+        auditoriaClinicaService.registrar("tratamiento", id, "eliminar", "Tratamiento eliminado");
+    }
+
+    private void validarTratamiento(Tratamiento tratamiento) {
+        if (tratamiento.getNombre() == null || tratamiento.getNombre().isBlank()) {
+            throw new IllegalArgumentException("Debes indicar el nombre del tratamiento");
+        }
+        if (tratamiento.getMedicamento() == null || tratamiento.getMedicamento().isBlank()) {
+            throw new IllegalArgumentException("Debes indicar el medicamento del tratamiento");
+        }
+        if (tratamiento.getDosis() == null || tratamiento.getDosis().isBlank()) {
+            throw new IllegalArgumentException("Debes indicar la dosis del tratamiento");
+        }
+        if (tratamiento.getDuracion() == null || tratamiento.getDuracion().isBlank()) {
+            throw new IllegalArgumentException("Debes indicar la duracion del tratamiento");
+        }
     }
 }

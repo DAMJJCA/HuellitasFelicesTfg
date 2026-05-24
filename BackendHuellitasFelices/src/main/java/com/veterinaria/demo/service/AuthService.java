@@ -66,7 +66,8 @@ public class AuthService {
                 "Bearer",
                 usuario.getEmail(),
                 usuario.getNombreUsuario(),
-                usuario.getRol().name());
+                usuario.getRol().name(),
+                usuario.getFotoPerfilUrl());
     }
 
     @Transactional
@@ -116,7 +117,8 @@ public class AuthService {
                     "Bearer",
                     usuarioGuardado.getEmail(),
                     usuarioGuardado.getNombreUsuario(),
-                    usuarioGuardado.getRol().name());
+                    usuarioGuardado.getRol().name(),
+                    usuarioGuardado.getFotoPerfilUrl());
         } catch (DataIntegrityViolationException ex) {
             throw new IllegalStateException("No se pudo registrar el usuario");
         }
