@@ -23,8 +23,7 @@ export class SidebarComponent {
         { label: 'Citas', route: '/citas' },
         { label: 'Vacunas', route: '/preventivos' },
         { label: 'Documentos', route: '/documentos-medicos' },
-        { label: 'Historial medico', route: '/historial' },
-        { label: 'Perfil', route: '/perfil' }
+        { label: 'Historial medico', route: '/historial' }
       ];
     }
 
@@ -39,8 +38,7 @@ export class SidebarComponent {
         { label: 'Facturacion', route: '/facturas' },
         { label: 'Citas', route: '/citas' },
         { label: 'Vacunas', route: '/preventivos' },
-        { label: 'Historial medico', route: '/historial' },
-        { label: 'Perfil', route: '/perfil' }
+        { label: 'Historial medico', route: '/historial' }
       ];
     }
 
@@ -53,8 +51,7 @@ export class SidebarComponent {
         { label: 'Tratamientos', route: '/tratamientos' },
         { label: 'Vacunas', route: '/preventivos' },
         { label: 'Documentos', route: '/documentos-medicos' },
-        { label: 'Historial medico', route: '/historial' },
-        { label: 'Perfil', route: '/perfil' }
+        { label: 'Historial medico', route: '/historial' }
       ];
     }
 
@@ -65,8 +62,7 @@ export class SidebarComponent {
         { label: 'Citas', route: '/citas' },
         { label: 'Vacunas', route: '/preventivos' },
         { label: 'Documentos', route: '/documentos-medicos' },
-        { label: 'Historial medico', route: '/historial' },
-        { label: 'Perfil', route: '/perfil' }
+        { label: 'Historial medico', route: '/historial' }
       ];
     }
 
@@ -84,8 +80,7 @@ export class SidebarComponent {
       { label: 'Tratamientos', route: '/tratamientos' },
       { label: 'Vacunas', route: '/preventivos' },
       { label: 'Documentos', route: '/documentos-medicos' },
-      { label: 'Historial medico', route: '/historial' },
-      { label: 'Perfil', route: '/perfil' }
+      { label: 'Historial medico', route: '/historial' }
     ];
   }
 

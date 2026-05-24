@@ -10,6 +10,7 @@ export interface Cliente {
   telefono: string;
   email: string;
   direccion: string;
+  nif?: string | null;
   fechaRegistro?: string;
 }
 export type CrearClienteDto = Omit<Cliente, 'idCliente' | 'fechaRegistro'>;

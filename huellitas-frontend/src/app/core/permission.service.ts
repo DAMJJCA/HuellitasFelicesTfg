@@ -1,9 +1,67 @@
 import { Injectable } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 
+export type ClinicPermission =
+  | 'manageUsers'
+  | 'manageClients'
+  | 'managePets'
+  | 'manageAppointments'
+  | 'changeAppointmentStatus'
+  | 'manageConsultations'
+  | 'manageTreatments'
+  | 'manageDocuments'
+  | 'managePreventives'
+  | 'manageAvailability'
+  | 'viewAudit'
+  | 'manageInvoices'
+  | 'viewDashboard';
+
+const PERMISSION_MATRIX: Record<string, ClinicPermission[]> = {
+  admin: [
+    'manageUsers',
+    'manageClients',
+    'managePets',
+    'manageAppointments',
+    'changeAppointmentStatus',
+    'manageConsultations',
+    'manageTreatments',
+    'manageDocuments',
+    'managePreventives',
+    'manageAvailability',
+    'viewAudit',
+    'manageInvoices',
+    'viewDashboard'
+  ],
+  recepcion: [
+    'manageClients',
+    'managePets',
+    'manageAppointments',
+    'changeAppointmentStatus',
+    'manageAvailability',
+    'viewAudit',
+    'manageInvoices',
+    'viewDashboard'
+  ],
+  veterinario: [
+    'changeAppointmentStatus',
+    'manageConsultations',
+    'manageTreatments',
+    'manageDocuments',
+    'managePreventives',
+    'viewDashboard'
+  ],
+  auxiliar: ['manageDocuments', 'managePreventives', 'viewDashboard'],
+  cliente: ['manageAppointments', 'viewDashboard']
+};
+
 @Injectable({ providedIn: 'root' })
 export class PermissionService {
   constructor(private authService: AuthService) {}
+
+  has(permission: ClinicPermission): boolean {
+    const role = this.authService.currentUser()?.rol?.toLowerCase() || '';
+    return PERMISSION_MATRIX[role]?.includes(permission) ?? false;
+  }
 
   get isAdmin(): boolean {
     return this.authService.isAdmin();
@@ -30,26 +88,34 @@ export class PermissionService {
   }
 
   get canManageCitas(): boolean {
-    return this.isAdmin || this.isRecepcion || this.isCliente;
+    return this.has('manageAppointments');
   }
 
   get canCreateConsulta(): boolean {
-    return this.isAdmin || this.isVeterinario;
+    return this.has('manageConsultations');
   }
 
   get canManageClinicalDocuments(): boolean {
-    return this.isAdmin || this.isVeterinario || this.isAuxiliar;
+    return this.has('manageDocuments');
   }
 
   get canViewAudit(): boolean {
-    return this.isAdmin || this.isRecepcion;
+    return this.has('viewAudit');
   }
 
   get canManageClients(): boolean {
-    return this.isAdmin || this.isRecepcion;
+    return this.has('manageClients');
   }
 
   get canManagePreventives(): boolean {
-    return this.isAdmin || this.isVeterinario || this.isAuxiliar;
+    return this.has('managePreventives');
+  }
+
+  get canManageInvoices(): boolean {
+    return this.has('manageInvoices');
+  }
+
+  get canManageUsers(): boolean {
+    return this.has('manageUsers');
   }
 }

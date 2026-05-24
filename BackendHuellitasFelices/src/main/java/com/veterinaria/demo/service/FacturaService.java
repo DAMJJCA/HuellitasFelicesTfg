@@ -24,12 +24,12 @@ import com.veterinaria.demo.dto.FacturaResponse;
 @Service
 public class FacturaService {
 
-    private static final BigDecimal IVA = new BigDecimal("0.21");
-
     private final JdbcTemplate jdbcTemplate;
+    private final AuditoriaClinicaService auditoriaClinicaService;
 
-    public FacturaService(JdbcTemplate jdbcTemplate) {
+    public FacturaService(JdbcTemplate jdbcTemplate, AuditoriaClinicaService auditoriaClinicaService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.auditoriaClinicaService = auditoriaClinicaService;
     }
 
     @Transactional(readOnly = true)
@@ -62,13 +62,17 @@ public class FacturaService {
     public FacturaResponse crear(FacturaRequest request) {
         validar(request);
 
-        Totales totales = calcularTotales(request.lineas());
+        Totales totales = calcularTotales(request);
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             var ps = connection.prepareStatement("""
-                    insert into facturas (id_cliente, id_cita, numero, fecha, estado, base_imponible, impuestos, total, notas)
-                    values (?, ?, null, current_date, 'borrador', ?, ?, ?, ?)
+                    insert into facturas (
+                        id_cliente, id_cita, numero, fecha, estado,
+                        impuesto_porcentaje, descuento_porcentaje, descuento,
+                        base_imponible, impuestos, total, pago_estado, notas
+                    )
+                    values (?, ?, null, current_date, 'borrador', ?, ?, ?, ?, ?, ?, 'pendiente', ?)
                     """, Statement.RETURN_GENERATED_KEYS);
             ps.setLong(1, request.idCliente());
             if (request.idCita() == null) {
@@ -76,10 +80,13 @@ public class FacturaService {
             } else {
                 ps.setLong(2, request.idCita());
             }
-            ps.setBigDecimal(3, totales.base());
-            ps.setBigDecimal(4, totales.impuestos());
-            ps.setBigDecimal(5, totales.total());
-            ps.setString(6, request.notas());
+            ps.setBigDecimal(3, totales.impuestoPorcentaje());
+            ps.setBigDecimal(4, totales.descuentoPorcentaje());
+            ps.setBigDecimal(5, totales.descuento());
+            ps.setBigDecimal(6, totales.base());
+            ps.setBigDecimal(7, totales.impuestos());
+            ps.setBigDecimal(8, totales.total());
+            ps.setString(9, request.notas());
             return ps;
         }, keyHolder);
 
@@ -101,7 +108,9 @@ public class FacturaService {
         String numero = "FAC-" + LocalDate.now().getYear() + "-" + String.format("%05d", idFactura);
         jdbcTemplate.update("update facturas set numero = ? where id_factura = ?", numero, idFactura);
 
-        return obtener(idFactura);
+        FacturaResponse factura = obtener(idFactura);
+        auditoriaClinicaService.registrar("factura", idFactura, "crear", "Factura " + numero + " creada por " + factura.total() + " EUR");
+        return factura;
     }
 
     @Transactional
@@ -110,11 +119,22 @@ public class FacturaService {
         if (!List.of("borrador", "emitida", "pagada", "cancelada").contains(estadoNormalizado)) {
             throw new IllegalArgumentException("Estado de factura no valido");
         }
-        int updated = jdbcTemplate.update("update facturas set estado = ? where id_factura = ?", estadoNormalizado, id);
+        int updated = jdbcTemplate.update("""
+                update facturas
+                set estado = ?,
+                    pago_estado = case
+                        when ? = 'pagada' then 'pagado'
+                        when ? = 'cancelada' then 'cancelado'
+                        else pago_estado
+                    end
+                where id_factura = ?
+                """, estadoNormalizado, estadoNormalizado, estadoNormalizado, id);
         if (updated == 0) {
             throw new IllegalArgumentException("La factura no existe");
         }
-        return obtener(id);
+        FacturaResponse factura = obtener(id);
+        auditoriaClinicaService.registrar("factura", id, "cambiar_estado", "Nuevo estado: " + estadoNormalizado);
+        return factura;
     }
 
     private FacturaResponse withLineas(FacturaResponse factura) {
@@ -138,9 +158,15 @@ public class FacturaService {
                 factura.numero(),
                 factura.fecha(),
                 factura.estado(),
+                factura.impuestoPorcentaje(),
+                factura.descuentoPorcentaje(),
+                factura.descuento(),
                 factura.baseImponible(),
                 factura.impuestos(),
                 factura.total(),
+                factura.pagoEstado(),
+                factura.pagoProveedor(),
+                factura.pagoReferencia(),
                 factura.notas(),
                 factura.creadoEn(),
                 lineas);
@@ -160,9 +186,15 @@ public class FacturaService {
                 rs.getString("numero"),
                 rs.getObject("fecha", LocalDate.class),
                 rs.getString("estado"),
+                rs.getBigDecimal("impuesto_porcentaje"),
+                rs.getBigDecimal("descuento_porcentaje"),
+                rs.getBigDecimal("descuento"),
                 rs.getBigDecimal("base_imponible"),
                 rs.getBigDecimal("impuestos"),
                 rs.getBigDecimal("total"),
+                rs.getString("pago_estado"),
+                rs.getString("pago_proveedor"),
+                rs.getString("pago_referencia"),
                 rs.getString("notas"),
                 rs.getObject("creado_en", LocalDateTime.class),
                 lineas);
@@ -187,23 +219,42 @@ public class FacturaService {
         }
     }
 
-    private Totales calcularTotales(List<FacturaLineaRequest> lineas) {
-        BigDecimal base = lineas.stream()
+    private Totales calcularTotales(FacturaRequest request) {
+        BigDecimal subtotal = request.lineas().stream()
                 .map(linea -> {
                     BigDecimal cantidad = linea.cantidad() == null ? BigDecimal.ONE : linea.cantidad();
                     BigDecimal precio = linea.precioUnitario() == null ? BigDecimal.ZERO : linea.precioUnitario();
                     return cantidad.multiply(precio);
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        base = normalizarImporte(base);
-        BigDecimal impuestos = normalizarImporte(base.multiply(IVA));
-        return new Totales(base, impuestos, normalizarImporte(base.add(impuestos)));
+        subtotal = normalizarImporte(subtotal);
+
+        BigDecimal impuestoPorcentaje = request.impuestoPorcentaje() == null ? new BigDecimal("21") : porcentaje(request.impuestoPorcentaje());
+        BigDecimal descuentoPorcentaje = request.descuentoPorcentaje() == null ? BigDecimal.ZERO : porcentaje(request.descuentoPorcentaje());
+        BigDecimal descuento = normalizarImporte(subtotal.multiply(descuentoPorcentaje).divide(new BigDecimal("100"), RoundingMode.HALF_UP));
+        BigDecimal base = normalizarImporte(subtotal.subtract(descuento));
+        BigDecimal impuestos = normalizarImporte(base.multiply(impuestoPorcentaje).divide(new BigDecimal("100"), RoundingMode.HALF_UP));
+        return new Totales(base, impuestos, normalizarImporte(base.add(impuestos)), impuestoPorcentaje, descuentoPorcentaje, descuento);
+    }
+
+    private BigDecimal porcentaje(BigDecimal value) {
+        BigDecimal normalized = normalizarImporte(value);
+        if (normalized.compareTo(BigDecimal.ZERO) < 0 || normalized.compareTo(new BigDecimal("100")) > 0) {
+            throw new IllegalArgumentException("Los porcentajes deben estar entre 0 y 100");
+        }
+        return normalized;
     }
 
     private BigDecimal normalizarImporte(BigDecimal importe) {
         return importe.setScale(2, RoundingMode.HALF_UP);
     }
 
-    private record Totales(BigDecimal base, BigDecimal impuestos, BigDecimal total) {
+    private record Totales(
+            BigDecimal base,
+            BigDecimal impuestos,
+            BigDecimal total,
+            BigDecimal impuestoPorcentaje,
+            BigDecimal descuentoPorcentaje,
+            BigDecimal descuento) {
     }
 }
